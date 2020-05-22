@@ -47,7 +47,7 @@ def start_warp_task(H, sim_specs, base_path, sim_id):
 
     time_limit = sim_specs['user']['time_limit']
     cores = sim_specs['user']['cores']
-    inputfile = 'run_warp.py '
+    inputfile = 'rsopt run-tec-3d '
     inputfile += os.path.join(base_path, sim_id+'.yaml')
     exctr = Executor.executor
     stdout, stderr = os.path.join(base_path, 'out_'+sim_id+'.txt'), \

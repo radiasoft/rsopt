@@ -4,7 +4,7 @@ import numpy as np
 
 # Import libEnsemble items for this test
 from libensemble.libE import libE
-from libe_sim import sim_func as sim_f
+from rsopt.codes.warp.libe_sim import sim_func as sim_f
 
 # Only import the optimizer package we need for APOSMM
 import libensemble.gen_funcs
@@ -15,15 +15,27 @@ from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_al
 from libensemble.tools import parse_args, save_libE_output, add_unique_random_streams
 from time import time
 
+# Output/Run directory setup
+# `base_directory` should be set before running this script
+# Recommendations are provided below are well
+base_directory = None
+# For NERSC use
+# base_directory = os.environ['SCRATCH']
 
 # RUN SETTINGS
-RUN_NAME = 'TEST3'
-TEMPLATE_FILE = 'gpyopt_best.yaml'
-RUN_DIR = os.path.join(os.environ['SCRATCH'], RUN_NAME)
+RUN_NAME = 'tec_efficiency_example'
+# Base design for the TEC to start optimization
+TEMPLATE_FILE = './support/gpyopt_best.yaml'
+RUN_DIR = os.path.join(base_directory, RUN_NAME)
+# Can be used to load the results of a previous optimization run
 CHECKPOINT_FILE = None
+# How often to record parameters in the middle of the optimization
 CHECKPOINTS = 1  # Steps per libE checkpoint
-INIT_SAMPLES = 6  # APOSMM initial sample count
-N = 3  # Parameter dimensionality
+# How many points does APOSMM sample before it starts to run optimization
+INIT_SAMPLES = 6
+# Optimizer input parameter dimensionality
+N = 3
+# Local optimizer that APOSMM wil use - see APOSMM documentation for more information
 LOCAL_OPT = 'LN_BOBYQA'
 
 
@@ -42,10 +54,7 @@ if CHECKPOINTS:
     libE_specs['save_every_k_sims'] = CHECKPOINTS
 libE_specs['sim_dirs_make'] = False
 libE_specs['ensemble_dir_path'] = RUN_DIR
-# TODO: These can be removed after the new directory specification is tested
-# libE_specs['use_worker_dirs'] = True  # Probably don't want here because we need to read from disk to get efficiency
-# libE_specs['ensemble_dir'] = RUN_DIR
-libE_specs['sim_dir_copy_files'] = [TEMPLATE_FILE,'run_warp.py']
+# TODO This is being replaced: libE_specs['sim_dir_copy_files'] = [TEMPLATE_FILE, os.path.join('run_tec_3d.py')]
 
 if is_master:
     start_time = time()
