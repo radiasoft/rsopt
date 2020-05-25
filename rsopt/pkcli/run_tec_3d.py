@@ -3,7 +3,7 @@ from rswarp.run_files.tec.gridded_tec_3d import main
 from rswarp.run_files.tec.tec_utilities import read_parameter_file
 
 
-if __name__ == '__main__':
+def simulate_efficiency(attribute_file, run_id=None):
     """
     x_struts: Number of struts that intercept the x-axis.
     y_struts: Number of struts that intercept the y-axis
@@ -18,10 +18,14 @@ if __name__ == '__main__':
     phi_cw: Resistivity of collector side wiring in ohm*cm
     run_id: Run id will be added to diagnostic folder name. Mainly used for parallel optimization.
     """
-    attribute_file = sys.argv[1]
     print("trying to open file", attribute_file)
     print("I am in", os.getcwd())
     run_attributes = read_parameter_file(attribute_file)
-    run_attributes['run_id'] = '{}'.format('_' + attribute_file[:-5])
+    if not run_id:
+        run_id = os.path.split(attribute_file)[-1]
+        run_id = os.path.splitext(run_id)[0]
+        run_attributes['run_id'] = '{}'.format('_' + run_id)
+    else:
+        run_attributes['run_id'] = run_id
 
     main(**run_attributes)

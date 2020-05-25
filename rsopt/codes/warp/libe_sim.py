@@ -14,7 +14,7 @@ def simulate_tec_efficiency(H, persis_info, sim_specs, libE_info):
     sim_name, output_path = make_sim_name(base_path)
     create_input_schema(H, base_path, sim_name, template_file)
     
-    calc_status = start_warp_task(H, sim_specs, base_path, sim_name)
+    calc_status = start_warp_task(H, sim_specs, sim_name+'.yaml',sim_name)
 
     if calc_status == WORKER_DONE:
         # There is an internal flag set in my Warp output if simulation hits a known failure mode
@@ -37,17 +37,17 @@ def simulate_tec_efficiency(H, persis_info, sim_specs, libE_info):
 def simulate_tec_runtime(H, persis_info, sim_specs, libE_info):
     # For use in run time scans with varying processor number
 
-    x = H['x']
+    x = H['x'][0][0]
     base_path = sim_specs['user']['base_path']
-    sim_name, output_path = make_sim_name(base_path)
-
+    template_file = sim_specs['user']['template_file']
+    
     # Cores is normally set by user dict. Create temporary entry to mimic
     sim_specs_pass = sim_specs.copy()
     sim_specs_pass['user']['cores'] = x
 
     # Run simulation
     start_time = time.time()
-    calc_status = start_warp_task(H, sim_specs_pass, base_path, sim_name)
+    calc_status = start_warp_task(H, sim_specs_pass, template_file, str(int(x)))
     run_time = time.time() - start_time
 
     # Format output
@@ -71,15 +71,15 @@ def make_sim_name(base_path):
     return sim_name, output_path
 
 
-def start_warp_task(H, sim_specs, base_path, sim_id):
+def start_warp_task(H, sim_specs, schema_file, sim_id):
 
     time_limit = sim_specs['user']['time_limit']
     cores = sim_specs['user']['cores']
-    inputfile = 'rsopt run-tec-3d '
-    inputfile += os.path.join(base_path, sim_id+'.yaml')
+    inputfile = 'run-tec-3d simulate-efficiency '
+    inputfile += schema_file + ' '
+    inputfile += '-r _'+sim_id
     exctr = Executor.executor
-    stdout, stderr = os.path.join(base_path, 'out_'+sim_id+'.txt'), \
-                     os.path.join(base_path, 'err_' + sim_id + '.txt')
+    stdout, stderr = 'out_'+sim_id+'.txt', 'err_'+sim_id+'.txt'
 
     if cores:
         # wait_on_run? was true for fmu work
