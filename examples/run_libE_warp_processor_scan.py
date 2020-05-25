@@ -4,21 +4,36 @@ import numpy as np
 
 # Import libEnsemble items for this test
 from libensemble.libE import libE
-from libe_sim import sim_func as sim_f
-from libe_tools.generator_functions.utility_generators import generate_mesh as gen_f
-from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc as alloc_f
-from libensemble.tools import parse_args, save_libE_output, add_
+from rsopt.codes.warp.libe_sim import simulate_tec_runtime as sim_f
+from rsopt.libe_tools.generator_functions.utility_generators import generate_mesh as gen_f
+from rsopt.libe_tools.tools import create_empty_persis_info
+from libensemble.tools import parse_args, save_libE_output
 from time import time
 
 
 # RUN SETTINGS
+
+# Output/Run directory setup
+# `base_directory` should be set before running this script
+# Recommendations are provided below are well
+base_directory = None
+# For NERSC use
+# base_directory = os.environ['SCRATCH']
+
 RUN_NAME = 'SCAN1'
 TEMPLATE_FILE = 'gpyopt_best.yaml'
-RUN_DIR = os.path.join(os.environ['SCRATCH'], RUN_NAME)
-CHECKPOINT_FILE = None
+RUN_DIR = os.path.join(base_directory, RUN_NAME)
+TIME_LIMIT = 120.  # Time limit for each run in minutes
 CHECKPOINTS = 1  # Steps per libE checkpoint
-INIT_SAMPLES = 6  # APOSMM initial sample count
-N = 3  # Parameter dimensionality
+
+MESH = [[0, 5, 10],
+        [1, 3, 5],
+        [5, 12, 2]]
+N = len(MESH)  # Parameter dimensionality
+MAX = 101
+
+
+# Set up and Run libEnsemble
 
 # libEnsemble Setup                                                                                             
 nworkers, is_master, libE_specs, _ = parse_args()
@@ -53,10 +68,8 @@ jobctrl.register_calc(full_path=sim_app, calc_type='sim')
 
 # Setup for Run with APOSMM
 USER_DICT = {
-             'failure_penalty': -10.,
              'base_path': RUN_DIR,
-             'cores': 34,
-             'time_limit': 30. * 60.,
+             'time_limit': TIME_LIMIT * 60.,
              'template_file': TEMPLATE_FILE
              }
 
@@ -66,40 +79,22 @@ sim_specs = {'sim_f': sim_f,
              'user': USER_DICT
              }
 
-gen_out = [('x', float, N), ('x_on_cube', float, N), ('sim_id', int),
-           ('local_min', bool), ('local_pt', bool)]
+gen_out = [('x', float, (N,))]
 
 gen_specs = {'gen_f': gen_f,
              'in': [],
              'out': gen_out,
-             'user': {'initial_sample_size': INIT_SAMPLES,
-                      'localopt_method': 'LN_BOBYQA',
-                      # 'num_pts_first_pass': nworkers - 1,
-                      'xtol_rel': 1e-12,
-                      'ftol_rel': 1e-12,
-                      'high_priority_to_best_localopt_runs': True,
-                      'num_active_gens': 3,  # Can't find where this passed to may be from old version
-                      'max_active_runs': 6,
-                      'lb': np.array([.0, 0.12, 0.5]),
-                      'ub': np.array([1.0, 0.88, 2.5])}
+             'user': {
+                     'mesh_definition': MESH
+                     }
              }
 
-alloc_specs = {'alloc_f': alloc_f, 'out': [('given_back', bool)], 'user': {'batch_mode': True}}
-persis_info = add_unique_random_streams({}, nworkers + 1)
-exit_criteria = {'sim_max': 16}
-
-# Perform the run
-# Load from Checkpoint if requested
-if CHECKPOINT_FILE:
-    H0 = np.load(CHECKPOINT_FILE)
-    H0 = H0[H0['given_back'] * H0['returned']]  # Remove points that failed to evaluate before end of run
-else:
-    H0 = None
+persis_info = create_empty_persis_info(libE_specs)  # {0: {'worker_num': 0}, 1: {'worker_num': 1}}
+exit_criteria = {'sim_max': MAX}
 
 
 # Perform the run
-H, persis_info, flag = libE(sim_specs, gen_specs, exit_criteria, persis_info,
-                            alloc_specs, libE_specs, H0=H0)
+H, persis_info, flag = libE(sim_specs, gen_specs, exit_criteria, persis_info, libE_specs=libE_specs)
 
 if is_master:
     print('[Manager]: Time taken =', time() - start_time, flush=True)
