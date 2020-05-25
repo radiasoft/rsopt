@@ -1,11 +1,11 @@
 import os, time, uuid
 import numpy as np
-from tec_utilities import get_efficiency, create_settings_file
+from rsopt.codes.warp.tec_utilities import get_efficiency, create_settings_file
 from libensemble.executors.executor import Executor
 from libensemble.message_numbers import WORKER_DONE, WORKER_KILL, TASK_FAILED, WORKER_KILL_ON_TIMEOUT
 
 
-def sim_func(H, persis_info, sim_specs, libE_info):
+def simulate_tec_efficiency(H, persis_info, sim_specs, libE_info):
 
     # Setup
     failure_penalty = sim_specs['user']['failure_penalty']
@@ -30,6 +30,34 @@ def sim_func(H, persis_info, sim_specs, libE_info):
         efficiency = failure_penalty
 
     output = create_output(sim_specs, efficiency)
+
+    return output, persis_info, calc_status
+
+
+def simulate_tec_runtime(H, persis_info, sim_specs, libE_info):
+    # For use in run time scans with varying processor number
+
+    x = H['x']
+    base_path = sim_specs['user']['base_path']
+    sim_name, output_path = make_sim_name(base_path)
+
+    # Cores is normally set by user dict. Create temporary entry to mimic
+    sim_specs_pass = sim_specs.copy()
+    sim_specs_pass['user']['cores'] = x
+
+    # Run simulation
+    start_time = time.time()
+    calc_status = start_warp_task(H, sim_specs_pass, base_path, sim_name)
+    run_time = time.time() - start_time
+
+    # Format output
+    outspecs = sim_specs['out']
+    output = np.zeros(1, dtype=outspecs)
+
+    if calc_status == WORKER_DONE:
+        output['f'][0] = run_time
+    else:
+        output['f'][0] = np.nan
 
     return output, persis_info, calc_status
 
