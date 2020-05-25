@@ -4,7 +4,7 @@ import numpy as np
 
 # Import libEnsemble items for this test
 from libensemble.libE import libE
-from rsopt.codes.warp.libe_sim import sim_func as sim_f
+from rsopt.codes.warp.libe_sim import simulate_tec_efficiency as sim_f
 
 # Only import the optimizer package we need for APOSMM
 import libensemble.gen_funcs
