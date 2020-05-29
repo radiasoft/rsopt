@@ -13,6 +13,8 @@ pksetup.setup(
     description='A Python library with tools for optimization problems',
     install_requires=[
         'pykern',
+        'libEnsemble',
+        'numpy'
     ],
     license='http://www.apache.org/licenses/LICENSE-2.0.html',
     url='https://github.com/radiasoft/rsopt',
