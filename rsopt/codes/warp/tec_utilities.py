@@ -9,13 +9,14 @@ def create_settings_file(path, sim_id, base_file, new_settings):
     Make a new TEC description file based on new settings and the 'tec_start.yaml' base file.
     Return the UUID generated, unique identifier for the file.
     """
+    print("I am in:", os.getcwd())
+    print('loading settings file', base_file)
     base_file = yaml.safe_load(open(base_file, 'r'))
 
-    b, h, r = new_settings
+    h, w = new_settings
 
-    base_file['tec']['magnetic_field'] = float(b)
-    base_file['tec']['grid_height'] = float(h)
-    base_file['tec']['strut_width'] = float(base_file['tec']['strut_height'] / r)
+    base_file['tec']['strut_height'] = float(h)
+    base_file['tec']['strut_width'] = float(w)
 
     new_file = sim_id + '.yaml'
     yaml.dump(base_file, open(os.path.join(path, new_file), 'w'))
@@ -23,11 +24,11 @@ def create_settings_file(path, sim_id, base_file, new_settings):
 
 def get_optimization_parameters(path):
     parameters = yaml.safe_load(open(path, 'r'))
-    b = float(parameters['tec']['magnetic_field'])
-    h = float(parameters['tec']['grid_height'])
-    r = float(parameters['tec']['strut_height'] / parameters['tec']['strut_width'])
+    # b = float(parameters['tec']['magnetic_field'])
+    h = float(parameters['tec']['strut_height'])
+    w = float(parameters['tec']['strut_width'])
 
-    return b, h, r
+    return h, w
 
 
 def get_efficiency(path, sim_id, penalty=-10.):
@@ -42,8 +43,7 @@ def get_efficiency(path, sim_id, penalty=-10.):
     Return (float) efficiency
     """
     filename = 'efficiency_id_' + sim_id + '.h5'
-    diag_path = 'diag_id_' + sim_id
-    file_path = os.path.join(path, diag_path, filename)
+    file_path = os.path.join(path, filename)
     datafile = h5.File(file_path, 'r')
     if datafile.attrs['complete'] == 0 or datafile.attrs['complete'] == 3:
         # Simulation returned a meaningful result

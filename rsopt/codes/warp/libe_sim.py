@@ -3,9 +3,10 @@ import numpy as np
 from rsopt.codes.warp.tec_utilities import get_efficiency, create_settings_file
 from libensemble.executors.executor import Executor
 from libensemble.message_numbers import WORKER_DONE, WORKER_KILL, TASK_FAILED, WORKER_KILL_ON_TIMEOUT
-
+import logging
 
 def simulate_tec_efficiency(H, persis_info, sim_specs, libE_info):
+    logger = logging.getLogger('libensemble')
 
     # Setup
     failure_penalty = sim_specs['user']['failure_penalty']
@@ -13,9 +14,11 @@ def simulate_tec_efficiency(H, persis_info, sim_specs, libE_info):
     template_file = sim_specs['user']['template_file']
     sim_name, output_path = make_sim_name(base_path)
     create_input_schema(H, base_path, sim_name, template_file)
-    
-    calc_status = start_warp_task(H, sim_specs, sim_name+'.yaml',sim_name)
+    logger.info('base_path: ' + base_path)
+    logger.info('output_path: ' + output_path)
+    logger.info('sim_name: ' + sim_name)
 
+    calc_status = start_warp_task(H, sim_specs, sim_name+'.yaml',sim_name)
     if calc_status == WORKER_DONE:
         # There is an internal flag set in my Warp output if simulation hits a known failure mode
         # then failure_penalty is used. Otherwise read the calculated efficiency.
@@ -66,7 +69,7 @@ def make_sim_name(base_path):
 
     sim_name = str(uuid.uuid4())
     dir_prefix = 'diags_id_'
-    output_path = os.path.join(base_path, dir_prefix, sim_name)
+    output_path = os.path.join(base_path, dir_prefix + sim_name)
 
     return sim_name, output_path
 
@@ -114,6 +117,7 @@ def create_input_schema(H, path, sim_id, base_file):
 def create_output(sim_specs, efficiency):
     outspecs = sim_specs['out']
     output = np.zeros(1, dtype=outspecs)
-    output['f'][0] = efficiency
+    scaled_efficiency = sim_specs['user']['scaling'](efficiency)
+    output['f'][0] = scaled_efficiency
 
     return output
