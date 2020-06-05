@@ -22,10 +22,11 @@ def get_opal_emittance(H):
 # some codes only support absolute pathing requiring this to be set off the location of a user's installation
 # This assumes you are working out of fastfelo/examples
 
-# TODO: A non-proprietary version of this example needs to be created
-this_directory = os.getcwd()
-fastfelo_path = os.path.split(os.path.split(this_directory)[0])[0]
+# fastfelo_path should be the absolute path to the top level
+#  of your fastfelo repository directory
+fastfelo_path = 'Set your path here'
 
+# s2e_schema can be obtained from fastfelo/examples/argonne_linac_tessa_s2e
 from s2e_schema import schema
 with open('s2e_schema.yaml', 'w') as ff:
     ff.write(schema.format(my_path=fastfelo_path))
