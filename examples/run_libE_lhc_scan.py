@@ -26,9 +26,8 @@ sim_func():
 import os
 
 from libensemble.libE import libE
-from libensemble.gen_funcs.persistent_aposmm import aposmm as gen_f
-from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc as alloc_f
 from libensemble.tools import parse_args, add_unique_random_streams
+from libensemble.gen_funcs.sampling import latin_hypercube_sample as gen_f
 
 from rsopt.codes.runner.Runner import Runner
 from rsopt.codes.runner.sim_functions import sim_function_with_runner as sim_f
@@ -44,7 +43,7 @@ SCHEMA_DIR = './schema/'  # Place schema files in ./schema
 BASE_SCHEMA = 'aposmm_schema_{}.yaml'  # Filename will be formatted with index when needed
 # RUN_DIR is the base directory where libEnsemble workers will execute sim_f. libE will create new directories
 #  in RUN_DIR for each worker execution.
-RUN_DIR = '//INSERT YOUR PATH HERE'  # EXAMPLE: '/home/vagrant/jupyter/StaffScratch/my_github_username/scan1'
+RUN_DIR = '//INSERT YOUR PATH HERE'  # EXAMPLE:   '/home/vagrant/jupyter/StaffScratch/my_github_username/scan1'
 
     
 if not os.path.isdir('{}'.format(RUN_DIR)):
@@ -66,8 +65,8 @@ if CHECKPOINTS:
     libE_specs['save_every_k_sims'] = CHECKPOINTS
 libE_specs['use_worker_dirs'] = True
 libE_specs['sim_input_dir'] = './schema' 
-libE_specs['ensemble_dir'] = RUN_DIR
-libE_specs['symlink_input_files'] = [BASE_SCHEMA.format(i) for i in range(1, nworkers)]
+libE_specs['ensemble_dir_path'] = RUN_DIR
+libE_specs['sim_dir_symlink_files'] = [BASE_SCHEMA.format(i) for i in range(1, nworkers)]
 
 
 # Sim Setup
@@ -76,6 +75,7 @@ sim_specs = {'sim_f': sim_f,
              'out': [('f', float)],
              'user': {
                  'base_schema': BASE_SCHEMA,
+                 'persistant_worker_count': 0,
                  'objective_function': obj_f
               }
              }
@@ -88,16 +88,11 @@ gen_specs = {'gen_f': gen_f,
                       }
              }
 
-
-# APOSMM Allocator Setup
-alloc_specs = {'alloc_f': alloc_f, 'out': [('given_back', bool)], 'user': {}}
 persis_info = add_unique_random_streams({}, nworkers + 1)
-
 
 # Stopping Criteria
 exit_criteria = {'gen_max': SAMPLE_SIZE+1}
 
 
 # Perform the run
-H, persis_info, flag = libE(sim_specs, gen_specs, exit_criteria, persis_info,
-                            alloc_specs, libE_specs, H0=None)
+H, persis_info, flag = libE(sim_specs, gen_specs, exit_criteria, persis_info, libE_specs=libE_specs, H0=None)
