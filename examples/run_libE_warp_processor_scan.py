@@ -42,7 +42,7 @@ libE_specs['nworkers'] = nworkers
 
 if is_master:
     if not os.path.isdir('./{}'.format(RUN_DIR)):
-        os.mkdir('{}'.format(RUN_DIR))
+        os.makedirs('{}'.format(RUN_DIR))
     else:
         print("Stopping - Directory exists: {}".format(RUN_DIR))
         exit()
