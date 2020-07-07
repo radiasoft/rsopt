@@ -29,9 +29,13 @@ def sim_function_with_runner(H, persis_info, sim_specs, libE_info):
     x = H['x'][0]
     base_schema = sim_specs['user']['base_schema']
     objective_function = sim_specs['user']['objective_function']
-    
+    try:
+        processing_funcs = sim_specs['user']['processing']
+    except KeyError:
+        processing_funcs = None
+
     # Run Simulations
-    runner = Runner(base_schema.format(server_id), objective_function=objective_function)
+    runner = Runner(base_schema.format(server_id), objective_function=objective_function, processing=processing_funcs)
     result = runner.run(x)
     print('result on {} is {}'.format(server_id, result))
     
