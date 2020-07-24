@@ -1,6 +1,8 @@
 from libensemble.executors import MPIExecutor
 import os
 
+_CONFIG_PATH = '/home/vagrant/jupyter/.rsmpi/ssh_config'
+
 
 def register_rsmpi_executor(sim_app, hosts='auto', cores_on_node=None):
     """
@@ -32,9 +34,8 @@ def register_rsmpi_executor(sim_app, hosts='auto', cores_on_node=None):
 
 def _detect_rsmpi_resources():
     hosts = 0
-    config_path = '/home/vagrant/jupyter/.rsmpi/ssh_config'
-    assert os.path.isfile(config_path), "rsmpi configuration does not exist"
-    with open(config_path, 'r') as ff:
+    assert os.path.isfile(_CONFIG_PATH), "rsmpi configuration does not exist"
+    with open(_CONFIG_PATH, 'r') as ff:
         for line in ff.readlines():
             if 'Host' in line:
                 hosts += 1
