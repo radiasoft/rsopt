@@ -64,9 +64,8 @@ nworkers, is_master, libE_specs, _ = parse_args()
 if CHECKPOINTS:
     libE_specs['save_every_k_sims'] = CHECKPOINTS
 libE_specs['use_worker_dirs'] = True
-libE_specs['sim_input_dir'] = './schema' 
+libE_specs['sim_input_dir'] = SCHEMA_DIR
 libE_specs['ensemble_dir_path'] = RUN_DIR
-libE_specs['sim_dir_symlink_files'] = [BASE_SCHEMA.format(i) for i in range(1, nworkers)]
 
 
 # Sim Setup
