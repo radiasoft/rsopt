@@ -14,7 +14,7 @@ objective_type = [float, ]
 # Set optimizer parameters
 parameters = np.array([('period', 30., 60., 46.),
                        ('lpy', 1., 10., 5.),
-                       ('lmz', 10., 40., 45.),
+                       ('lmz', 10., 40., 20.),
                        ('lpz', 30., 60., 25.),
                        ('offset', 0.25, 4., 1.)],
                        dtype=[('name', 'U20'), ('min', 'float'), ('max', 'float'), ('start', 'float')])
