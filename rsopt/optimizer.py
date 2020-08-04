@@ -35,9 +35,11 @@ class Optimizer:
     def start(self, value=None):
         pass
 
-    def _set_dimension(self, array):
-        self.dimension = array.size
-        return self.dimension
+    def _set_dimension(self):
+        if len(self.parameters.pararameters) == 0:
+            print("Warning: Cannot set dimension. No parameters have been set.")
+        else:
+            self.dimension = len(self.parameters.pararameters)
 
     def set_parameters(self, parameters):
         reader = get_reader(parameters, 'parameters')
