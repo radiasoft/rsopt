@@ -4,8 +4,8 @@ from scipy.constants import mu_0, e, m_e, c
 
 
 def hybrid_undulator(lpx, lpy, lpz, pole_properties, pole_segmentation, pole_color,
-                     lmx, lmy, lmz, magnet_properties, magnet_separation, magnet_color,
-                     gap, offset, period_number):
+                     lmx, lmz, magnet_properties, magnet_segmentation, magnet_color,
+                     gap, offset, period, period_number):
     """
     create hybrid undulator magnet
     arguments:
@@ -15,15 +15,17 @@ def hybrid_undulator(lpx, lpy, lpz, pole_properties, pole_segmentation, pole_col
       pole_color = [r,g,b] = color for the iron poles
       magnet_dimensions = [lmx, lmy, lmz] = dimensions of the magnet blocks / mm
       magnet_properties = magnetic properties of the magnet blocks (remanent magnetization)
-      magnet_separation = segmentation of the magnet blocks
+      magnet_segmentation = segmentation of the magnet blocks
       magnet_color = [r,g,b] = color for the magnet blocks
       gap = undulator gap / mm
       offset = vertical offset / mm of the magnet blocks w/rt the poles
+      period = length of one undulator period / mm
       period_number = number of full periods of the undulator magnetic field
     return: Radia representations of
       undulator group, poles, permanent magnets
     """
     pole_dimensions = [lpx, lpy, lpz]
+    lmy = period / 2. - pole_dimensions[1]
     magnet_dimensions = [lmx, lmy, lmz]
     zer = [0, 0, 0]
     # full magnet will be assembled into this Radia group
@@ -43,7 +45,7 @@ def hybrid_undulator(lpx, lpy, lpz, pole_properties, pole_segmentation, pole_col
         y += magnet_dimensions[1] / 2
         magnet = rad.ObjFullMag([magnet_dimensions[0] / 4, y, -magnet_dimensions[2] / 2 - gap / 2 - offset],
                                 [magnet_dimensions[0] / 2, magnet_dimensions[1], magnet_dimensions[2]],
-                                init_magnetization, magnet_separation, grp, magnet_properties, magnet_color)
+                                init_magnetization, magnet_segmentation, grp, magnet_properties, magnet_color)
         y += (magnet_dimensions[1] + pole_dimensions[1]) / 2
         pole = rad.ObjFullMag([pole_dimensions[0] / 4, y, -pole_dimensions[2] / 2 - gap / 2],
                               [pole_dimensions[0] / 2, pole_dimensions[1], pole_dimensions[2]],
@@ -54,7 +56,7 @@ def hybrid_undulator(lpx, lpy, lpz, pole_properties, pole_segmentation, pole_col
     y += magnet_dimensions[1] / 4
     magnet = rad.ObjFullMag([magnet_dimensions[0] / 4, y, -magnet_dimensions[2] / 2 - gap / 2 - offset],
                             [magnet_dimensions[0] / 2, magnet_dimensions[1] / 2, magnet_dimensions[2]],
-                            init_magnetization, magnet_separation, grp, magnet_properties, magnet_color)
+                            init_magnetization, magnet_segmentation, grp, magnet_properties, magnet_color)
     # use mirror symmetry to define the full undulator
     rad.TrfZerPerp(grp, zer, [1, 0, 0])  # reflect in the (y,z) plane
     rad.TrfZerPara(grp, zer, [0, 0, 1])  # reflect in the (x,y) plane

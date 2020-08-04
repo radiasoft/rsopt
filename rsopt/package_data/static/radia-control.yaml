@@ -1,0 +1,29 @@
+codes:
+  opal:
+    settings:
+      mx: [Sx, 5, 7]
+      my: 32
+      mt: &mt 32
+      dimensions:
+        - 5
+        - 5
+        - 6
+      dimensions2: [6, 5, 5]
+      macroparticles: 4e4
+    parameters:
+      - Sx:
+          min: 1e-4
+          max: 1e-3
+          start: 5e-4
+      - Sy:
+          min: 1e-5
+          max: 1e-3
+          start: 6e-5
+    setup:
+      input_file: fastfelo.run_files.injector.opal_input
+      cores: *mt
+options:
+  local_optimizer: simplex
+  max_runs: 10000
+
+# at each run a copy of the schema is made that also contains 'run_parameters' with exact values for parameters
