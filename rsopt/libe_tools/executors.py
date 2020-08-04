@@ -11,12 +11,12 @@ def register_rsmpi_executor(sim_app, hosts='auto', cores_on_node=None):
     :param hosts: (str or int) If 'auto' then all rsmpi resources are detected and used. Otherwise specify number
                                of hosts as an int.
     :param cores_on_node: (tuple) Defaults to (16, 16). Number of physical cores and logical cores on the hosts.
-    :return: libensemble.executor.MPIExecutor object
+    :return: libensemble.executors.mpi_executor.MPIExecutor object
     """
 
     try:
         hosts = int(hosts)
-    except ValueError:
+    except TypeError:
         hosts = _detect_rsmpi_resources()
 
     _generate_rsmpi_node_file(hosts)
@@ -48,4 +48,4 @@ def _detect_rsmpi_resources():
 def _generate_rsmpi_node_file(nodes):
     with open('libe_nodes', 'w') as ff:
         for node in range(nodes):
-            ff.write(node)
+            ff.write(str(node))
