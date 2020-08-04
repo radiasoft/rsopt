@@ -3,7 +3,7 @@ from numpy import ndarray
 # FUTURE: Is there relevant code to move from `Runner`? Certainly some of configuration code will be
 #   used by runner
 
-# TODO: Should be extracted from YAML configuration load/dump
+
 _EXTERNAL_PARAMETER_CATEGORIES = ('min', 'max', 'start')
 
 
@@ -16,10 +16,7 @@ def read_parameter_array(obj):
     """
 
     for i, row in enumerate(obj):
-        if len(row) == 3:
-            # TODO: remove, need input formats that specify names corresonding to func args
-            yield 'Parameter' + str(i), row
-        elif len(row) == 4:
+        if len(row) == 4:
             yield row[0], row.tolist()[1:]
         else:
             raise IndexError("Input parameters are no length 3 or 4")
