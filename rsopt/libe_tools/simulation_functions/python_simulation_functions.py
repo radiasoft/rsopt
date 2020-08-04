@@ -40,9 +40,14 @@ def _merge_dicts(base, derived, depth=-1):
 
 def get_signature(parameters, settings):
     # No lambda functions are allowed in settings and parameter names may not be referenced
-    # So this doesn't need to do anything for now
+    # Just needs to insert parameter keys into the settings dict, but they won't have usable values yet
 
-    return parameters, settings
+    signature = settings.settings.copy()
+
+    for key in parameters._NAMES:
+        signature[key] = None
+
+    return signature
 
 
 class PythonFunction:
