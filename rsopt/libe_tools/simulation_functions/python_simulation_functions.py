@@ -5,6 +5,7 @@ from libensemble.message_numbers import WORKER_DONE, WORKER_KILL, TASK_FAILED
 
 
 def get_x_from_H(H):
+    # Assumes vector data
     x = H['x'][0]
     return x
 
@@ -57,7 +58,6 @@ class PythonFunction:
         self.parameters = parameters
         self.settings = settings
         self.signature = get_signature(parameters, settings)
-        self.x_struct = {}
 
         # Received from libEnsemble during function evaluation
         self.H = None
@@ -74,7 +74,7 @@ class PythonFunction:
 
         # Set function argument inputs
         x = get_x_from_H(H)
-        self.parse_x(x)
+        # self.parse_x(x)
         _, kwargs = self.compose_args(x, self.signature)
 
         # Function call and handling
@@ -84,13 +84,22 @@ class PythonFunction:
         # FUTURE: Error handling for function call?
         return output, persis_info, WORKER_DONE
 
-    def parse_x(self, x):
-        self.x_struct = {}
+    def _parse_x(self, x):
+        x_struct = {}
         for val, name in zip(x, self.parameters._NAMES):
-            self.x_struct[name] = val
+            x_struct[name] = val
+
+        return x_struct
 
     def compose_args(self, x, signature):
-        return None, None
+        args = None  # Not used for now
+        x_struct = self._parse_x(x)
+        kwargs = signature.copy()
+        for key in kwargs.keys():
+            if key in x_struct:
+                kwargs[key] = x_struct[key]
+
+        return args, kwargs
 
     def call_function(self, kwargs):
         f = self.function(**kwargs)
