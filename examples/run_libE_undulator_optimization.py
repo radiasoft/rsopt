@@ -1,6 +1,7 @@
 from rsopt.codes.radia.sim_functions import hybrid_undulator, materials, undulatorK_simple
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 import numpy as np
+
 # Start configuring a local optimizer run through libEnsemble
 optimizer = libEnsembleOptimizer()
 
@@ -31,17 +32,11 @@ ironM = [0.000998995, 0.00199812, 0.00299724, 0.00499548, 0.00699372, 0.00999145
 mp, mm = materials(ironH, ironM, 'NdFeB', 1.2)
 
 settings = {
-    # FUTURE: Not supporting nested parameters in nested items. The general case would be messy.
-    #   would need to iterate down an arbitrary number of levels and be able to replace string instances
-    #   with reference to new value
-    # 'pole_dimensions': [65, 'pole_tip_length', 'pole_tip_height'],
     'lpx': 65,
     'pole_properties': mp,
     'pole_segmentation': [2, 2, 5],
     'pole_color': [1, 0, 1],
     'lmx': 65,
-    # FUTURE: Not supporting lambda functions immediately. Requires inspect as imagined here.
-    # 'lmy': lambda period, pole_tip_length: period / 2. - pole_tip_length,
     'magnet_properties': mm,
     'magnet_segmentation': [1, 3, 1],
     'magnet_color': [0, 1, 1],
@@ -54,7 +49,7 @@ optimizer.set_settings(settings)
 # setup optimizer
 optimizer_settings = {'xtol_rel': 1e-4,
                       'gen_batch_size': 2}
-optimizer.set_optimizer(method='LN_BOBYQA',
+optimizer.set_optimizer(method='LN_BOBYQA',  # Optimization algorithm
                         options=optimizer_settings)
 
 # run optimization

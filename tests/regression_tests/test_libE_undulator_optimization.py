@@ -1,11 +1,3 @@
-import sys
-from unittest.mock import MagicMock
-radiamodule = MagicMock()
-radiamodule.__class__ = MagicMock
-petsc4pymodule = MagicMock()
-petsc4pymodule.__class__ = MagicMock
-sys.modules["radia"] = radiamodule
-sys.modules["petsc4py"] = petsc4pymodule
 from rsopt.codes.radia.sim_functions import hybrid_undulator, materials, undulatorK_simple
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 import numpy as np
@@ -18,16 +10,11 @@ optimizer = libEnsembleOptimizer()
 
 
 def dummy_obj(*args, **kwargs):
-    print('CALLED', kwargs)
+    print('CALLED with:', kwargs)
     sum = kwargs['period'] + kwargs['lpy'] + kwargs['lmz'] + kwargs['lpz'] + kwargs['offset']
 
     return sum
 
-
-# objective = MagicMock(name='hybrid_undulator',
-#                       return_value=dummy_obj)
-# objective.__class__ = MagicMock
-# sim_func = objective()
 optimizer.set_simulation(dummy_obj)
 
 # Set optimizer parameters
@@ -66,7 +53,8 @@ settings = {
     'magnet_properties': mm,
     'magnet_segmentation': [1, 3, 1],
     'magnet_color': [0, 1, 1],
-    'gap': 20.
+    'gap': 20.,
+    'period_number': 2
 }
 
 optimizer.set_settings(settings)
@@ -78,5 +66,5 @@ optimizer.set_optimizer(method='LN_BOBYQA',
                         options=optimizer_settings)
 
 # run optimization
-optimizer.set_exit_criteria({'sim_max': 4})
+optimizer.set_exit_criteria({'sim_max': 1000})
 optimizer.run()
