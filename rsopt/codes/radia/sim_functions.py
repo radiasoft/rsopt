@@ -61,7 +61,10 @@ def hybrid_undulator(lpx, lpy, lpz, pole_properties, pole_segmentation, pole_col
     rad.TrfZerPerp(grp, zer, [1, 0, 0])  # reflect in the (y,z) plane
     rad.TrfZerPara(grp, zer, [0, 0, 1])  # reflect in the (x,y) plane
     rad.TrfZerPerp(grp, zer, [0, 1, 0])  # reflect in the (z,x) plane
-    return grp, pole, magnet
+    
+    K_val = undulatorK_simple(grp, period)
+    result = np.sqrt((1 / K_val)**2 + (period / 100.)**2)
+    return result
 
 
 def materials(H, M, material_type_string, magnet_remanence):

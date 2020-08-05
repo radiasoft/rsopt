@@ -7,9 +7,7 @@ optimizer = libEnsembleOptimizer()
 # Set functions used for simulation and objective evaluation
 # Note: simulation function may also directly return the objective value
 sim_func = hybrid_undulator
-sim_app = False
-objective_func = undulatorK_simple
-objective_type = [float, ]
+optimizer.set_simulation(sim_func)
 
 # Set optimizer parameters
 parameters = np.array([('period', 30., 60., 46.),
@@ -47,12 +45,18 @@ settings = {
     'magnet_properties': mm,
     'magnet_segmentation': [1, 3, 1],
     'magnet_color': [0, 1, 1],
-    'gap': 20.
+    'gap': 20.,
+    'period_number': 2
 }
 
 optimizer.set_settings(settings)
 
 # setup optimizer
-optimizer_settings = {'xtol_rel': 1e-4}
-optimizer.set_optimizer(method='NL_BOBYQA',
+optimizer_settings = {'xtol_rel': 1e-4,
+                      'gen_batch_size': 2}
+optimizer.set_optimizer(method='LN_BOBYQA',
                         options=optimizer_settings)
+
+# run optimization
+optimizer.set_exit_criteria({'sim_max': 200})
+optimizer.run()
