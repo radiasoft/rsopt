@@ -10,6 +10,8 @@ class Optimizer:
         self.settings = Settings()
         self.parameters = Parameters()
         self.exit_criteria = None
+        self.function = None
+        self.executable = None
 
     @property
     def lb(self):

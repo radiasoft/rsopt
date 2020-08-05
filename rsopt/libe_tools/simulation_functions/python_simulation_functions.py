@@ -112,7 +112,7 @@ class PythonFunction:
         # FUTURE: Type check for container values against spec
         outspecs = self.sim_specs['out']
         output = np.zeros(1, dtype=outspecs)
-        for spec, value in zip(outspecs, container):
+        for spec, value in zip(output.dtype.names, container):
             output[spec] = value
 
         return output
