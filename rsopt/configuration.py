@@ -1,3 +1,4 @@
+import numpy as np
 from numpy import ndarray
 # FUTURE: Setup load / dump of YAML configuration files
 # FUTURE: Is there relevant code to move from `Runner`? Certainly some of configuration code will be
@@ -52,13 +53,13 @@ class Parameters:
             self.pararameters[name][field] = value
 
     def get_lower_bound(self):
-        return [self.pararameters[name][self._LOWER_BOUND] for name in self._NAMES]
+        return np.array([self.pararameters[name][self._LOWER_BOUND] for name in self._NAMES])
 
     def get_upper_bound(self):
-        return [self.pararameters[name][self._UPPER_BOUND] for name in self._NAMES]
+        return np.array([self.pararameters[name][self._UPPER_BOUND] for name in self._NAMES])
 
     def get_start(self):
-        return [self.pararameters[name][self._START] for name in self._NAMES]
+        return np.array([self.pararameters[name][self._START] for name in self._NAMES])
 
 
 def read_setting_dict(input):

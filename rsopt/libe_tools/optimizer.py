@@ -21,10 +21,6 @@ uniform_or_localopt_gen_out = [('priority', float),
 
 class libEnsembleOptimizer(Optimizer):
     # Configurationf or Local Optimization through uniform_or_localopt
-    def _set_dimension(self, array):
-        self.dimension = array.size
-        return self.dimension
-
     # Just sets up a local optimizer for now
     def set_optimizer(self, method, options=None):
         self.optimizer_method = method
@@ -73,6 +69,7 @@ class libEnsembleOptimizer(Optimizer):
         self.libE_specs = {'nworkers': self.nworkers, 'comms': self.comms}
 
     def _configure_libE(self):
+        self._set_dimension()
         self._configure_optimizer()
         self._configure_allocation(self.gen_specs['out'])
         self._configure_specs()
