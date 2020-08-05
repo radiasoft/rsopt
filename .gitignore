@@ -6,6 +6,12 @@ pykern_setup.yaml
 .#*
 \#*
 
+# libEnsemble generated files / data storage
+*.npy
+*.pickle
+ensemble.log
+libE_stats.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
