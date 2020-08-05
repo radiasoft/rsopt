@@ -13,7 +13,7 @@ from test_configuration import parameters_dict, settings_dict
 test_function_signature = inspect.signature(hybrid_undulator)
 x_vec = [1, 2, 3, 4, 5]
 H = np.array([x_vec], dtype=[('x', float)])
-sim_specs = {'out': [('f', float), ('fvec', float, 3)]}
+sim_specs = {'out': [('f', float), ('fvec', float, 4)]}
 
 
 class TestOptimizer(unittest.TestCase):
@@ -41,6 +41,23 @@ class TestOptimizer(unittest.TestCase):
         for base_key, base_value in zip(parameters_dict.keys(), x_vec):
             self.assertEqual(kwargs[base_key], base_value)
 
-    def test_function_call(self):
+    def test_function_call_function(self):
+        objective = mock.MagicMock(name='hybrid_undulator',
+                                   return_value=lambda *args, **kwargs: (args, kwargs))
+        pf = pyfunc.PythonFunction(objective(), self.optimizer.parameters, self.optimizer.settings)
+        kwargs = {key: i for i, key in enumerate(self.optimizer.parameters._NAMES)}
+        pyfunc._merge_dicts(settings_dict, kwargs, depth=1)
 
-        pf = pyfunc.PythonFunction()
+        _, f = pf.call_function(kwargs)
+
+        self.assertEqual(f.keys(), kwargs.keys())
+
+    def test_format_evaluation(self):
+        pf = pyfunc.PythonFunction(lambda x: x, self.optimizer.parameters, self.optimizer.settings)
+        pf.sim_specs = sim_specs
+        result = (x_vec[0], x_vec[1:])
+        f = pf.format_evaluation(result)
+
+        self.assertEqual(f['f'][0], x_vec[0])
+        self.assertEqual(f['fvec'][0], x_vec[1:])
+
