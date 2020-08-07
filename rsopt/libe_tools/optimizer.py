@@ -18,12 +18,24 @@ uniform_or_localopt_gen_out = [('priority', float),
                                ('num_active_runs', int),
                                ('local_min', bool)]
 
+# Options like record interval are useful for a variety of optimizers and should not be mapped
+#   to libE specific terms. Other libE specific options can retain their original terminology.
+# FUTURE: Allowed option keys should be stored with parent once built out
+LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims'}
+
 
 class libEnsembleOptimizer(Optimizer):
     # Configurationf or Local Optimization through uniform_or_localopt
     # Just sets up a local optimizer for now
+    def __init__(self):
+        super(libEnsembleOptimizer, self).__init__()
+        self.libE_specs = {}
+
     def set_optimizer(self, method, options=None):
         self.optimizer_method = method
+        for key in LIBE_SPECS_ALLOWED:
+            if key in options:
+                self.libE_specs[LIBE_SPECS_ALLOWED[key]] = options.pop[key]
         self.options = options
 
     def set_simulation(self, simulation, function=True):
@@ -66,7 +78,7 @@ class libEnsembleOptimizer(Optimizer):
         # Persistent generator + local optimization eval = 2 workers always
         self.nworkers = 2
         self.comms = 'local'
-        self.libE_specs = {'nworkers': self.nworkers, 'comms': self.comms}
+        self.libE_specs = {'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs}
 
     def _configure_libE(self):
         self._set_dimension()

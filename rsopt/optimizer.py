@@ -9,6 +9,8 @@ class Optimizer:
         self.options = {}
         self.settings = Settings()
         self.parameters = Parameters()
+
+        self.recording_method = None
         self.exit_criteria = None
         self.function = None
         self.executable = None
@@ -56,3 +58,7 @@ class Optimizer:
     def set_exit_criteria(self, exit_criteria):
         # TODO: Will override in sublcasses probably
         self.exit_criteria = exit_criteria
+
+    def _set_recording(self):
+        if self.recording_method:
+            self.recording_method()
