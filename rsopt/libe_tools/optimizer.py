@@ -1,6 +1,6 @@
 from libensemble.libE import libE
-from libensemble.gen_funcs.uniform_or_localopt import uniform_or_localopt
-from libensemble.alloc_funcs.start_persistent_local_opt_gens import start_persistent_local_opt_gens
+from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_local_opt
+from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
 from libensemble.tools import add_unique_random_streams
 from rsopt.optimizer import Optimizer
 from rsopt.libe_tools.interface import get_local_optimizer_method
@@ -40,19 +40,22 @@ class libEnsembleOptimizer(Optimizer):
         gen_out = [set_dtype_dimension(dtype, self.dimension) for dtype in persistent_local_opt_gen_out]
         user_keys = {'lb': self.lb,
                      'ub': self.ub,
+                     'initial_sample_size': 1,
+                     'xstart': self.start,
                      'localopt_method': get_local_optimizer_method(self.optimizer_method, 'nlopt')}
+        print(user_keys['xstart'], type(user_keys['xstart']))
         for key, val in self.options.items():
             user_keys[key] = val
-        gen_specs = {'gen_f': uniform_or_localopt,
+        gen_specs = {'gen_f': persistent_local_opt,
                      'in': [],
                      'out': gen_out,
                      'user': user_keys}
         self.gen_specs = gen_specs
 
-    def _configure_allocation(self, generator_out):
+    def _configure_allocation(self):
         # local optimizer allocation
-        self.alloc_specs = {'alloc_f': start_persistent_local_opt_gens, 'out': generator_out,
-                            'user': {'batch_mode': True, 'num_active_gens': 1}}
+        self.alloc_specs = {'alloc_f': persistent_aposmm_alloc, 'out': [('given_back', bool)],
+                            'user': {}}
 
     def _configure_persistant_info(self):
         self.persis_info = add_unique_random_streams({}, self.nworkers + 1)
@@ -66,7 +69,7 @@ class libEnsembleOptimizer(Optimizer):
     def _configure_libE(self):
         self._set_dimension()
         self._configure_optimizer()
-        self._configure_allocation(self.gen_specs['out'])
+        self._configure_allocation()
         self._configure_specs()
         self._configure_persistant_info()
         self._configure_sim()
@@ -99,11 +102,11 @@ class libEnsembleOptimizer(Optimizer):
 
 
 def set_dtype_dimension(dtype, dimension):
-    if len(dtype == 2):
+    if len(dtype) == 2:
         return dtype
-    elif len(dtype == 3):
-        dtype[2] = dimension
-        return dtype
+    elif len(dtype) == 3:
+        new_dtype = (dtype[0], dtype[1], dimension)
+        return new_dtype
     else:
         raise IndexError('size of dtype cannot be set')
 

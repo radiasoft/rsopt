@@ -5,6 +5,23 @@ in this module was adapted from the persistent APOSMM generator as defined in:
 https://github.com/Libensemble/libensemble/blob/a870bd4beffccbc863f79dfd7ab3940f2a57a269/libensemble/gen_funcs/persistent_aposmm.py
 """
 
+from importlib import util
+# TODO: If libEnsemble is updated can import optimizer list
+# from libensemble.gen_funcs import aposmm_optimizer_list
+aposmm_optimizer_list = ['petsc', 'nlopt', 'dfols', 'scipy', 'external']
+available_opt = []
+for optimizer in aposmm_optimizer_list:
+    if optimizer == 'external':
+        continue
+    if util.find_spec(optimizer):
+        print('found', optimizer)
+        available_opt.append(optimizer)
+    else:
+        print(f'Package{optimizer} not installed. Will not be available.')
+
+import libensemble.gen_funcs
+libensemble.gen_funcs.rc.aposmm_optimizers = available_opt
+
 import numpy as np
 from libensemble.gen_funcs.aposmm_localopt_support import LocalOptInterfacer, ConvergedMsg, simulate_recv_from_manager
 
