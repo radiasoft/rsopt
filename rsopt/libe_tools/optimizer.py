@@ -6,17 +6,12 @@ from rsopt.optimizer import Optimizer
 from rsopt.libe_tools.interface import get_local_optimizer_method
 from rsopt.libe_tools.simulation_functions.python_simulation_functions import PythonFunction
 
-uniform_or_localopt_gen_out = [('priority', float),
-                               ('local_pt', bool),
-                               ('known_to_aposmm', bool),
-                               ('dist_to_unit_bounds', float),
-                               ('dist_to_better_l', float),
-                               ('dist_to_better_s', float),
-                               ('ind_of_better_l', int),
-                               ('ind_of_better_s', int),
-                               ('started_run', bool),
-                               ('num_active_runs', int),
-                               ('local_min', bool)]
+
+# dimension for x needs to be set
+persistent_local_opt_gen_out = [('x', float, None),
+                                ('x_on_cube', float, None),
+                                ('sim_id', int),
+                                ('local_pt', bool)]
 
 
 class libEnsembleOptimizer(Optimizer):
@@ -42,7 +37,7 @@ class libEnsembleOptimizer(Optimizer):
 
     def _configure_optimizer(self):
         # TODO: The generator creation procedure needs to generalized and set up separately
-        gen_out = uniform_or_localopt_gen_out + [('x', float, self.dimension), ('x_on_cube', float, self.dimension)]
+        gen_out = [set_dtype_dimension(dtype, self.dimension) for dtype in persistent_local_opt_gen_out]
         user_keys = {'lb': self.lb,
                      'ub': self.ub,
                      'localopt_method': get_local_optimizer_method(self.optimizer_method, 'nlopt')}
@@ -101,3 +96,14 @@ class libEnsembleOptimizer(Optimizer):
                 self.exit_criteria[key] = val
             else:
                 raise KeyError(f'{key} is not a valid exit criteria option for libEnsemble')
+
+
+def set_dtype_dimension(dtype, dimension):
+    if len(dtype == 2):
+        return dtype
+    elif len(dtype == 3):
+        dtype[2] = dimension
+        return dtype
+    else:
+        raise IndexError('size of dtype cannot be set')
+
