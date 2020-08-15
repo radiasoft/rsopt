@@ -6,8 +6,6 @@ from rsopt.optimizer import Optimizer
 from rsopt.libe_tools.interface import get_local_optimizer_method
 from rsopt.libe_tools.simulation_functions.python_simulation_functions import PythonFunction
 
-_NAME = 'libensemble'
-
 uniform_or_localopt_gen_out = [('priority', float),
                                ('local_pt', bool),
                                ('known_to_aposmm', bool),
@@ -23,15 +21,14 @@ uniform_or_localopt_gen_out = [('priority', float),
 # Options like record interval are useful for a variety of optimizers and should not be mapped
 #   to libE specific terms. Other libE specific options can retain their original terminology.
 # FUTURE: Allowed option keys should be stored with parent once built out
+LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims'}
 
 
 class libEnsembleOptimizer(Optimizer):
-    name = _NAME
     # Configurationf or Local Optimization through uniform_or_localopt
     # Just sets up a local optimizer for now
-
-    def __init__(self, options):
-        super(libEnsembleOptimizer, self).__init__(options)
+    def __init__(self):
+        super(libEnsembleOptimizer, self).__init__()
         self.libE_specs = {}
 
     def set_optimizer(self, method, options=None):
