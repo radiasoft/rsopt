@@ -12,11 +12,11 @@ from libensemble.message_numbers import STOP_TAG, PERSIS_STOP, FINISHED_PERSISTE
 from libensemble.tools.gen_support import send_mgr_worker_msg, get_mgr_worker_msg
 
 
-def optimizer(H, persis_info, gen_specs, libE_info):
+def persistent_local_opt(H, persis_info, gen_specs, libE_info):
     try:
         # Setup
         user_specs = gen_specs['user']
-        n, n_s, comm, local_H = initialize_APOSMM(H, user_specs, libE_info)
+        n, n_s, comm, local_H = initialize_local_opt(H, user_specs, libE_info)
         x_start = (user_specs['xstart']-user_specs['lb'])/(user_specs['ub']-user_specs['lb'])
         x_start = x_start.reshape(1, 2)  # x_start will be iterated over, should contain single row
         _, _, run_order, run_pts, total_runs, fields_to_pass = initialize_children(user_specs)
@@ -132,14 +132,10 @@ def update_local_H_after_receiving(local_H, n, n_s, user_specs, Work, calc_in, f
 
 
 def clean_up_and_stop(local_opter):
-    # FIXME: This has to be a clean exit.
-
-    # print('[Parent]: The optimal points and values are:\n',
-    #       local_H[np.where(local_H['local_min'])][['x', 'f']], flush=True)
     local_opter.destroy()
 
 
-def initialize_APOSMM(H, user_specs, libE_info):
+def initialize_local_opt(H, user_specs, libE_info):
     """
     Computes common values every time that APOSMM is reinvoked
 
@@ -160,7 +156,6 @@ def initialize_APOSMM(H, user_specs, libE_info):
                       ('x', float, n),
                       ('x_on_cube', float, n),
                       ('local_pt', bool),
-                      ('local_min', bool),  # TODO: Would be nice if local_min was set at close out
                       ('sim_id', int),
                       ('paused', bool),
                       ('returned', bool),
@@ -176,25 +171,15 @@ def initialize_APOSMM(H, user_specs, libE_info):
             local_H[field][:len(H)] = H[field]
 
         if user_specs['localopt_method'] in ['LD_MMA', 'blmvm']:
-            assert 'grad' in H.dtype.names, "Must give 'grad' values to persistent_aposmm in gen_specs['in'] when using 'localopt_method'" + user_specs['localopt_method']
+            assert 'grad' in H.dtype.names, "Must give 'grad' values to persistent_local_opt in gen_specs['in'] " \
+                                            "when using 'localopt_method'" + user_specs['localopt_method']
             assert not np.all(local_H['grad'] == 0), "All 'grad' values are zero for the given points."
 
-        assert 'f' in H.dtype.names, "Must give 'f' values to persistent_aposmm in gen_specs['in']"
-        assert 'sim_id' in H.dtype.names, "Must give 'sim_id' to persistent_aposmm in gen_specs['in']"
-        assert 'returned' in H.dtype.names, "Must give 'returned' status to persistent_aposmm in gen_specs['in']"
-
-        over_written_fields = ['dist_to_unit_bounds', 'dist_to_better_l', 'dist_to_better_s', 'ind_of_better_l', 'ind_of_better_s']
-        if any([i in H.dtype.names for i in over_written_fields]):
-            print("\n persistent_aposmm ignores any given values in these fields: " + str(over_written_fields) + "\n")
-
-        # initialize_dists_and_inds(local_H, len(H))
-        #
-        # # Update after receiving initial points
-        # update_history_dist(local_H, n)
+        assert 'f' in H.dtype.names, "Must give 'f' values to persistent_local_opt in gen_specs['in']"
+        assert 'sim_id' in H.dtype.names, "Must give 'sim_id' to persistent_local_opt in gen_specs['in']"
+        assert 'returned' in H.dtype.names, "Must give 'returned' status to persistent_local_opt in gen_specs['in']"
 
     n_s = np.sum(~local_H['local_pt'])
-
-    # assert n_s > 0 or user_specs['initial_sample_size'] > 0, "APOSMM requires a positive initial_sample_size, or some existing points in order to determine where to start local optimization runs."
 
     if 'sample_points' in user_specs:
         assert isinstance(user_specs['sample_points'], np.ndarray)
