@@ -1,12 +1,20 @@
 from rsopt.configuration import Settings, Parameters, get_reader
 
+_NAME = None
+
+OPTIONS_ALLOWED = {'record_interval': {'libensemble': ['libE_specs', 'save_every_k_sims']},
+                   'working_directory': {'libensemble': ['libE_specs', 'ensemble_dir_path']}
+                   }
+
 
 class Optimizer:
+    name = _NAME
+
     def __init__(self):
         self.gen_specs = {}
         self.dimension = 0
         self.optimizer_method = ''
-        self.options = {}
+        self._options = {}
         self.settings = Settings()
         self.parameters = Parameters()
 
