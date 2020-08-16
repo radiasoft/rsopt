@@ -22,6 +22,7 @@ LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims'}
 class libEnsembleOptimizer(Optimizer):
     # Configurationf or Local Optimization through uniform_or_localopt
     # Just sets up a local optimizer for now
+    _NAME = 'libEnsemble'
     _SPECIFICATION_DICTS = ['gen_specs', 'libE_specs', 'sim_specs', 'alloc_specs']
 
     def __init__(self):
@@ -47,9 +48,11 @@ class libEnsembleOptimizer(Optimizer):
         """
         self.optimizer_method = method
         # move options to their appropriate dict for libE
-        for key, mapping in OPTIONS_ALLOWED:
+        for key, mapping in OPTIONS_ALLOWED.items():
             if key in options:
-                self.__getattribute__(mapping[0]).update(mapping[1], options.pop[key])
+                dict_name, dict_value = mapping[self._NAME]
+                self.__getattribute__(dict_name)[dict_value] = options.pop(key)
+        # If option in options not used above it will be passed directly to the optimizer
         self._options.update(options)
 
     def set_simulation(self, simulation, function=True):
@@ -75,7 +78,7 @@ class libEnsembleOptimizer(Optimizer):
                      'xstart': self.start,
                      'localopt_method': get_local_optimizer_method(self.optimizer_method, 'nlopt')}
         print(user_keys['xstart'], type(user_keys['xstart']))
-        for key, val in self.options.items():
+        for key, val in self._options.items():
             user_keys[key] = val
         self.gen_specs.update({'gen_f': persistent_local_opt,
                      'in': [],
@@ -95,7 +98,7 @@ class libEnsembleOptimizer(Optimizer):
         # Persistent generator + local optimization eval = 2 workers always
         self.nworkers = 2
         self.comms = 'local'
-        self.libE_specs.updat({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
+        self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
 
     def _configure_sim(self):
         # TODO: THe sim spec creation procedure needs to generalized and set up separately

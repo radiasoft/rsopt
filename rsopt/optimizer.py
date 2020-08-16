@@ -2,8 +2,8 @@ from rsopt.configuration import Settings, Parameters, get_reader
 
 _NAME = None
 
-OPTIONS_ALLOWED = {'record_interval': {'libensemble': ['libE_specs', 'save_every_k_sims']},
-                   'working_directory': {'libensemble': ['libE_specs', 'ensemble_dir_path']}
+OPTIONS_ALLOWED = {'record_interval': {'libEnsemble': ['libE_specs', 'save_every_k_sims']},
+                   'working_directory': {'libEnsemble': ['libE_specs', 'ensemble_dir_path']}
                    }
 
 
