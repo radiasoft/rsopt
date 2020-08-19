@@ -35,7 +35,7 @@ def persistent_local_opt(H, persis_info, gen_specs, libE_info):
         user_specs = gen_specs['user']
         n, n_s, comm, local_H = initialize_local_opt(H, user_specs, libE_info)
         x_start = (user_specs['xstart']-user_specs['lb'])/(user_specs['ub']-user_specs['lb'])
-        x_start = x_start.reshape(1, 2)  # x_start will be iterated over, should contain single row
+        x_start = x_start.reshape(1, n)  # x_start will be iterated over, should contain single row
         _, _, run_order, run_pts, total_runs, fields_to_pass = initialize_children(user_specs)
 
         # Intialize first point
