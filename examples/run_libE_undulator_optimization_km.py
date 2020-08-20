@@ -1,4 +1,4 @@
-from rsopt.codes.radia.sim_functions_km import hybrid_undulator, materials, km_max
+from rsopt.codes.radia.sim_functions import hybrid_undulator, materials, km_max
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 import numpy as np
 
