@@ -1,8 +1,6 @@
 from rsopt.codes.radia.sim_functions_km import hybrid_undulator, materials, km_max
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 import numpy as np
-import libensemble.gen_funcs
-libensemble.gen_funcs.rc.aposmm_optimizers = ['nlopt']
 
 # Start configuring a local optimizer run through libEnsemble
 optimizer = libEnsembleOptimizer()
@@ -14,9 +12,9 @@ optimizer.set_simulation(sim_func)
 
 # Set optimizer parameters
 parameters = np.array([
-                       ('lpx', 40., 50., 45.),
-#                        ('lpy', 2, 8, 5.)
-                       ('lpz', 20., 30., 25.)
+                       ('lpx', 20., 70., 45.),
+                       ('lpy', 1, 10, 5.),
+#                        ('lpz', 1., 200., 25.)
 #                        ('lmx', 45., 60., 55.),
 #                        ('lmz', 25., 40., 35.)
                       ],
@@ -37,8 +35,8 @@ mp, mm = materials(ironH, ironM, 'NdFeB', 1.2)
 
 settings = {
 #     'lpx': 45.,
-    'lpy':  5.,
-#     'lpz': 25.,
+#     'lpy':  5.,
+    'lpz': 25.,
     'pole_properties': mp,
     'pole_segmentation': [2, 2, 5],
     'pole_color': [1, 0, 1],
@@ -56,8 +54,8 @@ settings = {
 optimizer.set_settings(settings)
 
 # setup optimizer
-optimizer_settings = { 'xtol_rel': 1e-12, #1e-4
-                      'ftol_rel': 1e-3
+optimizer_settings = { 'xtol_rel': 1e-10, #1e-4
+                      'ftol_rel': 1e-10
                       }#'gen_batch_size': 2
 optimizer.set_optimizer(method='LN_BOBYQA',  # Optimization algorithm
                         options=optimizer_settings)
