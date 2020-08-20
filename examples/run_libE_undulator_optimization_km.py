@@ -1,4 +1,4 @@
-from rsopt.codes.radia.sim_functions import hybrid_undulator, materials, km_max
+from rsopt.codes.radia.sim_functions import optimize_objective_km, materials
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 import numpy as np
 
@@ -7,14 +7,14 @@ optimizer = libEnsembleOptimizer()
 
 # Set functions used for simulation and objective evaluation
 # Note: simulation function may also directly return the objective value
-sim_func = hybrid_undulator
+sim_func = optimize_objective_km
 optimizer.set_simulation(sim_func)
 
 # Set optimizer parameters
 parameters = np.array([
                        ('lpx', 20., 70., 45.),
                        ('lpy', 1, 10, 5.),
-#                        ('lpz', 1., 200., 25.)
+                       ('lpz', 1., 200., 25.)
 #                        ('lmx', 45., 60., 55.),
 #                        ('lmz', 25., 40., 35.)
                       ],
@@ -36,7 +36,7 @@ mp, mm = materials(ironH, ironM, 'NdFeB', 1.2)
 settings = {
 #     'lpx': 45.,
 #     'lpy':  5.,
-    'lpz': 25.,
+#     'lpz': 25.,
     'pole_properties': mp,
     'pole_segmentation': [2, 2, 5],
     'pole_color': [1, 0, 1],
@@ -64,6 +64,6 @@ optimizer.set_optimizer(method='LN_BOBYQA',  # Optimization algorithm
 # run optimization
 optimizer.set_exit_criteria({'sim_max': 500})
 H, _, _ = optimizer.run()
-np.save('undulator_optimizer_history_km.npy', H) 
+np.save('undulator_optimizer_history_km.npy', H)
 # optimizer.set_exit_criteria({'sim_max': 500})
 # optimizer.run()

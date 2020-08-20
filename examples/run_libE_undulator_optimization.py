@@ -1,4 +1,4 @@
-from rsopt.codes.radia.sim_functions import hybrid_undulator, materials, undulatorK_simple
+from rsopt.codes.radia.sim_functions import optimize_objective_k, materials
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 import numpy as np
 
@@ -7,14 +7,14 @@ optimizer = libEnsembleOptimizer()
 
 # Set functions used for simulation and objective evaluation
 # Note: simulation function may also directly return the objective value
-sim_func = hybrid_undulator
+sim_func = optimize_objective_k
 optimizer.set_simulation(sim_func)
 
 # Set optimizer parameters
 parameters = np.array([('period', 30., 60., 46.),
                        ('lpy', 1., 10., 5.),
                        ('lmz', 10., 40., 20.),
-                       ('lpz', 30., 60., 25.),
+                       ('lpz', 30., 60., 35.),
                        ('offset', 0.25, 4., 1.)],
                        dtype=[('name', 'U20'), ('min', 'float'), ('max', 'float'), ('start', 'float')])
 
