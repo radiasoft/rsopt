@@ -56,12 +56,12 @@ class Optimizer:
     def set_parameters(self, parameters):
         reader = get_reader(parameters, 'parameters')
         for name, values in reader(parameters):
-            self.parameters.parse_parameters(name, values)
+            self.parameters.parse(name, values)
 
     def set_settings(self, settings):
         reader = get_reader(settings, 'settings')
         for name, value in reader(settings):
-            self.settings.parse_settings(name, value)
+            self.settings.parse(name, value)
 
     def set_exit_criteria(self, exit_criteria):
         # TODO: Will override in sublcasses probably
