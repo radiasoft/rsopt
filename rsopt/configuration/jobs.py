@@ -7,15 +7,6 @@ def get_reader(obj, category):
     config_categories = {'parameters': _PARAMETER_READERS,
                          'settings': _SETTING_READERS,
                          'setup': _SETUP_READERS}
-    obj_type = type(obj)
-
-    return config_categories[category][obj_type]
-
-
-def get_reader(obj, category):
-    config_categories = {'parameters': _PARAMETER_READERS,
-                         'settings': _SETTING_READERS,
-                         'setup': _SETUP_READERS}
     reader_options = config_categories[category]
     for key, value in reader_options.items():
         if isinstance(obj, key):
