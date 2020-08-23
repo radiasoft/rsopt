@@ -3,11 +3,7 @@
 # Configuration Parameter and Setting object will be defined externally
 from pykern.pkyaml import load_file
 from rsopt.configuration import Configuration, Job
-
-
-# Templated codes have schema files that can be used to check input and create run files. Otherwise user
-#   must supply module containing inputs
-_TEMPLATED_CODES = ['elegant', ]
+from rsopt.codes import _SUPPORTED_CODES
 
 _CODE_FIELD = 'codes'  # TODO: Might be more consistent to change this this field title to 'jobs'
 _PARAMETERS_FIELD = 'parameters'
@@ -20,10 +16,6 @@ def _DEFAULT_SETUP(code_name):
     raise KeyError(f'setup is not defined for {code_name}')
 
 
-def read_configuration_file(filename):
-    return load_file(filename)
-
-
 def _sanitize_fields(field: str):
     field = field.lower()
 
@@ -31,13 +23,13 @@ def _sanitize_fields(field: str):
 
 
 def _is_code_supported(code_name):
-    return code_name in _TEMPLATED_CODES
+    return code_name in _SUPPORTED_CODES
 
 
 def _read_codes_to_jobs(template: dict):
     job_list = []
 
-    for code_name, code_dict in template[_CODE_FIELD].popitem():
+    for code_name, code_dict in [code.popitem() for code in template[_CODE_FIELD]]:
         code_name = _sanitize_fields(code_name)
         assert _is_code_supported(code_name), f"{code_name} is not supported"
 
@@ -51,7 +43,11 @@ def _read_codes_to_jobs(template: dict):
     return job_list
 
 
-def parse_yaml_template(template: dict) -> object:
+def read_configuration_file(filename):
+    return load_file(filename)
+
+
+def parse_yaml_schema(template: dict) -> object:
     job_list = _read_codes_to_jobs(template)
 
     configuration = Configuration()

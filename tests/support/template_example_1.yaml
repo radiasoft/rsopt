@@ -1,12 +1,13 @@
 # List of codes in execution order
 codes:
   # Code names should be validated as usable during read
+  # codes holds a list of dictionaries since the code execution order is preserved
   - opal:
       # Settings are an (optional) dictionary that will be set every time this job is executed
       settings:
         mx: 32
         my: 32
-        mt: &mt 32
+        mt: 32
         macroparticles: 5.e4
       # Parameters are changed every time a job is executed, normally an outside source is specifying their value
       # For now three keys are required: min, max, and start.
@@ -14,33 +15,33 @@ codes:
       #   names of configuration file fields
       parameters:
       # Laser parameters
-        - pulse_length:  # s
+        pulse_length:  # s
             min: 50.e-15
             max: 3.e-12
             start: 1.15e-12
-        - spot_size:  # m
+        spot_size:  # m
             min: 5.e-6
             max: 3.e-3
             start: 0.00040
       # Injector
-        - solenoid_field: # T
+        solenoid_field: # T
             min: 0.22
             max: 0.23
             start: 0.22989
-        - gun_amplitude:  # MW
+        gun_amplitude:  # MW
             min: 90.
             max: 120.
             start: 100.
-        - gun_phase:  # degrees
+        gun_phase:  # degrees
             min: -40.
             max: -5.
             start: -13.534
       # L1 linac
-        - l1_amplitude:  # MW
+        l1_amplitude:  # MW
             min: 8.
             max: 25.
             start: 17.594 # This is set higher than limit from Y. Park
-        - l1_phase:  # degrees
+        l1_phase:  # degrees
             min: -360.
             max: 0.
             start: -4.982
@@ -54,57 +55,62 @@ codes:
         server: 1
         # Path used to direct to needed files - could be simlinked into the sim run directory with libEnsemble
         source_directory: '/home/vagrant/jupyter/repos/fastfelo/fastfelo/tessa_optimization/input_files/injector'
-        run_command: rsmpi
+        execution_type: rsmpi  # TODO: Rename run_command to execution type
         # output distribution name needs to be specified to pass to the next code
         output_distribution: opal_0.h5
   - elegant:
       settings:  # C
         charge: 300.e-12
       parameters:
-        - l2_phase:  # degrees
+        l2_phase:  # degrees
             min: 50.
             max: 110.
             start: 65.
-        - l4_phase:  # degrees
+        l4_phase:  # degrees
             min: 50.
             max: 110.
             start: 90.
-        - l5_phase:  # degrees
+        l5_phase:  # degrees
             min: 50.
             max: 110.
             start: 90.
-        - l2_amplitude:  # Multiplicative setting
+        l2_amplitude:  # Multiplicative setting
             min: 0.5
             max: 1.5
             start: 1.0
-        - l4_amplitude:  # Multiplicative setting
+        l4_amplitude:  # Multiplicative setting
             min: 0.5
             max: 1.5
             start: 1.0
-        - l5_amplitude:  # Multiplicative setting
+        l5_amplitude:  # Multiplicative setting
             min: 0.5
             max: 1.5
             start: 1.0
       setup:
         input_file: fastfelo.tessa_optimization.input_files.linac.elegant_input
         cores: 20
-        run_command: rsmpi
+        execution_type: rsmpi  # mpi, rsmpi, serial are supported
         server: 1
         source_directory: '/home/vagrant/jupyter/repos/fastfelo/fastfelo/tessa_optimization/input_files/linac'
         output_distribution: PClinac_TESSA.w0
-    - genesis:
-        #settings:
-        #parameters:
-        setup:
-            input_file: fastfelo.tessa_optimization.input_files.fel.genesis_input
-            cores: 20
-            run_command: rsmpi
-            server: 1
-            source_directory: '/home/vagrant/jupyter/repos/fastfelo/fastfelo/tessa_optimization/input_files/fel'
-            output_distribution: None
+  - genesis:
+      #settings:
+      #parameters:
+      setup:
+          input_file: fastfelo.tessa_optimization.input_files.fel.genesis_input
+          cores: 20
+          execution_type: rsmpi
+          server: 1
+          source_directory: '/home/vagrant/jupyter/repos/fastfelo/fastfelo/tessa_optimization/input_files/fel'
+          output_distribution: None
 options:
   # Supplied to optimization setup
-  software: nlopt_sbplx
-  max_runs: 10000
+  software: nlopt
+  software_options: {}
+  algorithm: sbplx  # Could just be part of software
+  exit_criteria:
+    - max_runs: 10000
+    - wall_clock: 1e4
+  objective_function: my_module.obj_f  # Python function that takes in H object or None if provided by sim_func
 
 # at each run a copy of the schema is made that also contains 'run_parameters' with exact values for parameters
