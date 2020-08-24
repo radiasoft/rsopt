@@ -1,4 +1,9 @@
-from rsopt.configuration import Settings, Parameters, get_reader
+from rsopt.configuration import Configuration, Job
+from rsopt.parse import read_configuration_file, parse_yaml_configuration
+from pykern.pkcollections import PKDict
+from os import path
+import numpy as np
+
 
 _NAME = None
 
@@ -11,12 +16,11 @@ class Optimizer:
     name = _NAME
 
     def __init__(self):
+        self._config = Configuration()
         self.gen_specs = {}
         self.dimension = 0
         self.optimizer_method = ''
         self._options = {}
-        self.settings = Settings()
-        self.parameters = Parameters()
 
         self.recording_method = None
         self.exit_criteria = None
@@ -25,7 +29,7 @@ class Optimizer:
 
     @property
     def lb(self):
-        return self.parameters.get_lower_bound()
+        return self._config.get_parameters_list('get_lower_bound', formatter=np.array)
 
     @lb.setter
     def lb(self, value=None):
@@ -33,7 +37,7 @@ class Optimizer:
 
     @property
     def ub(self):
-        return self.parameters.get_upper_bound()
+        return self._config.get_parameters_list('get_upper_bound', formatter=np.array)
 
     @ub.setter
     def ub(self, value=None):
@@ -41,27 +45,41 @@ class Optimizer:
 
     @property
     def start(self):
-        return self.parameters.get_start()
+        return self._config.get_parameters_list('get_start', formatter=np.array)
 
     @start.setter
     def start(self, value=None):
         pass
 
+    def load_configuration(self, config):
+        """
+        Load a configuration file to setup an optimization run.
+        May be given as a dictionary or path to configuration stored in YAML format
+
+        :param config: (dict or PKDict or str) The configuration file definition or path to the file
+        :return: None
+        """
+        if isinstance(config, dict) or isinstance(config, PKDict):
+            parse_yaml_configuration(config, self._config)
+        elif path.exists(config):
+            config = read_configuration_file(config)
+            parse_yaml_configuration(config, self._config)
+        else:
+            raise TypeError('Configuration was not readable')
+
     def _set_dimension(self):
-        if len(self.parameters.pararameters) == 0:
+        if len(self._config.get_dimension()) == 0:
             print("Warning: Cannot set dimension. No parameters have been set.")
         else:
-            self.dimension = len(self.parameters.pararameters)
+            self.dimension = len(self._config.get_dimension())
 
     def set_parameters(self, parameters):
-        reader = get_reader(parameters, 'parameters')
-        for name, values in reader(parameters):
-            self.parameters.parse(name, values)
+        self._manual_job_setup()
+        self._config.jobs[0].parameters = parameters
 
     def set_settings(self, settings):
-        reader = get_reader(settings, 'settings')
-        for name, value in reader(settings):
-            self.settings.parse(name, value)
+        self._manual_job_setup()
+        self._config.jobs[0].settings = settings
 
     def set_exit_criteria(self, exit_criteria):
         # TODO: Will override in sublcasses probably
@@ -70,3 +88,13 @@ class Optimizer:
     def _set_recording(self):
         if self.recording_method:
             self.recording_method()
+
+    def _manual_job_setup(self):
+        # if Optimizer is being setup manually then only one job is allowed
+        # Running with a multi job chain must be setup through a config file
+
+        # Add the one job if it doesn't exist yet
+        if len(self._config.jobs) == 0:
+            self._config.set_jobs(Job)
+        else:
+            pass
