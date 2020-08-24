@@ -1,11 +1,12 @@
 from pykern.pkyaml import load_file
-from rsopt.configuration import Configuration, Job
+from rsopt.configuration import Configuration, Job, Options
 from rsopt.codes import _SUPPORTED_CODES
 
 _CODE_FIELD = 'codes'  # TODO: Might be more consistent to change this this field title to 'jobs'
 _PARAMETERS_FIELD = 'parameters'
 _SETTINGS_FIELD = 'settings'
 _SETUP_FIELD = 'setup'
+_OPTIONS_FIELD = 'options'
 
 
 def _DEFAULT_SETUP(code_name):
@@ -43,6 +44,11 @@ def _read_codes_to_jobs(template: dict):
     return job_list
 
 
+def _read_options(template: dict):
+    options = template[_OPTIONS_FIELD]
+
+    return options
+
 def read_configuration_file(filename):
     """
     Load a configuration file stored in YAML format into a dictionary
@@ -56,6 +62,8 @@ def parse_yaml_configuration(template: dict, configuration=None) -> Configuratio
     """
     Parse configuration into Configuration object
     :param template: (dict) Dictionary containing a configuration
+    :param configuration: (Configuration obj) Optional, specify existing `Configuration` object to load into.
+                                              No checks for overwriting existing values are performed.
     :return: (Configuration)
     """
     job_list = _read_codes_to_jobs(template)
@@ -63,5 +71,8 @@ def parse_yaml_configuration(template: dict, configuration=None) -> Configuratio
     if not configuration:
         configuration = Configuration()
     configuration.set_jobs(job_list)
+
+    options = _read_options(template)
+    configuration.options = options
 
     return configuration
