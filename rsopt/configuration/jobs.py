@@ -16,32 +16,55 @@ def get_reader(obj, category):
 
 
 class Job:
+    # Job should never assume any particular code so that all parts may be set independently
+    # When actually executed, or setting up to execute, then setup is queried to decide execution
     """
     A Job encompasses a simulation to be run together with its pre and post processing options
     """
-    def __init__(self, code):
+    def __init__(self, code=None):
         self.code = code
 
-        self.parameters = Parameters()
-        self.settings = Settings()
-        self.setup = None
+        self._parameters = Parameters()
+        self._settings = Settings()
+        self._setup = None
         self.pre_process = None
         self.post_process = None
 
         self.code_execution_type = None
 
-    def set_parameters(self, parameters):
+    @property
+    def parameters(self):
+        return self._parameters.pararameters
+    @property
+    def settings(self):
+        return self._settings.settings
+    @property
+    def setup(self):
+        if self._setup:
+            return self._setup.setup
+        else:
+            return None
+
+    @parameters.setter
+    def parameters(self, parameters):
         reader = get_reader(parameters, 'parameters')
         for name, values in reader(parameters):
-            self.parameters.parse(name, values)
+            self._parameters.parse(name, values)
 
-    def set_settings(self, settings):
+    @settings.setter
+    def settings(self, settings):
         reader = get_reader(settings, 'settings')
         for name, value in reader(settings):
-            self.settings.parse(name, value)
+            self._settings.parse(name, value)
 
-    def set_setup(self, setup):
+    @setup.setter
+    def setup(self, setup, code=None):
+        # `code` may be set here, but `setup` cannot override `code` if it was set at instantiation of the job
+        if not self.code:
+            self.code = code
+        assert self.code, "A code must be set before adding a setup to a Job"
+
         reader = get_reader(setup, 'setup')
-        self.setup = Setup.get_setup(setup, self.code)()
+        self._setup = Setup.get_setup(setup, self.code)()
         for name, value in reader(setup):
-            self.setup.parse(name, value)
+            self._setup.parse(name, value)

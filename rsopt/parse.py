@@ -34,9 +34,9 @@ def _read_codes_to_jobs(template: dict):
         assert _is_code_supported(code_name), f"{code_name} is not supported"
 
         new_job = Job(code_name)
-        new_job.set_parameters(code_dict.get(_PARAMETERS_FIELD) or {})
-        new_job.set_settings(code_dict.get(_SETTINGS_FIELD) or {})
-        new_job.set_setup(code_dict.get(_SETUP_FIELD) or _DEFAULT_SETUP(code_name))
+        new_job.parameters = code_dict.get(_PARAMETERS_FIELD) or {}
+        new_job.settings = code_dict.get(_SETTINGS_FIELD) or {}
+        new_job.setup = code_dict.get(_SETUP_FIELD) or _DEFAULT_SETUP(code_name)
 
         job_list.append(new_job)
 
@@ -52,7 +52,7 @@ def read_configuration_file(filename):
     return load_file(filename)
 
 
-def parse_yaml_configuration(template: dict) -> Configuration:
+def parse_yaml_configuration(template: dict, configuration=None) -> Configuration:
     """
     Parse configuration into Configuration object
     :param template: (dict) Dictionary containing a configuration
@@ -60,7 +60,8 @@ def parse_yaml_configuration(template: dict) -> Configuration:
     """
     job_list = _read_codes_to_jobs(template)
 
-    configuration = Configuration()
+    if not configuration:
+        configuration = Configuration()
     configuration.set_jobs(job_list)
 
     return configuration
