@@ -50,6 +50,9 @@ class Parameters:
         for field, value in zip(self.fields, values):
             self.pararameters[name][field] = value
 
+    def get_parameter_names(self):
+        return self._NAMES
+
     def get_lower_bound(self):
         return np.array([self.pararameters[name][self._LOWER_BOUND] for name in self._NAMES])
 

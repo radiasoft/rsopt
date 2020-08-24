@@ -86,7 +86,7 @@ class PythonFunction:
 
     def _parse_x(self, x):
         x_struct = {}
-        for val, name in zip(x, self.parameters._NAMES):
+        for val, name in zip(x, self.parameters.get_parameter_names()):
             x_struct[name] = val
 
         return x_struct

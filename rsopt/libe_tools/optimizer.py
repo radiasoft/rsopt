@@ -101,8 +101,15 @@ class libEnsembleOptimizer(Optimizer):
         self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
 
     def _configure_sim(self):
+        # TODO: This nees to be modified to accommodate Runner. sim_function will be created from a top level class
+        #   to be able to string multiple simulations
         # TODO: THe sim spec creation procedure needs to generalized and set up separately
-        sim_function = PythonFunction(self.function, self.parameters, self.settings)
+        if len(self._config.jobs) > 1:
+            print('WARNING: Multi job optimization not implemented yet only first job is being used')
+
+        sim_function = PythonFunction(self.function,
+                                      self._config.jobs[0]._parameters,
+                                      self._config.jobs[0]._settings)
         self.sim_specs.update({'sim_f': sim_function,
                                'in': ['x'],
                                'out': [('f', float), ]})

@@ -68,10 +68,10 @@ class Optimizer:
             raise TypeError('Configuration was not readable')
 
     def _set_dimension(self):
-        if len(self._config.get_dimension()) == 0:
+        if self._config.get_dimension() == 0:
             print("Warning: Cannot set dimension. No parameters have been set.")
         else:
-            self.dimension = len(self._config.get_dimension())
+            self.dimension = self._config.get_dimension()
 
     def set_parameters(self, parameters):
         self._manual_job_setup()
@@ -95,6 +95,6 @@ class Optimizer:
 
         # Add the one job if it doesn't exist yet
         if len(self._config.jobs) == 0:
-            self._config.set_jobs(Job)
+            self._config.set_jobs(Job())
         else:
             pass
