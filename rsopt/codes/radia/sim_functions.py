@@ -3,6 +3,69 @@ import numpy as np
 from scipy.constants import mu_0, e, m_e, c
 
 
+def optimize_objective_k(lpx, lpy, lpz, pole_properties, pole_segmentation, pole_color,
+                     lmx, lmz, magnet_properties, magnet_segmentation, magnet_color,
+                     gap, offset, period, period_number):
+    """
+    create objective function based on k value
+    arguments:
+      pole_dimensions = [lpx, lpy, lpz] = dimensions of the iron poles / mm
+      pole_properties = magnetic properties of the iron poles (M-H curve)
+      pole_separation = segmentation of the iron poles
+      pole_color = [r,g,b] = color for the iron poles
+      magnet_dimensions = [lmx, lmy, lmz] = dimensions of the magnet blocks / mm
+      magnet_properties = magnetic properties of the magnet blocks (remanent magnetization)
+      magnet_segmentation = segmentation of the magnet blocks
+      magnet_color = [r,g,b] = color for the magnet blocks
+      gap = undulator gap / mm
+      offset = vertical offset / mm of the magnet blocks w/rt the poles
+      period = length of one undulator period / mm
+      period_number = number of full periods of the undulator magnetic field
+    return: objective function
+    """
+    grp, pole, magnet = hybrid_undulator(lpx, lpy, lpz, pole_properties, pole_segmentation, pole_color,
+                     lmx, lmz, magnet_properties, magnet_segmentation, magnet_color,
+                     gap, offset, period, period_number)
+    K_val = undulatorK_simple(grp, period)
+    result = np.sqrt((1 / K_val)**2 + (period / 100.)**2)
+    print('period:', period,', lpy:', lpy,', lmz:',lmz,', lpz:', lpz,', offset:',offset, ', k:',K_val,', objective:',result)
+    return result
+
+
+def optimize_objective_km(lpx, lpy, lpz, pole_properties, pole_segmentation, pole_color,
+                     lmx, lmz, magnet_properties, magnet_segmentation, magnet_color,
+                     gap, offset, period, period_number):
+    """
+    create objective function based on the maximum value of the kick maps
+    arguments:
+      pole_dimensions = [lpx, lpy, lpz] = dimensions of the iron poles / mm
+      pole_properties = magnetic properties of the iron poles (M-H curve)
+      pole_separation = segmentation of the iron poles
+      pole_color = [r,g,b] = color for the iron poles
+      magnet_dimensions = [lmx, lmy, lmz] = dimensions of the magnet blocks / mm
+      magnet_properties = magnetic properties of the magnet blocks (remanent magnetization)
+      magnet_segmentation = segmentation of the magnet blocks
+      magnet_color = [r,g,b] = color for the magnet blocks
+      gap = undulator gap / mm
+      offset = vertical offset / mm of the magnet blocks w/rt the poles
+      period = length of one undulator period / mm
+      period_number = number of full periods of the undulator magnetic field
+    return: objective function
+    """
+    grp, pole, magnet = hybrid_undulator(lpx, lpy, lpz, pole_properties, pole_segmentation, pole_color,
+                     lmx, lmz, magnet_properties, magnet_segmentation, magnet_color,
+                     gap, offset, period, period_number)
+    p0 = [0,-period*period_number/2,0]
+    r1 = 0.75*gap
+    np1 = 21
+    r2 = 0.75*gap
+    np2 = 21
+    k_per_val = undulatorK_simple(grp, period)-2.112390751320377
+    km_val = km_max(grp,p0,period,period_number,r1,np1,r2,np2)
+    result = np.abs(k_per_val) + 10000 * km_val
+    print("lp: ",[lpx, lpy, lpz], ",k-k0 is: ", k_per_val, ",maximum kick map value is: ", km_val, "objective: ", result)
+    return result
+
 def hybrid_undulator(lpx, lpy, lpz, pole_properties, pole_segmentation, pole_color,
                      lmx, lmz, magnet_properties, magnet_segmentation, magnet_color,
                      gap, offset, period, period_number):
@@ -61,10 +124,9 @@ def hybrid_undulator(lpx, lpy, lpz, pole_properties, pole_segmentation, pole_col
     rad.TrfZerPerp(grp, zer, [1, 0, 0])  # reflect in the (y,z) plane
     rad.TrfZerPara(grp, zer, [0, 0, 1])  # reflect in the (x,y) plane
     rad.TrfZerPerp(grp, zer, [0, 1, 0])  # reflect in the (z,x) plane
-    
-    K_val = undulatorK_simple(grp, period)
-    result = np.sqrt((1 / K_val)**2 + (period / 100.)**2)
-    return result
+
+
+    return grp, pole, magnet
 
 
 def materials(H, M, material_type_string, magnet_remanence):
@@ -86,7 +148,7 @@ def materials(H, M, material_type_string, magnet_remanence):
     return mp, mm
 
 
-def undulatorK_simple(obj, per, pf_loc=None, prec=1e-5, maxIter=10000, lprint=True):
+def undulatorK_simple(obj, per, pf_loc=None, prec=1e-5, maxIter=10000, lprint=False):
     """
     compute undulator K value
     arguments:
@@ -108,3 +170,27 @@ def undulatorK_simple(obj, per, pf_loc=None, prec=1e-5, maxIter=10000, lprint=Tr
         print("peak field:", peak_field, "(calculated at given location",
               pf_loc, ")\nperiod is", per, "(given input)\nk is", k)
     return k
+
+def km_max(obj,p0,per,nper,r1,np1,r2,np2,vl=[0,1,0],vt=[1,0,0]):
+    """
+    obj = undulator object
+    p0 = the starting point of longitudinal integration
+    r1 = range of the transverse grid along vt (horizontal)
+    np1 = number of points in transverse direction vt (horizontal)
+    r2 = range of the transverse grid along (vt cross vl, vertical)
+    np2 = number of points in transverse direction (vt cross vl, vertical)
+    vl = longitudinal integration direction. Defaults to [0,1,0] if not given.
+    vt = one of the transverse direction (horizontal). Defaults to [1,0,0] if not given.
+    """
+
+    # default paras:
+    dpar = [1,8,0,0]    #[maximum number of magnetic field harmonics to treat:1,number of longitudinal points:8,steps of transverse differentiation:0,0]
+    unit = 'T2m2'     #the units for the resulting 2nd order kick values T2m2 or rad or microrad
+    en = 1     #eletron energy in GeV (required only if units are rad or microrad)
+    oFormat = 'fix'     #the format of the output data string: fix or tab
+
+    km = rad.FldFocKickPer(obj,p0,vl,per,nper,vt,r1,np1,r2,np2)
+    km_h = np.round(np.array(km[0]),10)
+    km_v = np.round(np.array(km[1]),10)
+    km_max = max(np.amax(km_h),np.amax(km_v))
+    return km_max

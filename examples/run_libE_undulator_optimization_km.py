@@ -1,4 +1,4 @@
-from rsopt.codes.radia.sim_functions import optimize_objective_k, materials
+from rsopt.codes.radia.sim_functions import optimize_objective_km, materials
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 import numpy as np
 
@@ -7,15 +7,17 @@ optimizer = libEnsembleOptimizer()
 
 # Set functions used for simulation and objective evaluation
 # Note: simulation function may also directly return the objective value
-sim_func = optimize_objective_k
+sim_func = optimize_objective_km
 optimizer.set_simulation(sim_func)
 
 # Set optimizer parameters
-parameters = np.array([('period', 30., 60., 46.),
-                       ('lpy', 1., 10., 5.),
-                       ('lmz', 10., 40., 20.),
-                       ('lpz', 30., 60., 35.),
-                       ('offset', 0.25, 4., 1.)],
+parameters = np.array([
+                       ('lpx', 20., 70., 45.),
+                       ('lpy', 1, 10, 5.),
+                       ('lpz', 1., 200., 25.)
+#                        ('lmx', 45., 60., 55.),
+#                        ('lmz', 25., 40., 35.)
+                      ],
                        dtype=[('name', 'U20'), ('min', 'float'), ('max', 'float'), ('start', 'float')])
 
 optimizer.set_parameters(parameters)
@@ -32,26 +34,36 @@ ironM = [0.000998995, 0.00199812, 0.00299724, 0.00499548, 0.00699372, 0.00999145
 mp, mm = materials(ironH, ironM, 'NdFeB', 1.2)
 
 settings = {
-    'lpx': 65,
+#     'lpx': 45.,
+#     'lpy':  5.,
+#     'lpz': 25.,
     'pole_properties': mp,
     'pole_segmentation': [2, 2, 5],
     'pole_color': [1, 0, 1],
-    'lmx': 65,
+    'lmx':65.,
+    'lmz': 45.,
     'magnet_properties': mm,
     'magnet_segmentation': [1, 3, 1],
     'magnet_color': [0, 1, 1],
     'gap': 20.,
+    'offset': 1.,
+    'period':46.,
     'period_number': 2
 }
 
 optimizer.set_settings(settings)
 
 # setup optimizer
-optimizer_settings = {'xtol_rel': 1e-4,
-                      'gen_batch_size': 2}
+optimizer_settings = { 'xtol_rel': 1e-10, #1e-4
+                      'ftol_rel': 1e-10
+                      }#'gen_batch_size': 2
 optimizer.set_optimizer(method='LN_BOBYQA',  # Optimization algorithm
                         options=optimizer_settings)
 
 # run optimization
-optimizer.set_exit_criteria({'sim_max': 200})
-optimizer.run()
+# run optimization
+optimizer.set_exit_criteria({'sim_max': 500})
+H, _, _ = optimizer.run()
+np.save('undulator_optimizer_history_km.npy', H)
+# optimizer.set_exit_criteria({'sim_max': 500})
+# optimizer.run()
