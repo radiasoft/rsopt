@@ -4,7 +4,10 @@ class Configuration:
         self.options = {}
 
     def set_jobs(self, jobs):
-        self.jobs.extend(jobs)
+        if hasattr(jobs, '__iter__'):
+            self.jobs.extend(jobs)
+        else:
+            self.jobs.append(jobs)
 
     def get_dimension(self):
         dim = 0
