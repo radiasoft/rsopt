@@ -4,7 +4,7 @@ from rsopt.configuration import Options
 class Configuration:
     def __init__(self):
         self.jobs = []
-        self._options = None
+        self._options = Options
 
     @property
     def options(self):
@@ -12,8 +12,10 @@ class Configuration:
 
     @options.setter
     def options(self, options):
-        new_options = Options.get_option(options)
-        new_options.parse()
+        new_options = self._options.get_option(options)()
+        for name, value in options.items():
+            new_options.parse(name, value)
+        self._options = new_options
 
     def set_jobs(self, jobs):
         if hasattr(jobs, '__iter__'):

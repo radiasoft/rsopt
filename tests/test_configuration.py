@@ -40,18 +40,27 @@ settings_dict = {
     'gap': 20.
 }
 
+options_dict = {'software': 'nlopt',
+                 'software_options': {'xtol_abs': '1e-6',
+                 'ftol_abs': '1e-6',
+                 'record_interval': 2},
+                 'method': 'LN_SBPLX',
+                 'exit_criteria': {'sim_max': 10000, 'wall_clock': '1e4'},
+                 'objective_function': None
+                }
+
 
 class TestParameterReaders(unittest.TestCase):
 
     def test_parameter_array_read(self):
-        for reader, base_key, base_value in zip(config.read_parameter_array(parameters_array),
+        for reader, base_key, base_value in zip(config.parameters.read_parameter_array(parameters_array),
                                                 parameter_test_baseline['keys'], parameter_test_baseline['values']):
 
             self.assertEqual(reader[0], base_key)
             self.assertEqual(list(reader[1]), base_value)
 
     def test_parameter_dict_read(self):
-        for reader, base_key, base_value in zip(config.read_parameter_dict(parameters_dict),
+        for reader, base_key, base_value in zip(config.parameters.read_parameter_dict(parameters_dict),
                                                 parameter_test_baseline['keys'], parameter_test_baseline['values']):
 
             self.assertEqual(reader[0], base_key)
@@ -61,5 +70,34 @@ class TestParameterReaders(unittest.TestCase):
 class TestSettingReaders(unittest.TestCase):
 
     def test_setting_dict_read(self):
-        for key, value in config.read_setting_dict(settings_dict):
+        for key, value in config.settings.read_setting_dict(settings_dict):
             print(key, value)
+
+
+class TestOptionsReaders(unittest.TestCase):
+    # Should not rely on hardcoded values
+    software_key = 'software'
+    required_keys = {'nlopt': {'method': 'LN_SBPLX',
+                               'exit_criteria': 'fill'}}
+
+    def test_options_set(self):
+        for option_name, option_class in config.options.option_classes.items():
+            opt_dict = {k: 'fill' for k in self.required_keys[option_name]}
+            opt_dict[self.software_key] = option_name
+            option_obj = config.options.Options.get_option(opt_dict)()
+            self.assertIsInstance(option_obj, option_class)
+
+    def test_missing_req_options(self):
+
+        for option_name, option_class in config.options.option_classes.items():
+            opt_dict = {}
+            opt_dict[self.software_key] = option_name
+            with self.assertRaises(AssertionError):  # could use assertRaisesRegex and loop from pulling keys
+                option_obj = config.options.Options.get_option(opt_dict)()
+
+
+class TestConfigurationSetup(unittest.TestCase):
+
+    def test_option_read(self):
+        cfg = config.configuration.Configuration()
+        cfg.options = options_dict

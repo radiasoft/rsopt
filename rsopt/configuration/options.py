@@ -21,12 +21,11 @@ class Options:
     @classmethod
     def _check_options(cls, options):
         for key in cls.__REQUIRED_KEYS:
-            assert options.get(key), f"{key} mustself.__NAME be defined in options"
+            assert options.get(key), f"{key} must be defined in options"
 
-    @classmethod
-    def _validate_input(cls, name, value):
+    def _validate_input(self, name, value):
         # If the name isn't registered then no point checking further
-        name_pass = hasattr(cls, name)
+        name_pass = hasattr(self, name)
         if not name_pass:
             print(f'{name} in options not recognized. It will be ignored.')
             return False
@@ -37,7 +36,7 @@ class Options:
                 assert callable(value), "f{name} must be either None or callable"
         # Check all other values defined in init
         else:
-            expected_type = type(getattr(cls, name))
+            expected_type = type(getattr(self, name))
             value_pass = isinstance(value, expected_type)
             if not value_pass:
                 received_type = type(value)
@@ -55,6 +54,7 @@ class Options:
 
 class Nlopt(Options):
     __NAME = 'nlopt'
+    # Ordering of required keys matters to validate method assignment is correct
     __REQUIRED_KEYS = ('method', 'exit_criteria')
     # Only can allow what aposmm_localopt_support handles right now
     __ALLOWED_METHODS = ('LN_BOBYQA', 'LN_SBPLX', 'LN_COBYLA', 'LN_NEWUOA',
@@ -63,7 +63,10 @@ class Nlopt(Options):
     @classmethod
     def _check_options(cls, options):
         for key in cls.__REQUIRED_KEYS:
-            assert options.get(key), f"{key} must be defined in options for f{cls.__NAME}"
+            assert options.get(key), f"{key} must be defined in options to use {cls.__NAME}"
+        proposed_method = options.get(cls.__REQUIRED_KEYS[0])
+        assert proposed_method in cls.__ALLOWED_METHODS, \
+            f"{proposed_method} not available for use in software {cls.__NAME}"
 
 option_classes = {
     'nlopt': Nlopt

@@ -106,11 +106,13 @@ codes:
 options:
   # Supplied to optimization setup
   software: nlopt
-  software_options: {}
-  algorithm: sbplx  # Could just be part of software
+  software_options: {'xtol_abs': 1e-6,
+                     'ftol_abs': 1e-6,
+                     'record_interval': 2}
+  method: sbplx  # Could just be part of software
   exit_criteria:
-    - max_runs: 10000
-    - wall_clock: 1e4
+    sim_max: 10000
+    wall_clock: 1e4
   objective_function: my_module.obj_f  # Python function that takes in H object or None if provided by sim_func
 
 # at each run a copy of the schema is made that also contains 'run_parameters' with exact values for parameters

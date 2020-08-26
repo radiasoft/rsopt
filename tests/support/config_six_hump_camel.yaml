@@ -1,0 +1,24 @@
+codes:
+  - python:
+      parameters:
+        x:
+          min: -3.
+          max: 3.
+          start: 0.08
+        y:
+          min: -2.
+          max: 2.
+          start: -0.07
+      setup:
+        input_file: six_hump_camel.py
+        function: six_hump_camel_func
+        execution_type: serial
+options:
+  software: nlopt
+  method: LN_BOBYQA
+  software_options: {'xtol_abs': 1e-6,
+                     'ftol_abs': 1e-6,
+                     'record_interval': 2}
+  exit_criteria:
+    sim_max: 30
+  objective_function: None
