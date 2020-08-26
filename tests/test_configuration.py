@@ -82,7 +82,7 @@ class TestOptionsReaders(unittest.TestCase):
 
     def test_options_set(self):
         for option_name, option_class in config.options.option_classes.items():
-            opt_dict = {k: 'fill' for k in self.required_keys[option_name]}
+            opt_dict = self.required_keys[option_name]
             opt_dict[self.software_key] = option_name
             option_obj = config.options.Options.get_option(opt_dict)()
             self.assertIsInstance(option_obj, option_class)
