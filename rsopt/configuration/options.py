@@ -30,10 +30,6 @@ class Options:
             print(f'{name} in options not recognized. It will be ignored.')
             return False
 
-        # Check special cases for values
-        if name == 'objective_function':
-            if value:
-                assert callable(value), "f{name} must be either None or callable"
         # Check all other values defined in init
         else:
             expected_type = type(getattr(self, name))
