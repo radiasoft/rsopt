@@ -61,6 +61,8 @@ class Optimizer:
         """
         if isinstance(config, dict) or isinstance(config, PKDict):
             parse_yaml_configuration(config, self._config)
+        elif isinstance(config, Configuration):
+            self._config = config
         elif path.exists(config):
             config = read_configuration_file(config)
             parse_yaml_configuration(config, self._config)

@@ -49,6 +49,7 @@ def _read_options(template: dict):
 
     return options
 
+
 def read_configuration_file(filename):
     """
     Load a configuration file stored in YAML format into a dictionary

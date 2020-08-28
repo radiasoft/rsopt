@@ -1,7 +1,8 @@
 import unittest
 import numpy as np
 import rsopt.configuration as config
-
+from rsopt.parse import read_configuration_file, parse_yaml_configuration
+SUPPORT_PATH = './support/'
 
 parameters_array = np.array([('period', 30., 60., 46.),
                              ('lpy', 1., 10., 5.),
@@ -25,7 +26,7 @@ parameter_test_baseline = {'keys': ['period', 'lpy', 'lmz', 'lpz', 'offset'],
                                [10., 40., 20.],
                                [30., 60., 25.],
                                [0.25, 4., 1.]
-                           ]
+                            ]
                            }
 
 settings_dict = {
@@ -101,3 +102,15 @@ class TestConfigurationSetup(unittest.TestCase):
     def test_option_read(self):
         cfg = config.configuration.Configuration()
         cfg.options = options_dict
+
+
+class TestYAMLtoConfiguration(unittest.TestCase):
+    config_file = SUPPORT_PATH + 'config_six_hump_camel.yaml'
+
+    def test_config_read(self):
+        config_file = read_configuration_file(self.config_file)
+
+    def test_config_import(self):
+        config_file = read_configuration_file(self.config_file)
+        parse_yaml_configuration(config_file, configuration=None)
+
