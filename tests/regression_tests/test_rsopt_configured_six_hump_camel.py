@@ -1,11 +1,11 @@
+import sys
+sys.path.append('../support')
+# from six_hump_camel import six_hump_camel_func
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 import numpy as np
 
-# Start configuring a local optimizer run through libEnsemble
-optimizer = libEnsembleOptimizer()
 
-# Set functions used for simulation and objective evaluation
-# Note: simulation function directly returns the objective value in this example
+# Objective Function
 def six_hump_camel_func(x, y):
     """
     Definition of the six-hump camel
@@ -18,6 +18,12 @@ def six_hump_camel_func(x, y):
 
     return term1 + term2 + term3
 
+
+# Start configuring a local optimizer run through libEnsemble
+optimizer = libEnsembleOptimizer()
+
+# Set functions used for simulation and objective evaluation
+# Note: simulation function directly returns the objective value in this example
 
 optimizer.set_simulation(six_hump_camel_func)
 
@@ -42,4 +48,6 @@ H, _, _ = optimizer.run()
 
 print(H)
 
-assert np.all(np.isclose(H['x'][-1], [0.08979957, -0.71264018], rtol=0., atol=1e-7)), "Min. not found"
+
+def test_optimizer_result():
+    assert np.all(np.isclose(H['x'][-1], [0.08979957, -0.71264018], rtol=0., atol=1e-7)), "Min. not found"

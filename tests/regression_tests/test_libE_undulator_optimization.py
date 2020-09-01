@@ -1,4 +1,4 @@
-from rsopt.codes.radia.sim_functions import hybrid_undulator, materials, undulatorK_simple
+# from rsopt.codes.radia.sim_functions import hybrid_undulator, materials, undulatorK_simple
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 import numpy as np
 
@@ -21,13 +21,18 @@ optimizer.set_simulation(dummy_obj)
 parameters = np.array([('period', 30., 60., 46.),
                        ('lpy', 1., 10., 5.),
                        ('lmz', 10., 40., 20.),
-                       ('lpz', 30., 60., 25.),
+                       ('lpz', 30., 60., 45.),
                        ('offset', 0.25, 4., 1.)],
                        dtype=[('name', 'U20'), ('min', 'float'), ('max', 'float'), ('start', 'float')])
 
 optimizer.set_parameters(parameters)
 
+
 # Set optimizer settings
+def dummy_materials(array1, array2, str1, float1):
+    return np.sum(array1) * float1, np.sum(array2) * float1
+
+
 ironH = [  0.8,   1.5,     2.2,    3.6,    5.0,     6.8,     9.8,    18.0,
           28.0,   37.5,   42.0,   55.0,   71.5,    80.0,    85.0,    88.0,
           92.0,  100.0,  120.0,  150.0,  200.0,   300.0,   400.0,   600.0,
@@ -36,7 +41,7 @@ ironM = [0.000998995, 0.00199812, 0.00299724, 0.00499548, 0.00699372, 0.00999145
          0.0499648,   0.0799529,  0.0999472,  0.199931,   0.49991,    0.799899,   0.999893, 1.09989,
          1.19988,     1.29987,    1.41985,    1.49981,    1.59975,    1.72962,    1.7995,   1.89925,
          1.96899,     1.99874,    2.09749,    2.19497,    2.24246,    2.27743,    2.28958,  2.28973]
-mp, mm = materials(ironH, ironM, 'NdFeB', 1.2)
+mp, mm = dummy_materials(ironH, ironM, 'NdFeB', 1.2)
 
 settings = {
     # FUTURE: Not supporting nested parameters in nested items. The general case would be messy.
@@ -67,4 +72,9 @@ optimizer.set_optimizer(method='LN_BOBYQA',
 
 # run optimization
 optimizer.set_exit_criteria({'sim_max': 1000})
-optimizer.run()
+H, _, _ = optimizer.run()
+
+
+def test_optimizer_result():
+    print(H)
+    assert np.abs(H['f'][-1] - 71.25) < 1e-12
