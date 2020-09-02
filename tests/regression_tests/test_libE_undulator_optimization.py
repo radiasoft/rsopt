@@ -73,7 +73,7 @@ optimizer.set_optimizer(software='nlopt',
                         options=optimizer_settings)
 
 # run optimization
-optimizer.set_exit_criteria({'sim_max': 1000})
+optimizer.set_exit_criteria({'sim_max': 30})
 H, _, _ = optimizer.run()
 
 

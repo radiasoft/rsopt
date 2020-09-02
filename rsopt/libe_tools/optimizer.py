@@ -89,8 +89,9 @@ class libEnsembleOptimizer(Optimizer):
                      'ub': self.ub,
                      'initial_sample_size': 1,
                      'xstart': self.start,
-                     'localopt_method': get_local_optimizer_method(self._config.method, 'nlopt')}
-        print(user_keys['xstart'], type(user_keys['xstart']))
+                     'localopt_method': get_local_optimizer_method(self._config.method, 'nlopt'),
+                     **self._config.options.software_options}
+
         for key, val in self._options.items():
             user_keys[key] = val
         self.gen_specs.update({'gen_f': persistent_local_opt,
