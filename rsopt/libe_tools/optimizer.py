@@ -1,5 +1,4 @@
 from libensemble.libE import libE
-from rsopt.configuration import Job
 from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_local_opt
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
 from libensemble.tools import add_unique_random_streams
