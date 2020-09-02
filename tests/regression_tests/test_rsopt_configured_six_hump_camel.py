@@ -39,7 +39,8 @@ optimizer.set_parameters(parameters)
 optimizer_settings = {'xtol_abs': 1e-6,
                       'ftol_abs': 1e-6,
                       'record_interval': 2}
-optimizer.set_optimizer(method='LN_BOBYQA',
+optimizer.set_optimizer(software='nlopt',
+                        method='LN_BOBYQA',
                         options=optimizer_settings)
 
 # run optimization
