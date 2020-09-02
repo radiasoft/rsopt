@@ -1,4 +1,5 @@
 from libensemble.libE import libE
+from rsopt.configuration import Job
 from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_local_opt
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
 from libensemble.tools import add_unique_random_streams
@@ -31,7 +32,7 @@ class libEnsembleOptimizer(Optimizer):
         for spec in self._SPECIFICATION_DICTS:
             self.__setattr__(spec, {})
 
-    def set_optimizer(self, method, options=None):
+    def set_optimizer(self, software, method, options=None):
         """
         Choose an optimizer and set supporting options.
         Optimizer package options are:
@@ -42,22 +43,34 @@ class libEnsembleOptimizer(Optimizer):
                 `record_interval` optimization steps.
             working_directory (str): Path to a directory where simulations will be run. Optimizer logs
                 and records will still be created in the directory where the optimizer is run.
+        :param software: (str) name of optimization package to use.
         :param method: (str) name of optimization algorithm.
         :param options: (dict) dictionary of options and settings.
         :return: None
         """
-        self.optimizer_method = method
+
+        # TODO: NEXT: This should just set method and options in the correct place in the Configuration
+        #   there should be separate functions that load from the Configuration file when needed
+        #   so it will not matter if setters are initiated from a python file or console loads a configuration file
+
         # move options to their appropriate dict for libE
         for key, mapping in OPTIONS_ALLOWED.items():
             if key in options:
                 dict_name, dict_value = mapping[self._NAME]
                 self.__getattribute__(dict_name)[dict_value] = options.pop(key)
-        # If option in options not used above it will be passed directly to the optimizer
-        self._options.update(options)
+
+        config_options = {'software': software, 'method': method, 'software_options': options}
+        if not options.get('exit_criteria'):
+            config_options['exit_criteria'] = {'sim_max': int(1000)}
+        self._config.options = config_options
 
     def set_simulation(self, simulation, function=True):
+        # TODO: Hardcoded for python at the moment
         if function:
-            self.function = simulation
+            self._manual_job_setup()
+            self._config.jobs[0].setup = {'function': simulation,
+                                          'execution_type': 'serial',
+                                          'code': 'python'}
         else:
             raise ValueError('Executable simulation not yet supported')
 
@@ -76,7 +89,7 @@ class libEnsembleOptimizer(Optimizer):
                      'ub': self.ub,
                      'initial_sample_size': 1,
                      'xstart': self.start,
-                     'localopt_method': get_local_optimizer_method(self.optimizer_method, 'nlopt')}
+                     'localopt_method': get_local_optimizer_method(self._config.method, 'nlopt')}
         print(user_keys['xstart'], type(user_keys['xstart']))
         for key, val in self._options.items():
             user_keys[key] = val
@@ -107,9 +120,9 @@ class libEnsembleOptimizer(Optimizer):
         if len(self._config.jobs) > 1:
             print('WARNING: Multi job optimization not implemented yet only first job is being used')
 
-        sim_function = PythonFunction(self.function,
-                                      self._config.jobs[0]._parameters,
-                                      self._config.jobs[0]._settings)
+        sim_function = PythonFunction(self._config.jobs[0],
+                                      self._config.parameters(job=0),
+                                      self._config.settings(job=0))
         self.sim_specs.update({'sim_f': sim_function,
                                'in': ['x'],
                                'out': [('f', float), ]})
@@ -122,9 +135,14 @@ class libEnsembleOptimizer(Optimizer):
         self._configure_persistant_info()
         self._configure_sim()
 
+        if self._config.options.exit_criteria:
+            self.set_exit_criteria(self._config.options.exit_criteria)
+
         if not self.exit_criteria:
             print('No libEnsemble exit criteria set. Optimizer will terminate when finished.')
             self.exit_criteria = {'sim_max': int(1e9)}
+        else:
+            self._config.options.exit_criteria = self.exit_criteria
 
     def set_exit_criteria(self, exit_criteria):
         """
@@ -134,7 +152,7 @@ class libEnsembleOptimizer(Optimizer):
         :return:
         """
         options = ['sim_max', 'gen_max', 'elapsed_wallclock_time', 'stop_val']
-        self.exit_criteria ={}
+        self.exit_criteria = {}
         for key, val in exit_criteria.items():
             if key in options:
                 self.exit_criteria[key] = val

@@ -67,7 +67,9 @@ optimizer.set_settings(settings)
 # setup optimizer
 optimizer_settings = {'xtol_rel': 1e-4,
                       'gen_batch_size': 2}
-optimizer.set_optimizer(method='LN_BOBYQA',
+
+optimizer.set_optimizer(software='nlopt',
+                        method='LN_BOBYQA',
                         options=optimizer_settings)
 
 # run optimization

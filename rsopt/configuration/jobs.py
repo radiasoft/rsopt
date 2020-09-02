@@ -45,6 +45,10 @@ class Job:
         else:
             return None
 
+    @property
+    def execute(self):
+        return self._setup.function
+
     @parameters.setter
     def parameters(self, parameters):
         reader = get_reader(parameters, 'parameters')
@@ -58,10 +62,12 @@ class Job:
             self._settings.parse(name, value)
 
     @setup.setter
-    def setup(self, setup, code=None):
-        # `code` may be set here, but `setup` cannot override `code` if it was set at instantiation of the job
+    def setup(self, setup):
+        # `code` must be set here if not set at Job instantiation,
+        # but this method cannot override `code` if it was set at instantiation of the job
+        assert setup.get('code'), "Code must be specified in the setup dictionary"
         if not self.code:
-            self.code = code
+            self.code = setup.get('code')
         assert self.code, "A code must be set before adding a setup to a Job"
 
         reader = get_reader(setup, 'setup')

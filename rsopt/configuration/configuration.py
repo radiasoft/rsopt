@@ -4,11 +4,27 @@ from rsopt.configuration import Options
 class Configuration:
     def __init__(self):
         self.jobs = []
-        self._options = Options
+        self._options = Options()
 
     @property
     def options(self):
         return self._options
+
+    # TODO: rename to get_job_parameters same for settings and setup
+    def parameters(self, job=0):
+        assert self.jobs[job], f"Requested job: {job} is not registered in the Configuration"
+
+        return self.jobs[job].parameters
+
+    def settings(self, job=0):
+        assert self.jobs[job], f"Requested job: {job} is not registered in the Configuration"
+
+        return self.jobs[job].settings
+
+    def setup(self, job=0):
+        assert self.jobs[job], f"Requested job: {job} is not registered in the Configuration"
+
+        return self.jobs[job].setup
 
     @options.setter
     def options(self, options):
@@ -16,6 +32,10 @@ class Configuration:
         for name, value in options.items():
             new_options.parse(name, value)
         self._options = new_options
+
+    @property
+    def method(self):
+        return self._options.method
 
     def set_jobs(self, jobs):
         if hasattr(jobs, '__iter__'):

@@ -4,10 +4,10 @@ class Options:
     __REQUIRED_KEYS = ('software',)
 
     def __init__(self):
-        self.objective_function = None
+        self.objective_function = ''  # Holds objective function name defined in config
         self.exit_criteria = {}
         self.software_options = {}
-        self.method = None
+        self.method = ''
 
     @classmethod
     def get_option(cls, options):
@@ -29,7 +29,6 @@ class Options:
         if not name_pass:
             print(f'{name} in options not recognized. It will be ignored.')
             return False
-
         # Check all other values defined in init
         else:
             expected_type = type(getattr(self, name))

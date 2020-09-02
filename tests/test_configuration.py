@@ -114,3 +114,18 @@ class TestYAMLtoConfiguration(unittest.TestCase):
         config_file = read_configuration_file(self.config_file)
         parse_yaml_configuration(config_file, configuration=None)
 
+    def test_job_setup(self):
+        config_file = read_configuration_file(self.config_file)
+        config = parse_yaml_configuration(config_file, configuration=None)
+
+        python_job = config.jobs[0]
+        setup = python_job._setup
+
+        # Path for six_hump_camel defined relative to support for cmd test
+        setup.setup['input_file'] = 'support/' + setup.setup['input_file']
+
+        assert callable(setup.function)
+
+
+
+

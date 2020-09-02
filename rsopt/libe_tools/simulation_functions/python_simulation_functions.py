@@ -43,9 +43,9 @@ def get_signature(parameters, settings):
     # No lambda functions are allowed in settings and parameter names may not be referenced
     # Just needs to insert parameter keys into the settings dict, but they won't have usable values yet
 
-    signature = settings.settings.copy()
+    signature = settings.copy()
 
-    for key in parameters._NAMES:
+    for key in parameters.keys():
         signature[key] = None
 
     return signature
@@ -53,8 +53,8 @@ def get_signature(parameters, settings):
 
 class PythonFunction:
 
-    def __init__(self, function, parameters, settings):
-        self.function = function
+    def __init__(self, job, parameters, settings):
+        self.function = job.execute
         self.parameters = parameters
         self.settings = settings
         self.signature = get_signature(parameters, settings)
@@ -86,7 +86,7 @@ class PythonFunction:
 
     def _parse_x(self, x):
         x_struct = {}
-        for val, name in zip(x, self.parameters.get_parameter_names()):
+        for val, name in zip(x, self.parameters.keys()):
             x_struct[name] = val
 
         return x_struct

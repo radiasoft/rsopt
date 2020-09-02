@@ -1,4 +1,5 @@
 from rsopt.codes import _TEMPLATED_CODES
+from pykern.pkrunpy import run_path_as_module
 
 
 def read_setup_dict(input):
@@ -55,9 +56,18 @@ class Setup:
 
 
 class Python(Setup):
-    __REQUIRED_KEYS = ('input_file',)
+    __REQUIRED_KEYS = ('function',)
     RUN_COMMAND = 'python'  # really translates to sys.executable
     NAME = 'python'
+
+    @property
+    def function(self):
+        if self.setup.get('input_file'):
+            module = run_path_as_module(self.setup['input_file'])
+            function = getattr(module, self.setup['function'])
+            return function
+
+        return self.setup['function']
 
 
 class Elegant(Setup):
