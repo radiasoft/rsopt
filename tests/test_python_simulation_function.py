@@ -16,6 +16,10 @@ H = np.array([x_vec], dtype=[('x', float)])
 sim_specs = {'out': [('f', float), ('fvec', float, 4)]}
 
 
+class DummyJob:
+    pass
+
+
 class TestOptimizer(unittest.TestCase):
 
     def setUp(self):
@@ -24,7 +28,10 @@ class TestOptimizer(unittest.TestCase):
         self.optimizer.set_settings(settings_dict)
 
     def test_class_signature(self):
-        pf = pyfunc.PythonFunction(lambda x: x, self.optimizer.parameters, self.optimizer.settings)
+        dummy_job = DummyJob()
+        dummy_job.execute = None
+        pf = pyfunc.PythonFunction(dummy_job, self.optimizer._config.parameters(job=0),
+                                   self.optimizer._config.settings(job=0))
 
         base_signature = settings_dict.copy()
         pyfunc._merge_dicts(parameters_dict, base_signature)
@@ -36,7 +43,10 @@ class TestOptimizer(unittest.TestCase):
         self.assertTrue(np.all(test_x == x_vec))
 
     def test_compose_args(self):
-        pf = pyfunc.PythonFunction(lambda x: x, self.optimizer.parameters, self.optimizer.settings)
+        dummy_job = DummyJob()
+        dummy_job.execute = None
+        pf = pyfunc.PythonFunction(dummy_job, self.optimizer._config.parameters(job=0),
+                                   self.optimizer._config.settings(job=0))
         _, kwargs = pf.compose_args(x_vec, pf.signature)
         for base_key, base_value in zip(parameters_dict.keys(), x_vec):
             self.assertEqual(kwargs[base_key], base_value)
@@ -44,8 +54,12 @@ class TestOptimizer(unittest.TestCase):
     def test_function_call_function(self):
         objective = mock.MagicMock(name='hybrid_undulator',
                                    return_value=lambda *args, **kwargs: (args, kwargs))
-        pf = pyfunc.PythonFunction(objective(), self.optimizer.parameters, self.optimizer.settings)
-        kwargs = {key: i for i, key in enumerate(self.optimizer.parameters._NAMES)}
+        dummy_job = DummyJob()
+        dummy_job.execute = objective()
+
+        pf = pyfunc.PythonFunction(dummy_job, self.optimizer._config.parameters(job=0),
+                                   self.optimizer._config.settings(job=0))
+        kwargs = {key: i for i, key in enumerate(self.optimizer._config.get_parameters_list('get_parameter_names'))}
         pyfunc._merge_dicts(settings_dict, kwargs, depth=1)
 
         _, f = pf.call_function(kwargs)
@@ -53,11 +67,14 @@ class TestOptimizer(unittest.TestCase):
         self.assertEqual(f.keys(), kwargs.keys())
 
     def test_format_evaluation(self):
-        pf = pyfunc.PythonFunction(lambda x: x, self.optimizer.parameters, self.optimizer.settings)
+        dummy_job = DummyJob()
+        dummy_job.execute = None
+        pf = pyfunc.PythonFunction(dummy_job, self.optimizer._config.parameters(job=0),
+                                   self.optimizer._config.settings(job=0))
         pf.sim_specs = sim_specs
         result = (x_vec[0], x_vec[1:])
         f = pf.format_evaluation(result)
 
         self.assertEqual(f['f'][0], x_vec[0])
-        self.assertEqual(f['fvec'][0], x_vec[1:])
+        self.assertTrue(np.all(f['fvec'][0] == x_vec[1:]))
 
