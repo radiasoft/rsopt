@@ -65,8 +65,9 @@ class Job:
     def setup(self, setup):
         # `code` must be set here if not set at Job instantiation,
         # but this method cannot override `code` if it was set at instantiation of the job
-        assert setup.get('code'), "Code must be specified in the setup dictionary"
         if not self.code:
+            assert setup.get('code'), "Code not specified during setup instantiation" \
+                                      "Code must be included in the setup dictionary"
             self.code = setup.get('code')
         assert self.code, "A code must be set before adding a setup to a Job"
 
