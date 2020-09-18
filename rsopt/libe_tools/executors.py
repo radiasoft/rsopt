@@ -4,10 +4,11 @@ import os
 _CONFIG_PATH = '/home/vagrant/jupyter/.rsmpi/ssh_config'
 
 
-def register_rsmpi_executor(sim_app, hosts='auto', cores_on_node=None):
+def register_rsmpi_executor(sim_app, app_name=None, hosts='auto', cores_on_node=None):
     """
     Create an MPIExecutor that can use rsmpi
-    :param sim_app: (str) Name of application to be executed
+    :param sim_app: (str) Name of application to be executed.
+    :param app_name: (str) Optional name to assign to executor for this application.
     :param hosts: (str or int) If 'auto' then all rsmpi resources are detected and used. Otherwise specify number
                                of hosts as an int.
     :param cores_on_node: (tuple) Defaults to (16, 16). Number of physical cores and logical cores on the hosts.
@@ -27,7 +28,7 @@ def register_rsmpi_executor(sim_app, hosts='auto', cores_on_node=None):
                   'cores_on_node': cores_on_node,
                   'node_file': 'libe_nodes'}
     jobctrl = MPIExecutor(custom_info=customizer)
-    jobctrl.register_calc(full_path=sim_app, calc_type='sim')
+    jobctrl.register_calc(full_path=sim_app, app_name=app_name, calc_type='sim')
 
     return jobctrl
 
