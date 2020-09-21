@@ -75,13 +75,13 @@ class Optimizer:
         else:
             self.dimension = self._config.get_dimension()
 
-    def set_parameters(self, parameters):
-        self._manual_job_setup()
-        self._config.jobs[0].parameters = parameters
+    def set_parameters(self, parameters, job=0):
+        assert len(self._config.jobs) < job, f"Job with index f{job} cannot be found"
+        self._config.jobs[job].parameters = parameters
 
-    def set_settings(self, settings):
-        self._manual_job_setup()
-        self._config.jobs[0].settings = settings
+    def set_settings(self, settings, job=0):
+        assert len(self._config.jobs) < job, f"Job with index f{job} cannot be found"
+        self._config.jobs[job].settings = settings
 
     def set_exit_criteria(self, exit_criteria):
         # TODO: Will override in sublcasses probably
@@ -94,9 +94,5 @@ class Optimizer:
     def _manual_job_setup(self):
         # if Optimizer is being setup manually then only one job is allowed
         # Running with a multi job chain must be setup through a config file
+        self._config.set_jobs(Job())
 
-        # Add the one job if it doesn't exist yet
-        if len(self._config.jobs) == 0:
-            self._config.set_jobs(Job())
-        else:
-            pass

@@ -4,7 +4,7 @@ from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_al
 from libensemble.tools import add_unique_random_streams
 from rsopt.optimizer import Optimizer, OPTIONS_ALLOWED
 from rsopt.libe_tools.interface import get_local_optimizer_method
-from rsopt.libe_tools.simulation_functions.python_simulation_functions import PythonFunction
+from rsopt.simulation import SimulationFunction
 
 
 # dimension for x needs to be set
@@ -63,15 +63,33 @@ class libEnsembleOptimizer(Optimizer):
             config_options['exit_criteria'] = {'sim_max': int(1000)}
         self._config.options = config_options
 
-    def set_simulation(self, simulation, function=True):
-        # TODO: Hardcoded for python at the moment
-        if function:
-            self._manual_job_setup()
-            self._config.jobs[0].setup = {'function': simulation,
+    def add_simulation(self, simulation, code):
+        # TODO: documentation will need to be fleshed out when code types are set
+        """
+        Add a simulation of type `code` to the Jobs list. If code is 'python` then `simulation` should be a callable
+        object that will run the simulation. Otherwise `simulation` should be the path to the
+        run file for the simulation.
+
+        Only serial simulations can be configured through the Python API. For parallel setup please use a YAML
+        configuration file.
+
+        Args:
+            simulation: (callable or str) If code=='python` then simulation should be callable else should be string
+            containing path (rel or abs) to run file.
+            code: (str) Type of job to be run. See documentation for full set of options.
+
+        Returns:
+            None
+        """
+        self._manual_job_setup()
+        if code == 'python':
+            self._config.jobs[-1].setup = {'function': simulation,
                                           'execution_type': 'serial',
-                                          'code': 'python'}
+                                          'code': code}
         else:
-            raise ValueError('Executable simulation not yet supported')
+            self._config.jobs[-1].setup = {'input_file': simulation,
+                                           'execution_type': 'serial',
+                                           'code': code}
 
     def run(self):
         self._configure_libE()
@@ -114,15 +132,7 @@ class libEnsembleOptimizer(Optimizer):
         self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
 
     def _configure_sim(self):
-        # TODO: This nees to be modified to accommodate Runner. sim_function will be created from a top level class
-        #   to be able to string multiple simulations
-        # TODO: THe sim spec creation procedure needs to generalized and set up separately
-        if len(self._config.jobs) > 1:
-            print('WARNING: Multi job optimization not implemented yet only first job is being used')
-
-        sim_function = PythonFunction(self._config.jobs[0],
-                                      self._config.parameters(job=0),
-                                      self._config.settings(job=0))
+        sim_function = SimulationFunction(self._config.jobs, self._config.objective_function)
         self.sim_specs.update({'sim_f': sim_function,
                                'in': ['x'],
                                'out': [('f', float), ]})
