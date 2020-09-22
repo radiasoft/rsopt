@@ -15,6 +15,31 @@ def get_reader(obj, category):
     raise TypeError(f'{category} input type is not recognized')
 
 
+def create_executor_arguments(setup):
+    args = {
+        # 'app_name': None, #  TODO: Not sure how to name so there are no conflicts. May not be produced by Job.
+        'num_procs': None,  # from setup.cores
+        'num_nodes': None,  # from setup.nodes
+        'ranks_per_node': None, # from setup.ranks_per_node?
+        'machinefile': None, # TODO: from setup.machinefile
+        # 'app_args': None, # TODO: Where does this need to come from
+        # 'stdout': None,  # TODO: Probably set based on app_name
+        # 'stderr': None, # TODO: Probably set based on app_name
+        # 'stage_inout': None,  # This option is not implemented in 0.7.1
+        'hyperthreads': False, # from setup.hyperthreads
+        # 'dry_run': False, # Keep false for now
+        # 'extra_args': None  # TODO: may need to be set for rsmpi?
+    }
+
+    for key, value in args.items():
+        args[key] = setup.setup.get(key, value)
+
+    # Cannot be overridden
+    args['calc_type'] = 'sim'
+    args['wait_on_run'] = True
+
+    return args
+
 class Job:
     # Job should never assume any particular code so that all parts may be set independently
     # When actually executed, or setting up to execute, then setup is queried to decide execution
@@ -27,10 +52,12 @@ class Job:
         self._parameters = Parameters()
         self._settings = Settings()
         self._setup = None
+        self.full_path = None
         self.pre_process = None
         self.post_process = None
 
-        self.code_execution_type = None
+        self.executor = None  # Name of the executor registered with libEnsemble
+        self.executor_args = {}  # Arguments configured by Job for the libEnsemble Executor.submit
 
     @property
     def parameters(self):
@@ -44,7 +71,6 @@ class Job:
             return self._setup.setup
         else:
             return None
-
     @property
     def execute(self):
         return self._setup.function
@@ -75,3 +101,8 @@ class Job:
         self._setup = Setup.get_setup(setup, self.code)()
         for name, value in reader(setup):
             self._setup.parse(name, value)
+
+        # Setup for Executor
+        self.executor_args = create_executor_arguments(self._setup.setup)
+        is_parallel = bool(abs(self._setup.setup.get('cores') - 1))
+        self.full_path = self._setup.get_run_command(is_parallel=is_parallel)

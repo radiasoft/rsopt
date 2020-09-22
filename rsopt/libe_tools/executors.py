@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 _CONFIG_PATH = '/home/vagrant/jupyter/.rsmpi/ssh_config'
 
 
-def register_rsmpi_executor(sim_app, app_name=None, hosts='auto', cores_on_node=None):
+def register_rsmpi_executor(sim_app, app_name=None, hosts='auto', cores_on_node=None, job_controller=None):
     """
     Create an MPIExecutor that can use rsmpi
     :param sim_app: (str) Name of application to be executed.
@@ -20,6 +20,8 @@ def register_rsmpi_executor(sim_app, app_name=None, hosts='auto', cores_on_node=
     :param hosts: (str or int) If 'auto' then all rsmpi resources are detected and used. Otherwise specify number
                                of hosts as an int.
     :param cores_on_node: (tuple) Defaults to (16, 16). Number of physical cores and logical cores on the hosts.
+    :param job_controller: (MPIExecutor) If multiple applications will be registered then an existing job controller
+                            may be passed in to register the application with.
     :return: libensemble.executors.mpi_executor.MPIExecutor object
     """
 
@@ -35,7 +37,11 @@ def register_rsmpi_executor(sim_app, app_name=None, hosts='auto', cores_on_node=
                   'runner_name': 'libensemble-rsmpi',
                   'cores_on_node': cores_on_node,
                   'node_file': 'libe_nodes'}
-    jobctrl = MPIExecutor(custom_info=customizer)
+    if not job_controller:
+        jobctrl = MPIExecutor(custom_info=customizer)
+    else:
+        jobctrl = job_controller
+
     jobctrl.register_calc(full_path=sim_app, app_name=app_name, calc_type='sim')
 
     return jobctrl
