@@ -15,7 +15,7 @@ def dummy_obj(*args, **kwargs):
 
     return sum
 
-optimizer.set_simulation(dummy_obj)
+optimizer.add_simulation(dummy_obj)
 
 # Set optimizer parameters
 parameters = np.array([('period', 30., 60., 46.),

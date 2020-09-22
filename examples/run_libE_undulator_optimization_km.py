@@ -8,7 +8,7 @@ optimizer = libEnsembleOptimizer()
 # Set functions used for simulation and objective evaluation
 # Note: simulation function may also directly return the objective value
 sim_func = optimize_objective_km
-optimizer.set_simulation(sim_func)
+optimizer.add_simulation(sim_func)
 
 # Set optimizer parameters
 parameters = np.array([
