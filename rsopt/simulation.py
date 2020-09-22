@@ -66,7 +66,7 @@ class SimulationFunction:
 
         for job in self.jobs:
             _, kwargs = compose_args(x, job.parameters, job.settings)
-            job.make_runfile(kwargs)  # TODO: This needs to compose the run file
+            job.setup.generate_input_file(kwargs)
 
             if job.executor:
                 # MPI Job or non-Python executable

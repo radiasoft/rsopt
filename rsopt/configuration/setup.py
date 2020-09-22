@@ -1,6 +1,13 @@
+import os
+import jinja2
 from rsopt.codes import _TEMPLATED_CODES
-from pykern.pkrunpy import run_path_as_module
+from pykern import pkrunpy
+from pykern import pkio
+from pykern import pkresource
 
+_PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
+_PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
+_TEMPLATE_PATH = pkio.py_path(pkresource.filename(''))
 
 def read_setup_dict(input):
     for name, values in input.items():
@@ -23,7 +30,9 @@ class Setup:
     NAME = None
 
     def __init__(self):
-        self.setup = {}
+        self.setup = {
+            'cores': 1
+        }
 
     @classmethod
     def get_setup(cls, setup, code):
@@ -51,23 +60,49 @@ class Setup:
     def get_run_command(cls, is_parallel):
         return cls.RUN_COMMAND
 
+    def generate_input_file(self, kwarg_dict, directory):
+        # stub
+        pass
+
     def parse(self, name, value):
          self.setup[name] = value
 
 
 class Python(Setup):
     __REQUIRED_KEYS = ('function',)
-    RUN_COMMAND = 'python'  # really translates to sys.executable
+    # SERIAL_RUN_COMMAND = 'python'  # really translates to sys.executable
+    PARALLEL_RUN_COMMAND = 'python'
     NAME = 'python'
 
     @property
     def function(self):
         if self.setup.get('input_file'):
-            module = run_path_as_module(self.setup['input_file'])
+            module = pkrunpy.run_path_as_module(self.setup['input_file'])
             function = getattr(module, self.setup['function'])
             return function
 
         return self.setup['function']
+
+    @classmethod
+    def get_run_command(cls, is_parallel):
+        if is_parallel:
+            return cls.PARALLEL_RUN_COMMAND
+        else:
+            return None
+
+    def generate_input_file(self, kwarg_dict, directory):
+        assert self.setup.get('input_file'), "Input file must be provided to load Python function from"
+        template_loader = jinja2.FileSystemLoader(searchpath=_TEMPLATE_PATH)
+        template_env = jinja2.Environment(loader=template_loader)
+        template = template_env.get_template(_PARALLEL_PYTHON_TEMPLATE)
+
+        output_template = template.render(dict_item=kwarg_dict, full_input_file_path=self.setup['input_file'],
+                                          function=self.setup['function'])
+
+        file_path = os.path.join(directory, _PARALLEL_PYTHON_RUN_FILE)
+
+        with open(file_path, 'w') as ff:
+            ff.write(output_template)
 
 
 class Elegant(Setup):

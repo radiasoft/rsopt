@@ -1,0 +1,11 @@
+from pykern.pkrunpy import run_path_as_module
+
+input_dict = {
+{% for key, value in dict_item.items() %}
+    '{{key}}': {{value}}{% if not loop.last %},{% endif %}
+{% endfor %}
+}
+
+m = run_path_as_module('{{full_input_file_path}}')
+
+m.{{function}}(**input_dict)

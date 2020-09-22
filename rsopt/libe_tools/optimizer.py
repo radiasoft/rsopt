@@ -1,6 +1,8 @@
 from libensemble.libE import libE
 from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_local_opt
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
+from libensemble.executors.mpi_executor import MPIExecutor
+from rsopt.libe_tools.executors import SerialExecutor, register_rsmpi_executor
 from libensemble.tools import add_unique_random_streams
 from rsopt.optimizer import Optimizer, OPTIONS_ALLOWED
 from rsopt.libe_tools.interface import get_local_optimizer_method
@@ -19,6 +21,26 @@ persistent_local_opt_gen_out = [('x', float, None),
 LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims'}
 
 
+def _configure_executor(job, name, executor):
+    executor.register_calc(full_path=job.full_path, app_name=name, calc_type='sim')
+
+def _set_app_names(config):
+    codes = {}
+    app_names = []
+    for job in config.jobs:
+        index = 1
+        code = job.code
+        if codes.get(code):
+            index += codes[code]
+        app_name = f'{code}_{index}'
+        app_names.append(app_name)
+
+        codes[code] = index
+
+    return app_names
+
+
+
 class libEnsembleOptimizer(Optimizer):
     # Configurationf or Local Optimization through uniform_or_localopt
     # Just sets up a local optimizer for now
@@ -28,6 +50,7 @@ class libEnsembleOptimizer(Optimizer):
     def __init__(self):
         super(libEnsembleOptimizer, self).__init__()
         self.options = []
+        self.executor = None  # Set by method
         for spec in self._SPECIFICATION_DICTS:
             self.__setattr__(spec, {})
 
@@ -137,12 +160,29 @@ class libEnsembleOptimizer(Optimizer):
                                'in': ['x'],
                                'out': [('f', float), ]})
 
+    def _configure_executor(self):
+        app_names = _set_app_names(self._config)
+        if self._config.options.get('executor'):
+            executor_setup = self._config.options.get('executor')
+        else:
+            executor_setup = {'auto': True}
+
+        self.executor = MPIExecutor(**executor_setup)
+
+        # If the job has a run command then that job should use an executor
+        for app_name, job in zip(app_names, self._config.jobs):
+            if not job.full_path:
+                pass
+            else:
+                _configure_executor(job, app_name, self.executor)
+
     def _configure_libE(self):
         self._set_dimension()
         self._configure_optimizer()
         self._configure_allocation()
         self._configure_specs()
         self._configure_persistant_info()
+        self._configure_executor()
         self._configure_sim()
 
         if self._config.options.exit_criteria:
