@@ -25,7 +25,7 @@ optimizer = libEnsembleOptimizer()
 # Set functions used for simulation and objective evaluation
 # Note: simulation function directly returns the objective value in this example
 
-optimizer.add_simulation(six_hump_camel_func)
+optimizer.add_simulation(six_hump_camel_func, 'python')
 
 # Set optimizer parameters
 parameters = np.array([('x', -3., 3.,  0.08),
