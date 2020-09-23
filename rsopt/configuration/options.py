@@ -4,9 +4,10 @@ class Options:
     __REQUIRED_KEYS = ('software',)
 
     def __init__(self):
-        self.objective_function = ''  # Holds objective function name defined in config
+        self.objective_function = None  # TODO: If objective function, should be loaded here
         self.exit_criteria = {}
         self.software_options = {}
+        self.executor_options = {}
         self.method = ''
 
     @classmethod

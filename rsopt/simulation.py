@@ -1,5 +1,6 @@
 import logging
 import time
+import numpy as np
 from libensemble.message_numbers import WORKER_DONE, WORKER_KILL, TASK_FAILED
 from libensemble.executors.executor import Executor
 
@@ -43,6 +44,17 @@ def compose_args(x, parameters, settings):
 
     return args, kwargs
 
+def format_evaluation(sim_specs, container):
+    if not hasattr(container, '__iter__'):
+        container = (container,)
+    # FUTURE: Type check for container values against spec
+    outspecs = sim_specs['out']
+    output = np.zeros(1, dtype=outspecs)
+    for spec, value in zip(output.dtype.names, container):
+        output[spec] = value
+
+    return output
+
 class SimulationFunction:
 
     def __init__(self, jobs: list, objective_function: callable):
@@ -66,7 +78,7 @@ class SimulationFunction:
 
         for job in self.jobs:
             _, kwargs = compose_args(x, job.parameters, job.settings)
-            job.setup.generate_input_file(kwargs)
+            job._setup.generate_input_file(kwargs, '.')  # TODO: Worker needs to be in their own directory
 
             if job.executor:
                 # MPI Job or non-Python executable
@@ -82,8 +94,18 @@ class SimulationFunction:
                             sim_status = 'FAILED'
             else:
                 # Serial Python Job
-                job.execute(**kwargs)
+                f = job.execute(**kwargs)
+                print("f is!!", f)
                 sim_status = 'FINISHED'
 
         if sim_status == 'FINISHED' and self.objective_function:
-            self.objective_function()
+            output = format_evaluation(self.sim_specs, self.objective_function())
+        else:
+            try:
+                output = format_evaluation(self.sim_specs, f)
+            except NameError as e:
+                print(e)
+                print("An objective function must be defined if final Job is is not Python")
+
+
+        return output, persis_info, WORKER_DONE

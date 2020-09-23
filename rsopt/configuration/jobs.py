@@ -32,7 +32,7 @@ def create_executor_arguments(setup):
     }
 
     for key, value in args.items():
-        args[key] = setup.setup.get(key, value)
+        args[key] = setup.get(key, value)
 
     # Cannot be overridden
     args['calc_type'] = 'sim'

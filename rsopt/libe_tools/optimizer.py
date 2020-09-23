@@ -155,17 +155,17 @@ class libEnsembleOptimizer(Optimizer):
         self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
 
     def _configure_sim(self):
-        sim_function = SimulationFunction(self._config.jobs, self._config.objective_function)
+        sim_function = SimulationFunction(self._config.jobs, self._config.options.objective_function)
         self.sim_specs.update({'sim_f': sim_function,
                                'in': ['x'],
                                'out': [('f', float), ]})
 
     def _configure_executor(self):
         app_names = _set_app_names(self._config)
-        if self._config.options.get('executor'):
-            executor_setup = self._config.options.get('executor')
+        if self._config.options.executor_options:
+            executor_setup = self._config.options.executor_options
         else:
-            executor_setup = {'auto': True}
+            executor_setup = {'auto_resources': True}
 
         self.executor = MPIExecutor(**executor_setup)
 

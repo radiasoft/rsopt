@@ -76,11 +76,11 @@ class Optimizer:
             self.dimension = self._config.get_dimension()
 
     def set_parameters(self, parameters, job=0):
-        assert len(self._config.jobs) < job, f"Job with index f{job} cannot be found"
+        assert job < len(self._config.jobs), f"Job with index {job} cannot be found"
         self._config.jobs[job].parameters = parameters
 
     def set_settings(self, settings, job=0):
-        assert len(self._config.jobs) < job, f"Job with index f{job} cannot be found"
+        assert job < len(self._config.jobs), f"Job with index {job} cannot be found"
         self._config.jobs[job].settings = settings
 
     def set_exit_criteria(self, exit_criteria):
