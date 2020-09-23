@@ -1,6 +1,8 @@
 import os
 import jinja2
+import sirepo.lib
 from rsopt.codes import _TEMPLATED_CODES
+from copy import deepcopy
 from pykern import pkrunpy
 from pykern import pkio
 from pykern import pkresource
@@ -13,6 +15,31 @@ def read_setup_dict(input):
     for name, values in input.items():
         yield name, values
 
+def _parse_name(name):
+    components = name.split('.')
+    if len(components) == 3:
+        field, index, name = components
+    elif len(components) == 2:
+        field, index, name = components[0], None, components[1]
+    else:
+        raise ValueError(f'Could not understand parameter/setting name {name}')
+
+    return field, index, name
+
+def _get_model_fields(model):
+    commands = {}
+    command_types = []
+    elements = {}
+    for i, c in enumerate(model.models.commands):
+        if c['_type'] not in command_types:
+            command_types.append(c['_type'])
+            commands[c['_type']] = [i]
+        else:
+            commands[c['_type']] = commands[c['_type']].append(i)
+    for i, e in enumerate(model.models.elements):
+        elements[e['name']] = [i]
+
+    return commands, elements
 
 _SETUP_READERS = {
     dict: read_setup_dict
@@ -33,6 +60,7 @@ class Setup:
         self.setup = {
             'cores': 1
         }
+        self.input_file_model = None
 
     @classmethod
     def get_setup(cls, setup, code):
@@ -60,7 +88,17 @@ class Setup:
     def get_run_command(cls, is_parallel):
         return cls.RUN_COMMAND
 
+    @classmethod
+    def parse_input_file(cls, input_file):
+        d = sirepo.lib.Importer(cls.NAME).parse_file(input_file)
+
+        return d
+
     def generate_input_file(self, kwarg_dict, directory):
+        # stub
+        pass
+
+    def _edit_input_file_schema(self, kwargs):
         # stub
         pass
 
@@ -90,7 +128,16 @@ class Python(Setup):
         else:
             return None
 
+    @classmethod
+    def parse_input_file(cls, input_file):
+        # Python does not use text input files. Functions are dynamically imported by `function`.
+        return None
+
     def generate_input_file(self, kwarg_dict, directory):
+        is_parallel = bool(abs(self._setup.setup.get('cores') - 1))
+        if not is_parallel:
+            return None
+
         assert self.setup.get('input_file'), "Input file must be provided to load Python function from"
         template_loader = jinja2.FileSystemLoader(searchpath=_TEMPLATE_PATH)
         template_env = jinja2.Environment(loader=template_loader)
@@ -118,6 +165,31 @@ class Elegant(Setup):
             return cls.PARALLEL_RUN_COMMAND
         else:
             return cls.SERIAL_RUN_COMMAND
+
+    def _edit_input_file_schema(self, kwarg_dict):
+        commands, elements = _get_model_fields(self.input_file_model)
+        model = deepcopy(self.input_file_model)
+
+        for n, v in kwarg_dict.items():
+            # TODO: Not sure about capitalization rules for elements and commands
+            field, index, name = _parse_name(n)
+            if field.lower() in commands.keys():
+                assert index or len(commands[field.lower()]) == 1, \
+                    "{} is not unique in {}. Please add identifier".format(n, self.setup['input_file'])
+                id = commands[field.lower()][index-1 or 0]
+                model.models.commands[id][name] = v
+            elif field in elements:
+                id = elements[field][0]
+                model.models.elements[id][name] = v
+            else:
+                raise ValueError("{} was not found in loaded .ele or .lte files".format(n))
+
+        return model
+
+    def generate_input_file(self, kwarg_dict, directory):
+        model = self._edit_input_file_schema(kwarg_dict)
+
+        model.write_files(directory)
 
 
 class Opal(Setup):
