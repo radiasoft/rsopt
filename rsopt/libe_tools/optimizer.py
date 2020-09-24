@@ -155,7 +155,7 @@ class libEnsembleOptimizer(Optimizer):
         self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
 
     def _configure_sim(self):
-        sim_function = SimulationFunction(self._config.jobs, self._config.options.objective_function)
+        sim_function = SimulationFunction(self._config.jobs, self._config.options.get_objective_function())
         self.sim_specs.update({'sim_f': sim_function,
                                'in': ['x'],
                                'out': [('f', float), ]})
@@ -175,6 +175,7 @@ class libEnsembleOptimizer(Optimizer):
                 pass
             else:
                 _configure_executor(job, app_name, self.executor)
+                job.executor = app_name
 
     def _configure_libE(self):
         self._set_dimension()

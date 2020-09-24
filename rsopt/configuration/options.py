@@ -1,10 +1,10 @@
-
+from pykern import pkrunpy
 
 class Options:
     __REQUIRED_KEYS = ('software',)
 
     def __init__(self):
-        self.objective_function = None  # TODO: If objective function, should be loaded here
+        self.objective_function = []
         self.exit_criteria = {}
         self.software_options = {}
         self.executor_options = {}
@@ -47,6 +47,12 @@ class Options:
         if self._validate_input(name, value):
             self.__setattr__(name, value)
 
+    def get_objective_function(self):
+        module_path, function = self.objective_function
+        module = pkrunpy.run_path_as_module(module_path)
+        function = getattr(module, function)
+
+        return function
 
 class Nlopt(Options):
     __NAME = 'nlopt'

@@ -35,7 +35,7 @@ def _get_model_fields(model):
             command_types.append(c['_type'])
             commands[c['_type']] = [i]
         else:
-            commands[c['_type']] = commands[c['_type']].append(i)
+            commands[c['_type']].append(i)
     for i, e in enumerate(model.models.elements):
         elements[e['name']] = [i]
 
@@ -176,7 +176,7 @@ class Elegant(Setup):
             if field.lower() in commands.keys():
                 assert index or len(commands[field.lower()]) == 1, \
                     "{} is not unique in {}. Please add identifier".format(n, self.setup['input_file'])
-                id = commands[field.lower()][index-1 or 0]
+                id = commands[field.lower()][int(index)-1 if index else 0]
                 model.models.commands[id][name] = v
             elif field in elements:
                 id = elements[field][0]

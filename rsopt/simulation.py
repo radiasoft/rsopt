@@ -7,7 +7,7 @@ from libensemble.executors.executor import Executor
 # TODO: This should probably be in libe_tools right?
 
 _POLL_TIME = 1  # seconds
-
+_PENALTY = 1e9
 
 def get_x_from_H(H):
     # Assumes vector data
@@ -84,28 +84,40 @@ class SimulationFunction:
                 # MPI Job or non-Python executable
                 exctr = Executor.executor
                 task = exctr.submit(**job.executor_args)
-                while not task.finished:
+                while True:
                     time.sleep(_POLL_TIME)
+                    task.poll()
                     if task.finished:
-                        if job.state == 'FINISHED':
-                            sim_status = 'FINISHED'
-                            pass
-                        elif job.state == 'FAILED':
-                            sim_status = 'FAILED'
+                        if task.state == 'FINISHED':
+                            sim_status = WORKER_DONE
+                            break
+                        elif task.state == 'FAILED':
+                            sim_status = TASK_FAILED
+                            break
+                        else:
+                            self.log.warning("Unknown task failure")
+                            sim_status = TASK_FAILED
+                            break
             else:
                 # Serial Python Job
                 f = job.execute(**kwargs)
-                print("f is!!", f)
-                sim_status = 'FINISHED'
+                sim_status = WORKER_DONE
 
-        if sim_status == 'FINISHED' and self.objective_function:
-            output = format_evaluation(self.sim_specs, self.objective_function())
+        if sim_status == WORKER_DONE:
+            if self.objective_function:
+                val = self.objective_function()
+                output = format_evaluation(self.sim_specs, val)
+                self.log.info('val: {}, output: {}'.format(val, output))
+            else:
+                try:
+                    output = format_evaluation(self.sim_specs, f)
+                except NameError as e:
+                    print(e)
+                    print("An objective function must be defined if final Job is is not Python")
         else:
-            try:
-                output = format_evaluation(self.sim_specs, f)
-            except NameError as e:
-                print(e)
-                print("An objective function must be defined if final Job is is not Python")
+            # TODO: Temporary penalty
+            self.log.warning('Penalty was used because result could not be evaluated')
+            output = format_evaluation(self.sim_specs, _PENALTY)
 
 
-        return output, persis_info, WORKER_DONE
+        return output, persis_info, sim_status

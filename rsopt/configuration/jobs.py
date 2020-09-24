@@ -16,13 +16,14 @@ def get_reader(obj, category):
 
 
 def create_executor_arguments(setup):
+    # TODO: Could have better handling of default values here
     args = {
-        # 'app_name': None, #  TODO: Not sure how to name so there are no conflicts. May not be produced by Job.
-        'num_procs': None,  # from setup.cores
+        # 'app_name': None,  # Handled at optimizer setup
+        'num_procs': 1,  # from setup.cores
         'num_nodes': None,  # from setup.nodes
         'ranks_per_node': None, # from setup.ranks_per_node?
         'machinefile': None, # TODO: from setup.machinefile
-        # 'app_args': None, # TODO: Where does this need to come from
+        'app_args': setup['input_file'],
         # 'stdout': None,  # TODO: Probably set based on app_name
         # 'stderr': None, # TODO: Probably set based on app_name
         # 'stage_inout': None,  # This option is not implemented in 0.7.1
