@@ -90,6 +90,7 @@ class SimulationFunction:
                     if task.finished:
                         if task.state == 'FINISHED':
                             sim_status = WORKER_DONE
+                            f = None
                             break
                         elif task.state == 'FAILED':
                             sim_status = TASK_FAILED
@@ -105,7 +106,7 @@ class SimulationFunction:
 
         if sim_status == WORKER_DONE:
             if self.objective_function:
-                val = self.objective_function()
+                val = self.objective_function(f)
                 output = format_evaluation(self.sim_specs, val)
                 self.log.info('val: {}, output: {}'.format(val, output))
             else:

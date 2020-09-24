@@ -23,7 +23,7 @@ def create_executor_arguments(setup):
         'num_nodes': None,  # from setup.nodes
         'ranks_per_node': None, # from setup.ranks_per_node?
         'machinefile': None, # TODO: from setup.machinefile
-        'app_args': setup['input_file'],
+        'app_args': setup.get('input_file', None),
         # 'stdout': None,  # TODO: Probably set based on app_name
         # 'stderr': None, # TODO: Probably set based on app_name
         # 'stage_inout': None,  # This option is not implemented in 0.7.1

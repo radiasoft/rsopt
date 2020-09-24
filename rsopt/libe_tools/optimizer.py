@@ -54,7 +54,7 @@ class libEnsembleOptimizer(Optimizer):
         for spec in self._SPECIFICATION_DICTS:
             self.__setattr__(spec, {})
 
-    def set_optimizer(self, software, method, options=None):
+    def set_optimizer(self, software, method, objective_function=None, options=None):
         """
         Choose an optimizer and set supporting options.
         Optimizer package options are:
@@ -81,7 +81,8 @@ class libEnsembleOptimizer(Optimizer):
                 dict_name, dict_value = mapping[self._NAME]
                 self.__getattribute__(dict_name)[dict_value] = options.pop(key)
 
-        config_options = {'software': software, 'method': method, 'software_options': options}
+        config_options = {'software': software, 'method': method,
+                          'objective_function': objective_function, 'software_options': options}
         if not options.get('exit_criteria'):
             config_options['exit_criteria'] = {'sim_max': int(1000)}
         self._config.options = config_options

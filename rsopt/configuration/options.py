@@ -48,9 +48,12 @@ class Options:
             self.__setattr__(name, value)
 
     def get_objective_function(self):
-        module_path, function = self.objective_function
-        module = pkrunpy.run_path_as_module(module_path)
-        function = getattr(module, function)
+        if len(self.objective_function) == 2:
+            module_path, function = self.objective_function
+            module = pkrunpy.run_path_as_module(module_path)
+            function = getattr(module, function)
+        else:
+            function = None
 
         return function
 
