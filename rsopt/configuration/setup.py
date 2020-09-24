@@ -167,20 +167,32 @@ class Elegant(Setup):
             return cls.SERIAL_RUN_COMMAND
 
     def _edit_input_file_schema(self, kwarg_dict):
+        # Name cases:
+        # ELEMENT NAMES
+        # ELEMENT TYPES
+        # element parameters
+        # command _type
+        # command parameters
+
         commands, elements = _get_model_fields(self.input_file_model)
         model = deepcopy(self.input_file_model)
 
         for n, v in kwarg_dict.items():
-            # TODO: Not sure about capitalization rules for elements and commands
             field, index, name = _parse_name(n)
+            name = name.lower()  # element/command parameters are always lower
             if field.lower() in commands.keys():
                 assert index or len(commands[field.lower()]) == 1, \
                     "{} is not unique in {}. Please add identifier".format(n, self.setup['input_file'])
                 id = commands[field.lower()][int(index)-1 if index else 0]
                 model.models.commands[id][name] = v
-            elif field in elements:
+            elif field.upper() in elements:
                 id = elements[field][0]
-                model.models.elements[id][name] = v
+                if model.models.elements[id].get(name):
+                    model.models.elements[id][name] = v
+                else:
+                    ele_type = model.models.elements[id]["type"]
+                    ele_name = model.models.elements[id]["name"]
+                    raise NameError(f"Parameter: {name} is not found for element {ele_name} with type {ele_type}")
             else:
                 raise ValueError("{} was not found in loaded .ele or .lte files".format(n))
 

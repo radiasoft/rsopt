@@ -24,7 +24,6 @@ class Optimizer:
 
         self.recording_method = None
         self.exit_criteria = None
-        self.function = None
         self.executable = None
 
     @property
