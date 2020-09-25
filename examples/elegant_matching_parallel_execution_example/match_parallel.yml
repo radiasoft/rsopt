@@ -19,8 +19,8 @@ codes:
           start: -5.
       setup:
         input_file: elegant.ele
-        execution_type: parallel
-        cores: 4
+        execution_type: serial
+        # cores: 4
 options:
   software: nlopt
   method: LN_SBPLX

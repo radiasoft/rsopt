@@ -10,8 +10,8 @@ def obj_f(_):
     anb = readSDDS("output.anb")
     anb.read()
 
-    betax, betax_target = anb.columns['betax'].squeeze(), 25.
-    betay, betay_target = anb.columns['betay'].squeeze(), 10.
+    betax, betax_target = anb.columns['betax'].squeeze(), 18.
+    betay, betay_target = anb.columns['betay'].squeeze(), 20.
     alphax, alphax_target = anb.columns['alphax'].squeeze(), -1.
     alphay, alphay_target = anb.columns['alphay'].squeeze(), -1.
 

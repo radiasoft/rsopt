@@ -31,7 +31,7 @@
   emit_y = 4.6e-08,
   emit_z = 0,
   enforce_rms_values[0] = 1, 1, 1,
-  n_particles_per_bunch = 60000,
+  n_particles_per_bunch = 120000,
   one_random_bunch = 0,
   sigma_dp = 0.001,
   sigma_s = 0.00065,
