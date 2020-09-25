@@ -24,7 +24,7 @@ base_directory = '/home/vagrant/jupyter/StaffScratch/cchall/opt_tests'
 # RUN SETTINGS
 RUN_NAME = 'tec_efficiency_example'
 # Base design for the TEC to start optimization
-TEMPLATE_FILE = 'gpyopt_best.yaml'
+TEMPLATE_FILE = 'support/gpyopt_best.yaml'
 RUN_DIR = os.path.join(base_directory, RUN_NAME)
 # Can be used to load the results of a previous optimization run
 CHECKPOINT_FILE = None
@@ -61,7 +61,7 @@ if CHECKPOINTS:
     libE_specs['save_every_k_sims'] = CHECKPOINTS
 libE_specs['sim_dirs_make'] = False
 libE_specs['ensemble_dir_path'] = RUN_DIR
-libE_specs['sim_dir_copy_files'] = [os.path.join('./support', TEMPLATE_FILE)]
+libE_specs['sim_dir_copy_files'] = [os.path.join('../python_basic_example/support', TEMPLATE_FILE)]
 
 if is_master:
     start_time = time()

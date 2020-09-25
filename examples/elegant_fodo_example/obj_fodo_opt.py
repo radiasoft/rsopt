@@ -1,7 +1,7 @@
 from rsbeams.rsdata.SDDS import readSDDS
 
 def obj_f(_):
-    sdds = readSDDS('twiss_output.filename.sdds')
+    sdds = readSDDS('../../tests/support/twiss_output.filename.sdds')
     sdds.read()
 
     nux = sdds.parameters['nux'][0][0]

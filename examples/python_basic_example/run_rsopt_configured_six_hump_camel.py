@@ -25,11 +25,11 @@ optimizer = libEnsembleOptimizer()
 # Set functions used for simulation and objective evaluation
 # Note: simulation function directly returns the objective value in this example
 
-optimizer.add_simulation('fodo_opt.ele', 'elegant')
+optimizer.add_simulation(six_hump_camel_func, 'python')
 
 # Set optimizer parameters
-parameters = np.array([('Q1.K1', -15., 15.,  5.),
-                       ('Q2.K1', -15., 15., -5.)],
+parameters = np.array([('x', -3., 3.,  0.08),
+                       ('y', -2., 2., -0.7)],
                        dtype=[('name', 'U20'), ('min', 'float'), ('max', 'float'), ('start', 'float')])
 
 optimizer.set_parameters(parameters)
@@ -39,10 +39,8 @@ optimizer.set_parameters(parameters)
 optimizer_settings = {'xtol_abs': 1e-6,
                       'ftol_abs': 1e-6,
                       'record_interval': 2}
-
 optimizer.set_optimizer(software='nlopt',
                         method='LN_BOBYQA',
-                        objective_function= ['obj_fodo_opt.py', 'obj_f'],
                         options=optimizer_settings)
 
 # run optimization
@@ -54,3 +52,5 @@ print(H)
 
 def test_optimizer_result():
     assert np.all(np.isclose(H['x'][-1], [0.08979957, -0.71264018], rtol=0., atol=1e-7)), "Min. not found"
+
+test_optimizer_result()

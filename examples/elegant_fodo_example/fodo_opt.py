@@ -40,6 +40,7 @@ elegant_file = """
 
 &optimization_setup
   tolerance = -0.0001,
+  log_file = optimization_setup.log_file.sdds
 &end
 
 &optimization_term
@@ -107,10 +108,10 @@ elegant_file = """
 
 """
 
-with open('elegant.lte', 'w') as f:
+with open('../../tests/support/elegant.lte', 'w') as f:
     f.write(lattice_file)
 
-with open('elegant.ele', 'w') as f:
+with open('../../tests/support/elegant.ele', 'w') as f:
     f.write(elegant_file)
 
 import os
