@@ -5,7 +5,7 @@
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 
 
-def serial(config):
+def local_optimizer(config):
     opt = libEnsembleOptimizer()
     opt.load_configuration(config)
 
@@ -15,5 +15,5 @@ def serial(config):
 # These names have to line up with accepted values for setup.execution_type
 # Another place where shared names are imported from common source
 run_modes = {
-    'serial': serial
+    'serial': local_optimizer
 }
