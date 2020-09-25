@@ -9,6 +9,7 @@ radiamodule = mock.MagicMock()
 sys.modules["radia"] = radiamodule
 from rsopt.codes.radia.sim_functions import hybrid_undulator
 from test_configuration import parameters_dict, settings_dict
+from rsopt.configuration import jobs
 
 test_function_signature = inspect.signature(hybrid_undulator)
 x_vec = [1, 2, 3, 4, 5]
@@ -24,6 +25,7 @@ class TestOptimizer(unittest.TestCase):
 
     def setUp(self):
         self.optimizer = opt.Optimizer()
+        self.optimizer._config.jobs.append(jobs.Job())
         self.optimizer.set_parameters(parameters_dict)
         self.optimizer.set_settings(settings_dict)
 

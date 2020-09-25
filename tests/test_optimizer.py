@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import rsopt.optimizer as opt
+from rsopt.configuration import jobs
 
 
 parameters_array = np.array([('period', 30., 60., 46.),
@@ -35,6 +36,7 @@ class TestOptimizer(unittest.TestCase):
 
     def setUp(self):
         self.optimizer = opt.Optimizer()
+        self.optimizer._config.jobs.append(jobs.Job())
 
     def test_parameter_array_read(self):
         self.optimizer.set_parameters(parameters_array)
