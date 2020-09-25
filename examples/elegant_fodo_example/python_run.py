@@ -32,7 +32,9 @@ optimizer.set_optimizer(software='nlopt',
 
 # run optimization
 optimizer.set_exit_criteria({'sim_max': 30})
-H, _, _ = optimizer.run()
+# If `clean_work_dir` is  True the optimizer will not run if working_directory exists and is not empty
+#
+H, _, _ = optimizer.run(clean_work_dir=True)
 
 print(H)
 

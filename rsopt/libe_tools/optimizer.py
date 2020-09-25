@@ -18,8 +18,12 @@ persistent_local_opt_gen_out = [('x', float, None),
 # Options like record interval are useful for a variety of optimizers and should not be mapped
 #   to libE specific terms. Other libE specific options can retain their original terminology.
 # FUTURE: Allowed option keys should be stored with parent once built out
-LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims'}
-
+LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims',
+                      'use_worker_dirs': 'use_worker_dirs',
+                      'working_directory': 'ensemble_dir_path'}
+# These codes normally need separate working directories or input files will overwrite
+_USE_WORKER_DIRS_DEFAULT = ['elegant', 'opal', ]
+_LIBENSEMBLE_DIRECTORY = './ensemble'
 
 def _configure_executor(job, name, executor):
     executor.register_calc(full_path=job.full_path, app_name=name, calc_type='sim')
@@ -51,6 +55,7 @@ class libEnsembleOptimizer(Optimizer):
         super(libEnsembleOptimizer, self).__init__()
         self.options = []
         self.executor = None  # Set by method
+        self.working_directory = _LIBENSEMBLE_DIRECTORY
         for spec in self._SPECIFICATION_DICTS:
             self.__setattr__(spec, {})
 
@@ -115,7 +120,8 @@ class libEnsembleOptimizer(Optimizer):
                                            'execution_type': 'serial',
                                            'code': code}
 
-    def run(self):
+    def run(self, clean_work_dir=False):
+        self.clean_working_directory = clean_work_dir
         self._configure_libE()
 
         H, persis_info, flag = libE(self.sim_specs, self.gen_specs, self.exit_criteria, self.persis_info,
@@ -153,6 +159,13 @@ class libEnsembleOptimizer(Optimizer):
         # Persistent generator + local optimization eval = 2 workers always
         self.nworkers = 2
         self.comms = 'local'
+
+        for job in self._config.jobs:
+            if job.code in _USE_WORKER_DIRS_DEFAULT:
+                self.libE_specs.setdefault('use_worker_dirs', True)
+                self.libE_specs.setdefault('sim_dirs_make', True)
+                break
+
         self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
 
     def _configure_sim(self):
@@ -186,6 +199,7 @@ class libEnsembleOptimizer(Optimizer):
         self._configure_persistant_info()
         self._configure_executor()
         self._configure_sim()
+        self._cleanup()
 
         if self._config.options.exit_criteria:
             self.set_exit_criteria(self._config.options.exit_criteria)
@@ -195,6 +209,14 @@ class libEnsembleOptimizer(Optimizer):
             self.exit_criteria = {'sim_max': int(1e9)}
         else:
             self._config.options.exit_criteria = self.exit_criteria
+
+    def _cleanup(self):
+        import shutil
+
+        if self.clean_working_directory:
+            shutil.rmtree(self.working_directory)
+
+
 
     def set_exit_criteria(self, exit_criteria):
         """

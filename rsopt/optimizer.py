@@ -26,6 +26,8 @@ class Optimizer:
         self.exit_criteria = None
         self.executable = None
 
+        self.working_directory = '.'
+        self.clean_working_directory = False
     @property
     def lb(self):
         return self._config.get_parameters_list('get_lower_bound', formatter=np.array)
