@@ -1,0 +1,30 @@
+codes:
+  - elegant:
+      parameters:
+        Q1.K1:
+          min: -25.
+          max: 25.
+          start: 5.
+        Q2.K1:
+          min: -25.
+          max: 25.
+          start: -5.
+        Q3.K1:
+          min: -25.
+          max: 25.
+          start: 5.
+        Q4.K1:
+          min: -25.
+          max: 25.
+          start: -5.
+      setup:
+        input_file: elegant.ele
+        execution_type: parallel
+        cores: 4
+options:
+  software: nlopt
+  method: LN_SBPLX
+  software_options: {'ftol_abs': 1.0e-6}
+  objective_function: [obj_f_bunch_matching.py, obj_f]
+  exit_criteria:
+    sim_max: 30

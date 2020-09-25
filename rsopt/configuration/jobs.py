@@ -19,7 +19,7 @@ def create_executor_arguments(setup):
     # TODO: Could have better handling of default values here
     args = {
         # 'app_name': None,  # Handled at optimizer setup
-        'num_procs': 1,  # from setup.cores
+        'num_procs': setup.get('cores', 1),
         'num_nodes': None,  # from setup.nodes
         'ranks_per_node': None, # from setup.ranks_per_node?
         'machinefile': None, # TODO: from setup.machinefile

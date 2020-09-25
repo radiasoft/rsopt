@@ -156,7 +156,7 @@ class Elegant(Setup):
     __REQUIRED_KEYS = ('input_file',)
     RUN_COMMAND = None
     SERIAL_RUN_COMMAND = 'elegant'
-    PARALLEL_RUN_COMMAND = 'Pelgant'
+    PARALLEL_RUN_COMMAND = 'Pelegant'
     NAME = 'elegant'
 
     @classmethod
