@@ -17,7 +17,7 @@ for optimizer in aposmm_optimizer_list:
         print('found', optimizer)
         available_opt.append(optimizer)
     else:
-        print(f'Package{optimizer} not installed. Will not be available.')
+        print(f'Package {optimizer} not installed. Will not be available.')
 
 import libensemble.gen_funcs
 libensemble.gen_funcs.rc.aposmm_optimizers = available_opt
