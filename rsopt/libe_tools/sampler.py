@@ -20,8 +20,9 @@ class GridSampler(libEnsembleOptimizer):
 
         if self.exact_mesh:
             mesh = np.load(self.exact_mesh)
+            sim_max = mesh.size
         else:
-            mesh = self._define_mesh_parameters()
+            mesh, sim_max = self._define_mesh_parameters()
 
         user_keys = {
                      'mesh_definition': mesh,
@@ -37,6 +38,11 @@ class GridSampler(libEnsembleOptimizer):
                                'in': [],
                                'out': gen_out,
                                'user': user_keys})
+        self.exit_criteria = {'sim_max': sim_max}
+
+    def _configure_allocation(self):
+        # If not setting alloc_specs it must be None and not empty dict
+        self.alloc_specs = None
 
     def _configure_persistant_info(self):
         # _configure_specs must have been already called
@@ -44,9 +50,10 @@ class GridSampler(libEnsembleOptimizer):
 
     def _define_mesh_parameters(self):
         mesh_parameters = []
-
+        size = 1
         for lb, ub, s in zip(self.lb, self.ub, self._config.get_parameters_list('get_samples')):
             mp = [lb, ub, s]
             mesh_parameters.append(mp)
+            size *= s
 
-        return mesh_parameters
+        return mesh_parameters, size
