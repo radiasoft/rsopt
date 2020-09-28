@@ -3,7 +3,7 @@ import numpy as np
 from pykern.pkcollections import PKDict
 
 _EXTERNAL_PARAMETER_CATEGORIES = ('min', 'max', 'start')
-
+_OPTIONAL_PARAMETER_CATEGORIES = ('samples', )
 
 def read_parameter_array(obj):
     """
@@ -25,6 +25,8 @@ def read_parameter_dict(obj):
         output = []
         for key in _EXTERNAL_PARAMETER_CATEGORIES:
             output.append(values[key])
+        for key in _OPTIONAL_PARAMETER_CATEGORIES:
+            output.append(values.get(key, None))
         yield name, output
 
 
@@ -42,7 +44,8 @@ class Parameters:
         self._LOWER_BOUND = 'lb'
         self._UPPER_BOUND = 'ub'
         self._START = 'start'
-        self.fields = (self._LOWER_BOUND, self._UPPER_BOUND, self._START)
+        self._SAMPLES = 'samples'
+        self.fields = (self._LOWER_BOUND, self._UPPER_BOUND, self._START, self._SAMPLES)
 
     def parse(self, name, values):
         self._NAMES.append(name)
@@ -61,3 +64,18 @@ class Parameters:
 
     def get_start(self):
         return np.array([self.pararameters[name][self._START] for name in self._NAMES])
+
+    def get_samples(self):
+        samples = [self.pararameters[name][self._SAMPLES] for name in self._NAMES]
+
+        # Because samples is not required there are no prior validations
+        vals = set(samples)
+        if len(vals) == 1 and None in vals:
+            # samples were not set for any parameters
+            return samples
+        elif None in vals:
+            # samples were set for some parameters and not others
+            assert ValueError("Not all parameters had samples field set")
+        else:
+            # samples were properly set for all parameters
+            return samples

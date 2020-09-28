@@ -55,6 +55,7 @@ class libEnsembleOptimizer(Optimizer):
         super(libEnsembleOptimizer, self).__init__()
         self.options = []
         self.executor = None  # Set by method
+        self.nworkers = 2  # Always 2 for local optimizer (1 for sim worker and 1 for persis generator)
         self.working_directory = _LIBENSEMBLE_DIRECTORY
         for spec in self._SPECIFICATION_DICTS:
             self.__setattr__(spec, {})
@@ -157,7 +158,6 @@ class libEnsembleOptimizer(Optimizer):
 
     def _configure_specs(self):
         # Persistent generator + local optimization eval = 2 workers always
-        self.nworkers = 2
         self.comms = 'local'
 
         for job in self._config.jobs:
