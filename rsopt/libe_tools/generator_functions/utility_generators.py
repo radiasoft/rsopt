@@ -20,6 +20,6 @@ def generate_mesh(H, persis_info, gen_specs, libE_info):
         mesh = np.array(mesh_specs).T
 
     out = np.zeros(mesh.shape[0], dtype=gen_specs['out'])
-    out['x'] = mesh
+    out['x'] = mesh.squeeze()
 
     return out, persis_info
