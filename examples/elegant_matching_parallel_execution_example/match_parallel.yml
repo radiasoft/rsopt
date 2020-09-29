@@ -27,7 +27,7 @@ codes:
 options:
   software: nlopt
   method: LN_SBPLX
-  software_options: {'ftol_abs': 1.0e-6}
+  software_options: {'ftol_abs': 1e-6}
   objective_function: [obj_f_bunch_matching.py, obj_f]
   exit_criteria:
     sim_max: 30
