@@ -105,7 +105,7 @@ class Job:
 
         # Setup for Executor
         self.executor_args = create_executor_arguments(self._setup.setup)
-        is_parallel = bool(abs(self._setup.setup.get('cores') - 1))
+        is_parallel = self.setup.get('execution_type', False) == 'parallel'
         self.full_path = self._setup.get_run_command(is_parallel=is_parallel)
 
         # Import input_file
