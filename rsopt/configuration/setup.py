@@ -134,7 +134,7 @@ class Python(Setup):
         return None
 
     def generate_input_file(self, kwarg_dict, directory):
-        is_parallel = bool(abs(self.setup.get('cores') - 1))
+        is_parallel =  self.setup.get('execution_type', False) == 'parallel'
         if not is_parallel:
             return None
 
