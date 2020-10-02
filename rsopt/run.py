@@ -20,6 +20,6 @@ def aposmm_optimizer(config):
 # These names have to line up with accepted values for setup.execution_type
 # Another place where shared names are imported from common source
 run_modes = {
-    'serial': local_optimizer,
+    'nlopt': local_optimizer,
     'aposmm': aposmm_optimizer
 }
