@@ -10,7 +10,11 @@ def configuration(config):
     _config = parse.parse_yaml_configuration(config_yaml)
 
     software = _config.options.NAME
-    nworkers = _config.options.nworkers
+    try:
+        nworkers = _config.options.nworkers
+    except AttributeError:
+        # Any method that doesn't allow user specification must use 2 workers
+        nworkers = 2
 
     runner = run.run_modes[software](_config)
     H, persis_info, _ = runner.run()
