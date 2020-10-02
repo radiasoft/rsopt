@@ -1,6 +1,6 @@
 from rsopt.configuration.parameters import _PARAMETER_READERS, Parameters
 from rsopt.configuration.settings import _SETTING_READERS, Settings
-from rsopt.configuration.setup import _SETUP_READERS, Setup
+from rsopt.configuration.setup import _SETUP_READERS, Setup, _PARALLEL_PYTHON_RUN_FILE
 
 
 def get_reader(obj, category):
@@ -104,9 +104,12 @@ class Job:
             self._setup.parse(name, value)
 
         # Setup for Executor
-        self.executor_args = create_executor_arguments(self._setup.setup)
-        is_parallel = bool(abs(self._setup.setup.get('cores') - 1))
+        is_parallel = self.setup.get('execution_type', False) == 'parallel'
         self.full_path = self._setup.get_run_command(is_parallel=is_parallel)
+        self.executor_args = create_executor_arguments(self._setup.setup)
+        # TODO: This might be better generalized by creating an option to supply app_args
+        if is_parallel and self.code == 'python':
+            self.executor_args['app_args'] = _PARALLEL_PYTHON_RUN_FILE
 
         # Import input_file
         if self._setup.setup.get('input_file'):

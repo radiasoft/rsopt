@@ -3,6 +3,7 @@ import time
 import numpy as np
 from libensemble.message_numbers import WORKER_DONE, WORKER_KILL, TASK_FAILED
 from libensemble.executors.executor import Executor
+from collections import Iterable
 
 # TODO: This should probably be in libe_tools right?
 
@@ -28,6 +29,8 @@ def get_signature(parameters, settings):
 
 def _parse_x(x, parameters):
     x_struct = {}
+    if not isinstance(x, Iterable):
+        x = [x, ]
     for val, name in zip(x, parameters.keys()):
         x_struct[name] = val
 
