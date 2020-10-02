@@ -2,6 +2,7 @@ from pykern import pkrunpy
 
 class Options:
     __REQUIRED_KEYS = ('software',)
+    REQUIRED_KEYS = ()
 
     def __init__(self):
         self.objective_function = []
@@ -12,17 +13,25 @@ class Options:
 
     @classmethod
     def get_option(cls, options):
-        cls._check_options(options)
+        # Required setup checks for options
+        cls.__check_options(options)
         software = options.pop('software')
 
+        # Implementation specific checks
         option_classes[software]._check_options(options)
 
         return option_classes[software]
 
     @classmethod
-    def _check_options(cls, options):
+    def __check_options(cls, options):
         for key in cls.__REQUIRED_KEYS:
             assert options.get(key), f"{key} must be defined in options"
+
+    @classmethod
+    def _check_options(cls, options):
+        name = cls.NAME
+        for key in cls.REQUIRED_KEYS:
+            assert options.get(key), f"{key} must be defined in options for {name}"
 
     def _validate_input(self, name, value):
         # If the name isn't registered then no point checking further
@@ -58,22 +67,62 @@ class Options:
         return function
 
 class Nlopt(Options):
-    __NAME = 'nlopt'
+    NAME = 'nlopt'
     # Ordering of required keys matters to validate method assignment is correct
-    __REQUIRED_KEYS = ('method', 'exit_criteria')
+    REQUIRED_KEYS = ('method', 'exit_criteria')
     # Only can allow what aposmm_localopt_support handles right now
-    __ALLOWED_METHODS = ('LN_BOBYQA', 'LN_SBPLX', 'LN_COBYLA', 'LN_NEWUOA',
+    ALLOWED_METHODS = ('LN_BOBYQA', 'LN_SBPLX', 'LN_COBYLA', 'LN_NEWUOA',
                          'LN_NELDERMEAD', 'LD_MMA')
 
     @classmethod
     def _check_options(cls, options):
-        for key in cls.__REQUIRED_KEYS:
-            assert options.get(key), f"{key} must be defined in options to use {cls.__NAME}"
-        proposed_method = options.get(cls.__REQUIRED_KEYS[0])
-        assert proposed_method in cls.__ALLOWED_METHODS, \
-            f"{proposed_method} not available for use in software {cls.__NAME}"
+        for key in cls.REQUIRED_KEYS:
+            assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
+        proposed_method = options.get(cls.REQUIRED_KEYS[0])
+        assert proposed_method in cls.ALLOWED_METHODS, \
+            f"{proposed_method} not available for use in software {cls.NAME}"
+
+
+class Aposmm(Options):
+    NAME = 'aposmm'
+    REQUIRED_KEYS = ('method', 'exit_criteria')
+    # Only can allow what aposmm_localopt_support handles right now
+    ALLOWED_METHODS = ('LN_BOBYQA', 'LN_SBPLX', 'LN_COBYLA', 'LN_NEWUOA',
+                         'LN_NELDERMEAD', 'LD_MMA')
+    SOFTWARE_OPTIONS = {
+        'high_priority_to_best_localopt_runs': True,
+        'max_active_runs': 1,
+        'initial_sample_size': 0
+    }
+
+    def __init__(self):
+        super().__init__()
+
+        self.nworkers = 2
+        for key, val in self.SOFTWARE_OPTIONS.items():
+            self.__setattr__(key, val)
+
+    # def get_software_options(self):
+    #     options_dict = {}
+    #     for key in self.SOFTWARE_OPTIONS.keys():
+    #         options_dict[key] = self.__getattribute__(key)
+    #
+    #     return options_dict
+
+
+
+class Mesh(Options):
+    NAME = 'mesh_scan'
+    REQUIRED_KEYS = ()
+
+    def __init__(self):
+        super().__init__()
+        self.nworkers = 1
+        self.mesh_file = ''
 
 option_classes = {
-    'nlopt': Nlopt
+    'nlopt': Nlopt,
+    'aposmm': Aposmm,
+    'mesh_scan': Mesh
 }
 
