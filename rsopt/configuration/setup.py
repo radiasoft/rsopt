@@ -187,7 +187,7 @@ class Elegant(Setup):
                 model.models.commands[id][name] = v
             elif field.upper() in elements:
                 id = elements[field][0]
-                if model.models.elements[id].get(name):
+                if model.models.elements[id].get(name) is not None:
                     model.models.elements[id][name] = v
                 else:
                     ele_type = model.models.elements[id]["type"]
