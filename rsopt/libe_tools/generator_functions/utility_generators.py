@@ -7,8 +7,8 @@ def generate_mesh(H, persis_info, gen_specs, libE_info):
     mesh_specs = user_specs['mesh_definition']
     exact_mesh = user_specs['exact_mesh']
     
-    logger = logging.getLogger()
-    logging.info('Generator called by Worker', libE_info['workerID'])
+    logger = logging.getLogger('libensemble')
+    logger.info('Generator called by Worker: {}'.format(libE_info['workerID']))
     
     if not exact_mesh:
         mesh_1d = []
@@ -20,6 +20,7 @@ def generate_mesh(H, persis_info, gen_specs, libE_info):
         mesh = np.array(mesh_specs).T
 
     out = np.zeros(mesh.shape[0], dtype=gen_specs['out'])
-    out['x'] = mesh.squeeze()
+    logger.info('mesh shape: {}'.format(mesh.shape))
+    out['x'] =  mesh.reshape(out['x'].shape)
 
     return out, persis_info
