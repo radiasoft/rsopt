@@ -79,7 +79,10 @@ class TestOptionsReaders(unittest.TestCase):
     # Should not rely on hardcoded values
     software_key = 'software'
     required_keys = {'nlopt': {'method': 'LN_SBPLX',
-                               'exit_criteria': 'fill'}}
+                               'exit_criteria': 'fill'},
+                     'aposmm': {'method': 'LN_COBYLA',
+                                'exit_criteria': 'fill'},
+                     'mesh_scan': {}}
 
     def test_options_set(self):
         for option_name, option_class in config.options.option_classes.items():
@@ -91,10 +94,11 @@ class TestOptionsReaders(unittest.TestCase):
     def test_missing_req_options(self):
 
         for option_name, option_class in config.options.option_classes.items():
-            opt_dict = {}
-            opt_dict[self.software_key] = option_name
-            with self.assertRaises(AssertionError):  # could use assertRaisesRegex and loop from pulling keys
-                option_obj = config.options.Options.get_option(opt_dict)()
+            if option_class.REQUIRED_KEYS:
+                opt_dict = {}
+                opt_dict[self.software_key] = option_name
+                with self.assertRaises(AssertionError):  # could use assertRaisesRegex and loop from pulling keys
+                    option_obj = config.options.Options.get_option(opt_dict)()
 
 
 class TestConfigurationSetup(unittest.TestCase):

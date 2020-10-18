@@ -213,9 +213,9 @@ class libEnsembleOptimizer(Optimizer):
             self._config.options.exit_criteria = self.exit_criteria
 
     def _cleanup(self):
-        import shutil
+        import shutil, os
 
-        if self.clean_working_directory:
+        if self.clean_working_directory and os.path.isdir(self.working_directory):
             shutil.rmtree(self.working_directory)
 
 

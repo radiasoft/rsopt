@@ -8,7 +8,7 @@ https://github.com/Libensemble/libensemble/blob/a870bd4beffccbc863f79dfd7ab3940f
 from importlib import util
 # TODO: If libEnsemble is updated can import optimizer list
 # from libensemble.gen_funcs import aposmm_optimizer_list
-aposmm_optimizer_list = ['petsc', 'nlopt', 'dfols', 'scipy', 'external']
+aposmm_optimizer_list = ['nlopt', 'dfols', 'scipy', 'external']
 available_opt = []
 for optimizer in aposmm_optimizer_list:
     if optimizer == 'external':

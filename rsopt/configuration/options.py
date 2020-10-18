@@ -83,6 +83,34 @@ class Nlopt(Options):
             f"{proposed_method} not available for use in software {cls.NAME}"
 
 
+class Aposmm(Options):
+    NAME = 'aposmm'
+    REQUIRED_KEYS = ('method', 'exit_criteria')
+    # Only can allow what aposmm_localopt_support handles right now
+    ALLOWED_METHODS = ('LN_BOBYQA', 'LN_SBPLX', 'LN_COBYLA', 'LN_NEWUOA',
+                         'LN_NELDERMEAD', 'LD_MMA')
+    SOFTWARE_OPTIONS = {
+        'high_priority_to_best_localopt_runs': True,
+        'max_active_runs': 1,
+        'initial_sample_size': 0
+    }
+
+    def __init__(self):
+        super().__init__()
+
+        self.nworkers = 2
+        for key, val in self.SOFTWARE_OPTIONS.items():
+            self.__setattr__(key, val)
+
+    # def get_software_options(self):
+    #     options_dict = {}
+    #     for key in self.SOFTWARE_OPTIONS.keys():
+    #         options_dict[key] = self.__getattribute__(key)
+    #
+    #     return options_dict
+
+
+
 class Mesh(Options):
     NAME = 'mesh_scan'
     REQUIRED_KEYS = ()
@@ -94,6 +122,7 @@ class Mesh(Options):
 
 option_classes = {
     'nlopt': Nlopt,
+    'aposmm': Aposmm,
     'mesh_scan': Mesh
 }
 

@@ -4,6 +4,7 @@ import numpy as np
 from libensemble.message_numbers import WORKER_DONE, WORKER_KILL, TASK_FAILED
 from libensemble.executors.executor import Executor
 from collections import Iterable
+
 # TODO: This should probably be in libe_tools right?
 
 _POLL_TIME = 1  # seconds
