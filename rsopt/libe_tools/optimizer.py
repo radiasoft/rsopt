@@ -22,7 +22,7 @@ LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims',
                       'use_worker_dirs': 'use_worker_dirs',
                       'working_directory': 'ensemble_dir_path'}
 # These codes normally need separate working directories or input files will overwrite
-_USE_WORKER_DIRS_DEFAULT = ['elegant', 'opal', ]
+_USE_WORKER_DIRS_DEFAULT = ['elegant', 'opal', 'python']
 _LIBENSEMBLE_DIRECTORY = './ensemble'
 
 def _configure_executor(job, name, executor):
@@ -164,6 +164,8 @@ class libEnsembleOptimizer(Optimizer):
             if job.code in _USE_WORKER_DIRS_DEFAULT:
                 self.libE_specs.setdefault('use_worker_dirs', True)
                 self.libE_specs.setdefault('sim_dirs_make', True)
+                if job.code == 'python':
+                    self.libE_specs.setdefault('sim_dir_symlink_files', [job.setup['input_file'],])
                 break
 
         self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
