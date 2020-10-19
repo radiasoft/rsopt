@@ -6,14 +6,24 @@ from copy import deepcopy
 from pykern import pkrunpy
 from pykern import pkio
 from pykern import pkresource
+from libensemble.executors.mpi_executor import MPIExecutor
+from rsopt.libe_tools.executors import register_rsmpi_executor
+
 
 _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
 _TEMPLATE_PATH = pkio.py_path(pkresource.filename(''))
 
+_EXECUTION_TYPES = {'serial': MPIExecutor,  # Serial jobs executed in the shell use the MPIExecutor for simplicity
+                    'parallel': MPIExecutor,
+                    'rsmpi': register_rsmpi_executor,
+                    'shifter': MPIExecutor}
+
+
 def read_setup_dict(input):
     for name, values in input.items():
         yield name, values
+
 
 def _parse_name(name):
     components = name.split('.')
@@ -25,6 +35,7 @@ def _parse_name(name):
         raise ValueError(f'Could not understand parameter/setting name {name}')
 
     return field, index, name
+
 
 def _get_model_fields(model):
     commands = {}
@@ -40,6 +51,13 @@ def _get_model_fields(model):
         elements[e['name']] = [i]
 
     return commands, elements
+
+
+def _validate_execution_type(key):
+    if key in _EXECUTION_TYPES:
+        return True
+    else:
+        return False
 
 _SETUP_READERS = {
     dict: read_setup_dict
@@ -61,6 +79,7 @@ class Setup:
             'cores': 1
         }
         self.input_file_model = None
+        self.validators = {'execution_type': _validate_execution_type}
 
     @classmethod
     def get_setup(cls, setup, code):
@@ -103,7 +122,16 @@ class Setup:
         pass
 
     def parse(self, name, value):
-         self.setup[name] = value
+        self.validate_input(name, value)
+        self.setup[name] = value
+
+    def validate_input(self, key, value):
+        # Checks inputs with controlled inputs
+        if self.validators.get(key):
+            if self.validators[key](value):
+                return
+            else:
+                raise ValueError(f'{value} is not a recognized value for f{key}')
 
 
 class Python(Setup):
