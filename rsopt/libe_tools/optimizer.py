@@ -183,7 +183,7 @@ class libEnsembleOptimizer(Optimizer):
         else:
             executor_setup = {'auto_resources': True}
 
-        self.executor = MPIExecutor(**executor_setup)
+        self.executor = self._config.create_exector(**executor_setup)
 
         # If the job has a run command then that job should use an executor
         for app_name, job in zip(app_names, self._config.jobs):

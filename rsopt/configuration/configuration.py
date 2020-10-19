@@ -1,5 +1,6 @@
 from rsopt.configuration import Options
-
+from rsopt.configuration.setup import _EXECUTION_TYPES
+_EXECUTORS = {'parallel'}
 
 class Configuration:
     def __init__(self):
@@ -57,3 +58,18 @@ class Configuration:
             attribute_list.extend(job._parameters.__getattribute__(attribute)())
 
         return formatter(attribute_list)
+
+    # TODO: Shifter needs special handling, it is still MPIExecutor but needs to change app setup
+    def create_exector(self, **executor_options):
+        # Executor is created even for serial jobs
+        # For serial Python the executor is not registerd with the Job and goes unused
+
+        # rsmpi is the only mutually exclusive option right now
+        executors = [j.get('executor_type') for j in self.jobs if j.get('executor_type')]
+        if executors.count('rsmpi') != len(executors) or executors.count('rsmpi') == 0:
+            raise NotImplementedError("rsmpi is not supported in combination with other executors")
+
+        # Right now we implicitly guarantee all executors will be same type
+        executor = _EXECUTION_TYPES[executors[0]]
+
+        return executor(**executor_options)
