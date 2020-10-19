@@ -25,10 +25,10 @@ parsed_args = parser.parse_args()
 h = get_host_from_machinefile(parsed_args.machinefile)
 args = ' '.join(parsed_args.args)
 
-formatted_run_string = run_string.format(n=parsed_args.n, h=h, args=args)
+formatted_run_string = run_string.format(n=parsed_args.n, h=h, args=args).split()
 
 # Execute
-run_status = subprocess.Popen(formatted_run_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+run_status = subprocess.Popen(formatted_run_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 out, err = run_status.communicate()
 
