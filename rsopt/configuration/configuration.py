@@ -65,8 +65,8 @@ class Configuration:
         # For serial Python the executor is not registerd with the Job and goes unused
 
         # rsmpi is the only mutually exclusive option right now
-        executors = [j.get('executor_type') for j in self.jobs if j.get('executor_type')]
-        if executors.count('rsmpi') != len(executors) or executors.count('rsmpi') == 0:
+        executors = [j.setup.get('execution_type') for j in self.jobs if j.setup.get('execution_type')]
+        if executors.count('rsmpi') != len(executors) and executors.count('rsmpi') != 0:
             raise NotImplementedError("rsmpi is not supported in combination with other executors")
 
         # Right now we implicitly guarantee all executors will be same type

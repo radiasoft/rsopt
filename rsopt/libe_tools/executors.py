@@ -24,10 +24,12 @@ def register_rsmpi_executor(hosts='auto', cores_on_node=None, **kwargs):
     :return: libensemble.executors.mpi_executor.MPIExecutor object
     """
 
-    try:
+    if type(hosts) == int:
         hosts = int(hosts)
-    except TypeError:
+    elif type(hosts) == str:
         hosts = _detect_rsmpi_resources()
+    else:
+        raise TypeError('hosts must be str or int')
 
     _generate_rsmpi_node_file(hosts)
 
@@ -57,8 +59,8 @@ def _detect_rsmpi_resources():
 
 def _generate_rsmpi_node_file(nodes):
     with open('libe_nodes', 'w') as ff:
-        for node in range(nodes):
-            ff.write(str(node))
+        for node in range(1, nodes+1):
+            ff.write(str(node)+'\n')
 
 
 # Not strictly needed (MPIExecutor with n=1 is currently used by rsopt to simplify setup)
