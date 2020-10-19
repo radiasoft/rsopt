@@ -12,16 +12,15 @@ logger = logging.getLogger(__name__)
 _CONFIG_PATH = '/home/vagrant/jupyter/.rsmpi/ssh_config'
 
 
-def register_rsmpi_executor(sim_app, app_name=None, hosts='auto', cores_on_node=None, job_controller=None):
+def register_rsmpi_executor(hosts='auto', cores_on_node=None, **kwargs):
     """
-    Create an MPIExecutor that can use rsmpi
-    :param sim_app: (str) Name of application to be executed.
-    :param app_name: (str) Optional name to assign to executor for this application.
+    Create an MPIExecutor that can use rsmpi. The executor is returned and may be used to register calculations
+    for workers like any other libEnsemble executor.
     :param hosts: (str or int) If 'auto' then all rsmpi resources are detected and used. Otherwise specify number
                                of hosts as an int.
     :param cores_on_node: (tuple) Defaults to (16, 16). Number of physical cores and logical cores on the hosts.
-    :param job_controller: (MPIExecutor) If multiple applications will be registered then an existing job controller
-                            may be passed in to register the application with.
+    :param kwargs: Any other kwargs given will be passed to the MPIExecutor that is created.
+
     :return: libensemble.executors.mpi_executor.MPIExecutor object
     """
 
@@ -37,12 +36,8 @@ def register_rsmpi_executor(sim_app, app_name=None, hosts='auto', cores_on_node=
                   'runner_name': 'libensemble-rsmpi',
                   'cores_on_node': cores_on_node,
                   'node_file': 'libe_nodes'}
-    if not job_controller:
-        jobctrl = MPIExecutor(custom_info=customizer)
-    else:
-        jobctrl = job_controller
 
-    jobctrl.register_calc(full_path=sim_app, app_name=app_name, calc_type='sim')
+    jobctrl = MPIExecutor(**kwargs, custom_info=customizer)
 
     return jobctrl
 
@@ -66,7 +61,7 @@ def _generate_rsmpi_node_file(nodes):
             ff.write(str(node))
 
 
-# Not strictly needed (could use MPIExecutor with n=1)
+# Not strictly needed (MPIExecutor with n=1 is currently used by rsopt to simplify setup)
 class SerialExecutor(Executor):
     def __init__(self):
         super().__init__()
