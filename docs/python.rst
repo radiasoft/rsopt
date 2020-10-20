@@ -1,5 +1,7 @@
-``python``
 .. _python_ref:
+
+``python``
+----------
 
 Python code may be executed by rsopt when specified in the ``code`` field. When executed in serial all Python functions
 is run by workers, natively in their existing process. rsopt also supports parallel execution of Python code, however,

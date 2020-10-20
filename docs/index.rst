@@ -1,13 +1,19 @@
-Welcome to rsopt
-=================
+.. rsopt documentation master file, created by
+   sphinx-quickstart on Mon Oct 19 21:44:37 2020.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-A Python library with tools for optimization problems
+Welcome to rsopt's documentation!
+=================================
+
+rsopt is a Python library for modularizing and running optimization problems.
 
 .. toctree::
    :maxdepth: 2
 
-   rsopt
-   modules
+   Introduction<introduction>
+   Configuration<configuration>
+   Python<python>
 
 Indices and tables
 ==================
