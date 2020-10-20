@@ -1,0 +1,27 @@
+mkdir $SCRATCH/warp_install
+git clone warp to $SCRATCH/warp
+
+
+in ~/.bashrc.ext
+export PYTHONUSERBASE=$SCRATCH/warp_install
+module load python3
+module load h5py-parallel
+
+pip install Forthon --user
+(NEED TO SPECIFY FORTHON3 (3!) in path)
+
+FCOMP = -F intel --fargs "-fPIC -O3 -xMIC-AVX512" --cargs "-fPIC"
+FCOMPEXEC =  --fcompexec ftn
+FORTHON = $(PYTHONUSERBASE)/bin/Forthon3
+INSTALLOPTIONS = --user
+
+
+git clone rswarp to $SCRATCH/rswarp
+pip install . --user
+
+in ~/.bashrc.ext
+export PYTHONPATH=$PYTHONUSERBASE/bin/rswarp
+export PYTHONPATH=$PYTHONUSERBASE/bin/rsopt
+! To run the rsopt interface you need to add bin/
+export PATH=$PATH:$PYTHONUSERBASE/bin/
+

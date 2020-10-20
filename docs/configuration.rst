@@ -60,6 +60,8 @@ all of these values may be used at run, however, they must always be given in th
 
 Execution Methods
 -----------------
+.. _exec_methods:
+
 Under ``setup`` for each ``code`` an ``execution_type`` must be specified::
 
     codes:
@@ -74,22 +76,59 @@ Under ``setup`` for each ``code`` an ``execution_type`` must be specified::
 Currently accepted execution modes are:
 
 * ``serial``: Serial execution of the code
+* ``parallel``: Parallel execution of the code with MPI. libEnsemble automatically detects MPI implementation and will automatically format input commands
+* ``rsmpi``: Special command for users who have servers registered to them on jupyter.radiasoft.org_. If rsmpi is being used for any code it must be used for all. The number of cores requested may vary from code to code though.
+
+When using ``parallel`` or ``rsmpi`` you must also specify the number of cores used to execute each code. This corresponds to the input for the ``-n`` flag in the usual ``mpiexec`` command.::
+
+            - setup:
+                - execution_type: parallel
+                - cores: 16
+
+.. _jupyter.radiasoft.org: https://jupyter.radiasoft.org/
 
 Accepted Codes
 --------------
 Currently accepted code names are:
 
-* ``python``::
+* ``python``
+    See :ref:`here<python_ref>` for details on using your Python code as an evaluation function in rsopt.::
 
-    codes:
-        - python:
-            setup:
-                input_file: /a_path/a_module.py
-                function: foo  # Name of a function in `input_file` to be executed
-                execution_type: serial  # Choose execution mode
+        codes:
+            - python:
+                setup:
+                    input_file: /a_path/a_module.py
+                    function: foo  # Name of a function in `input_file` to be executed
+                    execution_type: serial  # Choose execution mode
 
-Required ``setup`` fields for ``python`` are:
+    Required ``setup`` fields for ``python`` are:
 
-* ``input_file``: The path to a Python module, either absolute or relative to execution directory.
-* ``function``: Name of a function in `input_file` to be executed
-* ``execution_type``: Method to use when executing the Python code. See Execution Methods for accepted types.
+    * ``input_file``: The path to a Python module, either absolute or relative to execution directory.
+    * ``function``: Name of a function in `input_file` to be executed
+    * ``execution_type``: Method to use when executing the Python code. See :ref:`Execution Methods<exec_methods>` for accepted types and any additional requirements.
+
+* ``elegant``
+    See :ref:`here<elegant_ref>` for details on using elegant to perform evaluations in rsopt. Example configuration setup::
+
+        codes:
+            - elegant:
+                setup:
+                    input_file: command_file.ele
+                    execution_type: parallel  # Choose execution mode
+                    cores: 16  # Should be given if using some form of parallel execution
+
+    Required ``setup`` fields for ``python`` are:
+
+    * ``input_file``: The path to a Python module, either absolute or relative to execution directory.
+    * ``execution_type``: Method to use when executing elegant (Pelegant if running in parallel). See :ref:`Execution Methods<exec_methods>` for accepted types and any additional requirements.
+
+* ``opal``
+    In progress...
+
+* ``user``
+    Coming Soon...?
+
+    rsopt has been designed with the possibility for execution of arbitrary, user-supplied executables. However, this feature has not been
+    fully implemented. If this is something you would like to see right now, please, `let me know`_.
+
+.. _let me know: https://github.com/radiasoft/rsopt/issues
