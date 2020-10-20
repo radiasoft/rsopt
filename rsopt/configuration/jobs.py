@@ -62,7 +62,7 @@ class Job:
 
     @property
     def parameters(self):
-        return self._parameters.pararameters
+        return self._parameters.parameters
     @property
     def settings(self):
         return self._settings.settings
