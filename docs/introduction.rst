@@ -1,5 +1,5 @@
-Placeholder Introduction to rsopt
----------------------------------
+Introduction to rsopt
+=====================
 
 Installation
 
