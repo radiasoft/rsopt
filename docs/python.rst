@@ -24,12 +24,12 @@ Required ``setup`` fields for ``python`` are:
 ``function`` Specification
 --------------------------
 
-* arguments: Input for the Python function being evaluated from the ``function`` key is always provided as a ``dict`` composed of
-the union of the settings and parameters for the job.
+*   **arguments**: Input for the Python function being evaluated from the ``function`` key is always provided as a ``dict`` composed of
+    the union of the settings and parameters for the job.
 
-* return value: The return value must be a single floating number (or be castable by NumPy to a float)
-Output is handled differently depending on if ``execution_type``
-is a serial or parallel run mode. For serial the output of the function is passed to ``options.objective_function``
-if one was given. If no separate objective function was supplied the output is directly handed to the optimizer, if one
-is being used. If you are using a parallel execution then you must specify a function in ``options.objective_function``
-that will read output, saved to file, from ``function``.
+*   **return value**: The return value must be a single floating number (or be castable by NumPy to a float)
+    Output is handled differently depending on if ``execution_type``
+    is a serial or parallel run mode. For serial the output of the function is passed to ``options.objective_function``
+    if one was given. If no separate objective function was supplied the output is directly handed to the optimizer, if one
+    is being used. If you are using a parallel execution then you must specify a function in ``options.objective_function``
+    that will read output, saved to file, from ``function``.

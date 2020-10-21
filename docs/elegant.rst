@@ -3,7 +3,7 @@
 ``elegant``
 ===========
 
-The particle accelerator tracking code ``elegant``[1]_[2]_ has special support in rsopt provided by the Sirepo library.
+The particle accelerator tracking code ``elegant`` [1]_ [2]_ has special support in rsopt provided by the Sirepo library.
 Using Sirepo, rsopt can parse ``elegant`` command and lattice files, automatically replacing and updating values given
 for parameters and settings with no additional work required by the user. An example setup is shown below::
 
@@ -48,8 +48,7 @@ When using ``elegant`` as part of an optimization run in rsopt you will need to 
 was run in for each new job and so can easily be used to read any output from elegant to perform required calculations.
 
 
-.. [1] M. Borland, ”elegant: A Flexible SDDS-Compliant Code for Accelerator Simulation,” AdvancedPhoton Source LS-287, September 2000.
-.. [2] Y. Wang and M. Borland, ”Pelegant: A Parallel Accelerator Simulation Code for Electron
-Generation and Tracking”, Proceedings of the 12th Advanced Accelerator Concepts Workshop,
-AIP Conf. Proc. 877, 241 (2006).
-
+.. [1]  M. Borland, ”elegant: A Flexible SDDS-Compliant Code for Accelerator Simulation,” AdvancedPhoton Source LS-287, September 2000.
+.. [2]  Y. Wang and M. Borland, ”Pelegant: A Parallel Accelerator Simulation Code for Electron
+        Generation and Tracking”, Proceedings of the 12th Advanced Accelerator Concepts Workshop,
+        AIP Conf. Proc. 877, 241 (2006).

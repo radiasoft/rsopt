@@ -1,5 +1,5 @@
 Supported Codes
 ===============
 
-* :ref:`Python<elegant_ref>`
+* :ref:`Python<python_ref>`
 * :ref:`elegant<elegant_ref>`
