@@ -5,12 +5,16 @@ import sys
 
 run_string = 'rsmpi -n {n} -h {h} {args}'
 
-parser = argparse.ArgumentParser(description="Wrap rsmpi for use by libensemble ")
+parser = argparse.ArgumentParser(description="Wrap rsmpi for use by libensemble. Converts required MPICH flags"
+                                             "to rsmpi flags.")
 
-parser.add_argument("-np", dest="n")
-parser.add_argument("-machinefile", dest="machinefile")
-parser.add_argument("--ppn", dest="ppn")  # This flag is not used by rsmpi
-parser.add_argument('args', nargs=argparse.REMAINDER)
+parser.add_argument("-np", dest="n", required=True,
+                     help="Pass number of processors to rsmpi")
+parser.add_argument("-machinefile", dest="machinefile", required=True,
+                    help="Location of machinefile that gives rsmpi server number on the first line")
+parser.add_argument("--ppn", dest="ppn", required=False,
+                    help="Not required by rsmpi, but supplied by libEnsemble. Input is not used if given.")
+parser.add_argument('args', nargs=argparse.REMAINDER, help="All other arguments are appended after rsmpi")
 
 
 def get_host_from_machinefile(machinefile):
