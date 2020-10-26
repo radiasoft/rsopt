@@ -7,7 +7,7 @@ from rsopt.configuration import jobs
 parameters_array = np.array([('period', 30., 60., 46.),
                              ('lpy', 1., 10., 5.),
                              ('lmz', 10., 40., 20.),
-                             ('lpz', 30., 60., 25.),
+                             ('lpz', 30., 60., 35.),
                              ('offset', 0.25, 4., 1.)],
                              dtype=[('name', 'U20'), ('min', 'float'), ('max', 'float'), ('start', 'float')])
 
@@ -15,7 +15,7 @@ parameters_dict = {
     'period': {'min': 30., 'max': 60., 'start': 46.},
     'lpy': {'min': 1., 'max': 10., 'start': 5.},
     'lmz': {'min': 10., 'max': 40., 'start': 20.},
-    'lpz': {'min': 30., 'max': 60., 'start': 25.},
+    'lpz': {'min': 30., 'max': 60., 'start': 35.},
     'offset': {'min': .25, 'max': 4., 'start': 1.}
 }
 
