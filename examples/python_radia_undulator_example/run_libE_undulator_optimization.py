@@ -8,7 +8,7 @@ optimizer = libEnsembleOptimizer()
 # Set functions used for simulation and objective evaluation
 # Note: simulation function may also directly return the objective value
 sim_func = optimize_objective_k
-optimizer.add_simulation(sim_func)
+optimizer.add_simulation(sim_func, 'python')
 
 # Set optimizer parameters
 parameters = np.array([('period', 30., 60., 46.),

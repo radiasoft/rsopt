@@ -1,0 +1,9 @@
+Example of a local optimizer evaluating elegant to match final conditions of a FODO lattice.
+This example shows how to configure rsopt using a Python script instead of a YAML configuration file.
+
+Has an additional dependence of rsbeams to read SDDS files: https://github.com/radiasoft/rsbeams
+
+To run in terminal: rsopt optimize configuration match_parallel.yml
+
+Note: This example is designed to show setup of rsopt on a simple problem.
+      This is not an efficient way to solve the optimization problem shown.

@@ -1,0 +1,9 @@
+Example of a local optimizer evaluating Pelegant. The local optimizer can only take on evaluation at a time,
+but the evaluation is run in parallel using Pelegant.
+
+Has an additional dependence of rsbeams to read SDDS files: https://github.com/radiasoft/rsbeams
+
+To run in terminal: rsopt optimize configuration match_parallel.yml
+
+Note: this example is a demonstration of how to run with rsopt using parallel evaluation setup, with a very simple
+example problem. This is not intended to be an efficient way to solve the optimization problem shown.

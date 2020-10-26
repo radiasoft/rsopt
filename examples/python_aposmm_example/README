@@ -1,0 +1,6 @@
+Example of running a global optimizer through rsopt. Uses the optimization algorith APOSMM [1] through libEnsemble.
+Runs 4 workers on the six-hump camel problem and should find 4 of the 6 global minima.
+
+To run in a terminal: rsopt optimize configuration config_six_hum_camel.yaml
+
+[1] https://doi.org/10.1007/s12532-017-0131-4
