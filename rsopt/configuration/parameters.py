@@ -14,16 +14,18 @@ def _validate_parameter(name, min, max, start):
 def read_parameter_array(obj):
     """
     Read an array of N parameters with rows organized by either
-    (name, min, max start) or (min, max, start)
+    (name, min, max start) or (name, min, max, start, samples)
     :param input:
     :return:
     """
 
     for i, row in enumerate(obj):
-        if len(row) == 4:
+        if len(row) == 5:
             yield row[0], row.tolist()[1:]
+        elif len(row) == 4:
+            yield row[0], row.tolist()[1:] + (None,)
         else:
-            raise IndexError("Input parameters are no length 3 or 4")
+            raise IndexError("Input parameters are not length 4 or 5")
 
 
 def read_parameter_dict(obj):

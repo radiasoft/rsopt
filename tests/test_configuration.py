@@ -21,11 +21,11 @@ parameters_dict = {
 
 parameter_test_baseline = {'keys': ['period', 'lpy', 'lmz', 'lpz', 'offset'],
                            'values': [
-                               [30., 60., 46.],
-                               [1., 10., 5.],
-                               [10., 40., 20.],
-                               [30., 60., 25.],
-                               [0.25, 4., 1.]
+                               [30., 60., 46., None],
+                               [1., 10., 5., None],
+                               [10., 40., 20., None],
+                               [30., 60., 25., None],
+                               [0.25, 4., 1., None]
                             ]
                            }
 
