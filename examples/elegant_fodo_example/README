@@ -3,7 +3,7 @@ This example shows how to configure rsopt using a Python script instead of a YAM
 
 Has an additional dependence of rsbeams to read SDDS files: https://github.com/radiasoft/rsbeams
 
-To run in terminal: rsopt optimize configuration match_parallel.yml
+To run in terminal: python fodo_opt.YAML
 
 Note: This example is designed to show setup of rsopt on a simple problem.
       This is not an efficient way to solve the optimization problem shown.

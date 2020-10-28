@@ -28,7 +28,7 @@ def configuration(config):
 
 
 def _final_local_result(H):
-    best, index = np.min(H['f']), np.argmin(H['f'])
+    best, index = np.nanmin(H['f']), np.argmin(H['f'])
     print("Minimum result:", H['x'][index], best)
 
 def _final_global_result(H):
