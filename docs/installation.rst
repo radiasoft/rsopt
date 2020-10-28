@@ -19,7 +19,9 @@ If you want to try examples bundled with rsopt you can download the repository f
 To use rsopt with expanded support for particle tracking codes through Sirepo you will need to install with
 the 'full' flag::
 
-    pip install git+https://github.com/radiasoft/rsopt[full]
+    git clone https://github.com/radiasoft/rsopt
+    cd rsopt
+    pip install .[full]
 
 
 
@@ -38,5 +40,7 @@ If you are using tracking codes (elegant, OPAL, etc.) you will need to install S
 
 Finally to install rsopt::
 
-    pip install git+https://github.com/radiasoft/rsopt[nersc]
+    git clone https://github.com/radiasoft/rsopt
+    cd rsopt
+    pip install .[nersc]
 
