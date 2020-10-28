@@ -12,7 +12,7 @@ from rsopt.libe_tools.executors import register_rsmpi_executor
 _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
 _TEMPLATE_PATH = pkio.py_path(pkresource.filename(''))
-
+_SHIFTER_BASH_FILE = pkio.py_path(pkresource.filename('shifter_exec.sh'))
 _EXECUTION_TYPES = {'serial': MPIExecutor,  # Serial jobs executed in the shell use the MPIExecutor for simplicity
                     'parallel': MPIExecutor,
                     'rsmpi': register_rsmpi_executor,
@@ -72,6 +72,7 @@ class Setup:
     __REQUIRED_KEYS = ('execution_type',)
     RUN_COMMAND = None
     NAME = None
+    SHIFTER_COMMAND = f'shifter /bin/bash {_SHIFTER_BASH_FILE}'
 
     def __init__(self):
         self.setup = {
@@ -103,10 +104,6 @@ class Setup:
         return cls.NAME in _TEMPLATED_CODES
 
     @classmethod
-    def get_run_command(cls, is_parallel):
-        return cls.RUN_COMMAND
-
-    @classmethod
     def parse_input_file(cls, input_file):
         # Prevent Sirepo from being required for default install
         # TODO: This could possibly be returned to a top level import if setup.py is split out by code
@@ -135,10 +132,24 @@ class Setup:
             else:
                 raise ValueError(f'{value} is not a recognized value for f{key}')
 
+    def get_run_command(self, is_parallel):
+        # There is an argument for making this a method of the Job class
+        # if it continues to grow in complexity it is worth moving out to a higher level
+        # class that has more information about the run configuration
+        if is_parallel:
+            run_command =  self.PARALLEL_RUN_COMMAND
+        else:
+            run_command = self.SERIAL_RUN_COMMAND
+
+        if self.setup.get('execution_type') == 'shifter':
+            run_command = ' '.join([self.SHIFTER_COMMAND, run_command])
+
+        return run_command
+
 
 class Python(Setup):
     __REQUIRED_KEYS = ('function',)
-    # SERIAL_RUN_COMMAND = 'python'  # really translates to sys.executable
+    SERIAL_RUN_COMMAND = None  # serial not executed by subprocess so no run command is needed
     PARALLEL_RUN_COMMAND = 'python'
     NAME = 'python'
 
@@ -150,13 +161,6 @@ class Python(Setup):
             return function
 
         return self.setup['function']
-
-    @classmethod
-    def get_run_command(cls, is_parallel):
-        if is_parallel:
-            return cls.PARALLEL_RUN_COMMAND
-        else:
-            return None
 
     @classmethod
     def parse_input_file(cls, input_file):
@@ -188,13 +192,6 @@ class Elegant(Setup):
     SERIAL_RUN_COMMAND = 'elegant'
     PARALLEL_RUN_COMMAND = 'Pelegant'
     NAME = 'elegant'
-
-    @classmethod
-    def get_run_command(cls, is_parallel):
-        if is_parallel:
-            return cls.PARALLEL_RUN_COMMAND
-        else:
-            return cls.SERIAL_RUN_COMMAND
 
     def _edit_input_file_schema(self, kwarg_dict):
         # Name cases:
@@ -244,12 +241,6 @@ class Genesis(Setup):
     SERIAL_RUN_COMMAND = 'genesis'
     PARALLEL_RUN_COMMAND = 'genesis_mpi'
 
-    @classmethod
-    def get_run_command(cls, is_parallel):
-        if is_parallel:
-            return cls.PARALLEL_RUN_COMMAND
-        else:
-            return cls.SERIAL_RUN_COMMAND
 
 
 # This maybe should be linked to rsopt.codes._SUPPORTED_CODES,
