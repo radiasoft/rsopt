@@ -43,5 +43,8 @@ Finally to install rsopt::
 
     git clone https://github.com/radiasoft/rsopt
     cd rsopt
-    pip install .[nersc]
+    pip install .[nersc] --user
 
+
+It is normal to see error messages stating sirepo has dependencies which are not installed. These dependencies
+are not needed for use of sirepo by rsopt and intentially left out during the NERSC installation process.
