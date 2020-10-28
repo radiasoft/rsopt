@@ -1,6 +1,5 @@
 import os
 import jinja2
-import sirepo.lib
 from rsopt.codes import _TEMPLATED_CODES
 from copy import deepcopy
 from pykern import pkrunpy
@@ -109,6 +108,9 @@ class Setup:
 
     @classmethod
     def parse_input_file(cls, input_file):
+        # Prevent Sirepo from being required for default install
+        # TODO: This could possibly be returned to a top level import if setup.py is split out by code
+        import sirepo.lib
         d = sirepo.lib.Importer(cls.NAME).parse_file(input_file)
 
         return d
