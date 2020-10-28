@@ -1,11 +1,9 @@
 Introduction to rsopt
 =====================
 
-Installation
+:ref:`Installation<installation_ref>`
 
 Quick Start
-
-Configuration file formatting
 
 Supported codes
 
