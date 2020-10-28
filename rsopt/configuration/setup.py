@@ -13,6 +13,7 @@ _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
 _TEMPLATE_PATH = pkio.py_path(pkresource.filename(''))
 _SHIFTER_BASH_FILE = pkio.py_path(pkresource.filename('shifter_exec.sh'))
+_SHIFTER_IMAGE = 'radiasoft/sirepo:prod'
 _EXECUTION_TYPES = {'serial': MPIExecutor,  # Serial jobs executed in the shell use the MPIExecutor for simplicity
                     'parallel': MPIExecutor,
                     'rsmpi': register_rsmpi_executor,
@@ -72,7 +73,7 @@ class Setup:
     __REQUIRED_KEYS = ('execution_type',)
     RUN_COMMAND = None
     NAME = None
-    SHIFTER_COMMAND = f'shifter /bin/bash {_SHIFTER_BASH_FILE}'
+    SHIFTER_COMMAND = f'shifter --image={_SHIFTER_IMAGE} /bin/bash {_SHIFTER_BASH_FILE}'
 
     def __init__(self):
         self.setup = {
