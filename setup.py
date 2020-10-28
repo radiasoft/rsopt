@@ -14,8 +14,25 @@ pksetup.setup(
     install_requires=[
         'pykern',
         'libEnsemble',
-        'numpy'
+        'numpy',
+        'nlopt',
+        'mpmath'
     ],
+    extras_require={
+        'nersc': ['rsbeams@git+https://github.com/radiasoft/rsbeams',
+                    # Inherited from sirepo
+                    # sirepo binary build fails so it needs to be installed with --no-deps
+                    'numconv',
+                    'flask',
+                    'user-agents',
+                    'aenum',
+                    'SQLAlchemy'
+                    ],
+        'full': [
+            'rsbeams@git+https://github.com/radiasoft/rsbeams',
+            'sirepo@git+https://github.com/radiasoft/sirepo'
+        ]
+    },
     license='http://www.apache.org/licenses/LICENSE-2.0.html',
     url='https://github.com/radiasoft/rsopt',
     classifiers=[
@@ -24,8 +41,8 @@ pksetup.setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python',
         'Topic :: Utilities',
     ],
