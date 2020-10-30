@@ -49,23 +49,23 @@ is in the file ``obj_func.py``.
     NOTE: Will need to make changes here when multi-objective is added and when Switchyard is added (dict passing)
     TODO: Add links to examples that use objective functions
 
-The job dictionary ``J`` will always be passed to the objective function (even if empty) so the functiontion should
-always accept a single argument. The return value should be a single ``float`` that will be passed to the optimizer.
-So an example of a valid function would be:
-.. code-block:: python
-    :linenos:
+    The job dictionary ``J`` will always be passed to the objective function (even if empty) so the functiontion should
+    always accept a single argument. The return value should be a single ``float`` that will be passed to the optimizer.
+    So an example of a valid function would be:
+    .. code-block:: python
+        :linenos:
 
-    def obj_f(J):
-        with open('my_sim_output.txt') as f:
-            result = f.readline()
+        def obj_f(J):
+            with open('my_sim_output.txt') as f:
+                result = f.readline()
 
-        return float(result)
+            return float(result)
 
-Here the job dictionary is not used. Instead it is assumed that one of the jobs that was run produced an output file
-``my_sim_output.txt`` that contained some result of the simulation that could be read and processed by ``obj_f`` to
-produce a value to be passed to the optimizer. Every time a set of jobs is run they will be stored in a common directory
-to prevent data from being overwritten. The objective function will always be evaluated in the directory where the
-set of jobs was just run so that there is easy access to any files written by your simulations.
+    Here the job dictionary is not used. Instead it is assumed that one of the jobs that was run produced an output file
+    ``my_sim_output.txt`` that contained some result of the simulation that could be read and processed by ``obj_f`` to
+    produce a value to be passed to the optimizer. Every time a set of jobs is run they will be stored in a common directory
+    to prevent data from being overwritten. The objective function will always be evaluated in the directory where the
+    set of jobs was just run so that there is easy access to any files written by your simulations.
 
 In the special case where you may only be running a serial ``python`` job or your last job in the ``codes`` list is
 a serial ``python`` job setting an ``objective_function`` is optional. You can just have the function set in your
