@@ -76,6 +76,16 @@ class Job:
     def execute(self):
         return self._setup.function
 
+    @property
+    def input_distribution(self):
+        # Used by conversion: a Switchyard will write a file called 'input_distribution' for the job to use
+        return self._setup.get('input_distribution')
+
+    @property
+    def output_distribution(self):
+        # Used by conversion: a Switchyard will read file called 'output_distribution' for a future job to use
+        return self._setup.get('output_distribution')
+
     @parameters.setter
     def parameters(self, parameters):
         reader = get_reader(parameters, 'parameters')
@@ -104,7 +114,8 @@ class Job:
             self._setup.parse(name, value)
 
         # Setup for Executor
-        is_parallel = self.setup.get('execution_type', False) == 'parallel' or self.setup.get('execution_type', False) == 'rsmpi'
+        is_parallel = self.setup.get('execution_type', False) == 'parallel' or \
+                      self.setup.get('execution_type', False) == 'rsmpi'
         self.full_path = self._setup.get_run_command(is_parallel=is_parallel)
         self.executor_args = create_executor_arguments(self._setup.setup)
 

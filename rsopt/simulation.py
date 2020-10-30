@@ -1,6 +1,7 @@
 import logging
 import time
 import numpy as np
+import rsopt.conversion
 from libensemble.message_numbers import WORKER_DONE, WORKER_KILL, TASK_FAILED
 from libensemble.executors.executor import Executor
 from collections import Iterable
@@ -63,12 +64,14 @@ class SimulationFunction:
     def __init__(self, jobs: list, objective_function: callable):
         # Received from libEnsemble during function evaluation
         self.H = None
+        self.J = {}
         self.persis_info = None
         self.sim_specs = None
         self.libE_info = None
         self.log = logging.getLogger('libensemble')
         self.jobs = jobs
         self.objective_function = objective_function
+        self.switchyard = None
 
 
     def __call__(self, H, persis_info, sim_specs, libE_info):
@@ -82,6 +85,9 @@ class SimulationFunction:
         for job in self.jobs:
             _, kwargs = compose_args(x, job.parameters, job.settings)
             job._setup.generate_input_file(kwargs, '.')  # TODO: Worker needs to be in their own directory
+
+            if self.switchyard and job.input_distribution:
+                self.switchyard.write(job.input_distribution, job.code)
 
             if job.executor:
                 # MPI Job or non-Python executable
@@ -106,20 +112,30 @@ class SimulationFunction:
                 # Serial Python Job
                 f = job.execute(**kwargs)
                 sim_status = WORKER_DONE
+                # NOTE: Right now f is not passed to the objective function. Would need to go inside J. Or pass J into
+                #       function job.execute(**kwargs)
+
+            if job.output_distribution:
+                self.switchyard = rsopt.conversion.create_switchyard(job.output_distribution, job.code)
+                self.J['switchyard'] = self.switchyard
+
+
 
         if sim_status == WORKER_DONE:
+            # Use objective function is present
             if self.objective_function:
-                val = self.objective_function(f)
+                val = self.objective_function(self.J)
                 output = format_evaluation(self.sim_specs, val)
                 self.log.info('val: {}, output: {}'.format(val, output))
             else:
+                # If only serial python was run then then objective_function doesn't need to be defined
                 try:
                     output = format_evaluation(self.sim_specs, f)
                 except NameError as e:
                     print(e)
                     print("An objective function must be defined if final Job is is not Python")
         else:
-            # TODO: Temporary penalty
+            # TODO: Temporary penalty. Need to add a way to adjust this.
             self.log.warning('Penalty was used because result could not be evaluated')
             output = format_evaluation(self.sim_specs, _PENALTY)
 
