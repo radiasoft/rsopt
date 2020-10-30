@@ -77,9 +77,11 @@ Currently accepted execution modes are:
 
 * ``serial``: Serial execution of the code
 * ``parallel``: Parallel execution of the code with MPI. libEnsemble automatically detects MPI implementation and will automatically format input commands
+* ``shifter``: For use on NERSC. Runs inside of a Shifter container from the radiasoft/sirepo:prod image.
 * ``rsmpi``: Special command for users who have servers registered to them on jupyter.radiasoft.org_. If rsmpi is being used for any code it must be used for all. The number of cores requested may vary from code to code though.
 
-When using ``parallel`` or ``rsmpi`` you must also specify the number of cores used to execute each code. This corresponds to the input for the ``-n`` flag in the usual ``mpiexec`` command.::
+When using ``parallel``, ``shifter``, or ``rsmpi`` you must also specify the number of cores used to execute each code.
+This corresponds to the input for the ``-n`` flag in the usual ``mpiexec`` command.::
 
             - setup:
                 - execution_type: parallel
