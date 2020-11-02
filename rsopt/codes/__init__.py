@@ -4,4 +4,4 @@ _TEMPLATED_CODES = ['elegant', 'opal']
 
 # Supported codes have defined Job class
 # FUTURE: 'Unsupported' codes could become a class of supported codes that have expanded user input required to run
-_SUPPORTED_CODES = ['python', 'genesis', *_TEMPLATED_CODES]
+_SUPPORTED_CODES = ['python', 'user', *_TEMPLATED_CODES]

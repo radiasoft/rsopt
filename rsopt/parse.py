@@ -29,7 +29,7 @@ def _is_code_supported(code_name):
 def _read_codes_to_jobs(template: dict):
     # parse each code into a Job object
     job_list = []
-
+    assert type(template[_CODE_FIELD]) == list, "codes must be a list in the configuration file (Use a dash before each code name)."
     for code_name, code_dict in [code.popitem() for code in template[_CODE_FIELD]]:
         code_name = _sanitize_fields(code_name)
         assert _is_code_supported(code_name), f"{code_name} is not supported"

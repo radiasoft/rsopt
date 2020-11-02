@@ -236,11 +236,46 @@ class Opal(Setup):
     __REQUIRED_KEYS = ('input_file',)
     RUN_COMMAND = 'opal'
 
+# FIXME: Cannot inherit from Setup directly or get a sirepo error. Need to understand better.
+# TODO: Remove the symlink of file_definitions if base_run_path works
+class User(Python):
+    __REQUIRED_KEYS = ('input_file', 'run_command', 'file_mapping', 'file_definitions')
+    NAME = 'user'
+    # SERIAL_RUN_COMMAND = 'genesis'
+    # PARALLEL_RUN_COMMAND = 'genesis_mpi'
 
-class Genesis(Setup):
-    __REQUIRED_KEYS = ('input_file', )
-    SERIAL_RUN_COMMAND = 'genesis'
-    PARALLEL_RUN_COMMAND = 'genesis_mpi'
+    def __init__(self):
+        super().__init__()
+        self._BASE_RUN_PATH = pkio.py_path()
+
+    def get_run_command(self, is_parallel):
+        # run_command is provided by user so no check for serial or parallel run mode
+        run_command = self.setup['run_command']
+
+        # Hardcode genesis input syntax: 'genesis < input_file.txt'
+        if run_command.strip() in ['genesis', 'genesis_mpi']:
+            run_command = ' '.join([run_command, '<'])
+
+        if self.setup.get('execution_type') == 'shifter':
+            run_command = ' '.join([self.SHIFTER_COMMAND, run_command])
+
+        return run_command
+
+    def get_file_def_module(self):
+
+        module_path = os.path.join(self._BASE_RUN_PATH, self.setup['file_definitions'])
+        module = pkrunpy.run_path_as_module(module_path)
+        return module
+
+    def generate_input_file(self, kwarg_dict, directory):
+
+        # Get strings for each file and fill in arguments for this job
+        for key, val in self.setup['file_mapping'].items():
+            local_file_instance = self.get_file_def_module().__getattribute__(key).format(**kwarg_dict)
+            pkio.write_text(os.path.join(directory, val), local_file_instance)
+
+
+
 
 
 
@@ -250,5 +285,5 @@ setup_classes = {
     'python': Python,
     'elegant': Elegant,
     'opal': Opal,
-    'genesis': Genesis
+    'user': User
 }
