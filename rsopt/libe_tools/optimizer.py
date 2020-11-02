@@ -162,13 +162,12 @@ class libEnsembleOptimizer(Optimizer):
 
         for job in self._config.jobs:
             if job.code in _USE_WORKER_DIRS_DEFAULT:
+                # TODO: Move these checks into configuration
                 self.libE_specs.setdefault('use_worker_dirs', True)
                 self.libE_specs.setdefault('sim_dirs_make', True)
-                if job.code == 'python' and job.setup.get('input_file'):
-                    # If an input file is registered then copy to run dir, otherwise expect Python function defined or
-                    # imported into input script
-                    self.libE_specs.setdefault('sim_dir_symlink_files', [job.setup['input_file'],])
-                break
+
+
+        self.libE_specs['sim_dir_symlink_files'] = self._config.get_sym_link_list()
 
         self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
 

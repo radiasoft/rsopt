@@ -10,6 +10,7 @@ class Options:
         self.software_options = {}
         self.executor_options = {}
         self.method = ''
+        self.sym_links = []
 
     @classmethod
     def get_option(cls, options):
