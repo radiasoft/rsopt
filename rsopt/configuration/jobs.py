@@ -124,4 +124,5 @@ class Job:
 
         # Import input_file
         if self._setup.setup.get('input_file'):
-            self._setup.input_file_model = self._setup.parse_input_file(self._setup.setup.get('input_file'))
+            self._setup.input_file_model = self._setup.parse_input_file(self._setup.setup.get('input_file'),
+                                                                        )

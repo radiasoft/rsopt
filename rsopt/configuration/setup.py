@@ -1,5 +1,7 @@
 import os
 import jinja2
+import pickle
+import subprocess
 from rsopt.codes import _TEMPLATED_CODES
 from copy import deepcopy
 from pykern import pkrunpy
@@ -13,6 +15,7 @@ _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
 _TEMPLATE_PATH = pkio.py_path(pkresource.filename(''))
 _SHIFTER_BASH_FILE = pkio.py_path(pkresource.filename('shifter_exec.sh'))
+_SHIFTER_SIREPO_SCRIPT = pkio.py_path(pkresource.filename('shifter_sirepo.py'))
 _SHIFTER_IMAGE = 'radiasoft/sirepo:prod'
 _EXECUTION_TYPES = {'serial': MPIExecutor,  # Serial jobs executed in the shell use the MPIExecutor for simplicity
                     'parallel': MPIExecutor,
@@ -100,11 +103,23 @@ class Setup:
         return cls.NAME in _TEMPLATED_CODES
 
     @classmethod
-    def parse_input_file(cls, input_file):
-        # Prevent Sirepo from being required for default install
-        # TODO: This could possibly be returned to a top level import if setup.py is split out by code
-        import sirepo.lib
-        d = sirepo.lib.Importer(cls.NAME).parse_file(input_file)
+    def parse_input_file(cls, input_file, shifter):
+
+        if shifter:
+            import shlex
+            from subprocess import Popen, PIPE
+            run_string = f"shifter --image={_SHIFTER_IMAGE} /bin/bash {_SHIFTER_BASH_FILE} {_SHIFTER_SIREPO_SCRIPT}"
+            run_string = ' '.join([run_string, cls.NAME, input_file])
+            cmd = Popen(shlex.split(run_string), stderr=PIPE, stdout=PIPE)
+            out, err = cmd.communicate()
+            if err:
+                print(err.decode())
+                raise Exception('Model load from Sirepo in Shifter failed.')
+            d = pickle.loads(out)
+
+        else:
+            import sirepo.lib
+            d = sirepo.lib.Importer(cls.NAME).parse_file(input_file)
 
         return d
 
@@ -159,7 +174,7 @@ class Python(Setup):
         return self.setup['function']
 
     @classmethod
-    def parse_input_file(cls, input_file):
+    def parse_input_file(cls, input_file, shifter):
         # Python does not use text input files. Functions are dynamically imported by `function`.
         return None
 
@@ -235,8 +250,6 @@ class Opal(Setup):
 class User(Python):
     __REQUIRED_KEYS = ('input_file', 'run_command', 'file_mapping', 'file_definitions')
     NAME = 'user'
-    # SERIAL_RUN_COMMAND = 'genesis'
-    # PARALLEL_RUN_COMMAND = 'genesis_mpi'
 
     def __init__(self):
         super().__init__()
