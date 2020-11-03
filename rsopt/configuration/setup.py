@@ -63,11 +63,6 @@ _SETUP_READERS = {
     dict: read_setup_dict
 }
 
-# Note to self: using classmethod for attributes that are set on a execution method basis and should never change
-# can organize by class and call the classmethod to find the value
-# Require keys is name mangled because technically any subclass should inherit the required
-# keys of the parent. This is probably not the best way to do this though...
-
 
 class Setup:
     __REQUIRED_KEYS = ('execution_type',)
@@ -288,10 +283,10 @@ class Genesis(User):
         else:
             run_command = self.SERIAL_RUN_COMMAND
 
-        wrapper_file = "{cmd} < {input_file}".format(cmd=run_command, input_file=self.setup['input_file'])
+        wrapper_file = "exec {cmd} < {input_file}".format(cmd=run_command, input_file=self.setup['input_file'])
         pkio.write_text(self.WRAPPER_NAME, wrapper_file)
 
-        # Set input_file to wrapper name so it is copied into run directories
+        # Overwrite input_file to wrapper name so it is copied into run directories
         self.setup['input_file'] = self.WRAPPER_NAME
 
         return "/bin/sh"
