@@ -236,8 +236,7 @@ class Opal(Setup):
     __REQUIRED_KEYS = ('input_file',)
     RUN_COMMAND = 'opal'
 
-# FIXME: Cannot inherit from Setup directly or get a sirepo error. Need to understand better.
-# TODO: Remove the symlink of file_definitions if base_run_path works
+
 class User(Python):
     __REQUIRED_KEYS = ('input_file', 'run_command', 'file_mapping', 'file_definitions')
     NAME = 'user'
