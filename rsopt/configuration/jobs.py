@@ -16,20 +16,19 @@ def get_reader(obj, category):
 
 
 def create_executor_arguments(setup):
-    # TODO: Could have better handling of default values here
     args = {
-        # 'app_name': None,  # Handled at optimizer setup
         'num_procs': setup.get('cores', 1),
-        'num_nodes': None,  # from setup.nodes
-        'ranks_per_node': None, # from setup.ranks_per_node?
-        'machinefile': None, # TODO: from setup.machinefile
+        'num_nodes': None,  # No user interface right now
+        'ranks_per_node': None, # No user interface right now
+        'machinefile': None, # Add in  setup.machinefile if user wants to control
         'app_args': setup.get('input_file', None),
-        # 'stdout': None,  # TODO: Probably set based on app_name
-        # 'stderr': None, # TODO: Probably set based on app_name
-        # 'stage_inout': None,  # This option is not implemented in 0.7.1
-        'hyperthreads': False, # from setup.hyperthreads
+        'hyperthreads': False, # Add in  setup.hyperthreads if this is needed
+        # 'app_name': None,  # Handled at optimizer setup
+        # 'stdout': None,  # Handled at optimizer setup
+        # 'stderr': None, # Handled at optimizer setup
+        # 'stage_inout': None,  # No used
         # 'dry_run': False, # Keep false for now
-        # 'extra_args': None  # TODO: may need to be set for rsmpi?
+        # 'extra_args': None  # Unused
     }
 
     for key, value in args.items():
