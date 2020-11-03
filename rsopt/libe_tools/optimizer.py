@@ -193,6 +193,8 @@ class libEnsembleOptimizer(Optimizer):
             else:
                 _configure_executor(job, app_name, self.executor)
                 job.executor = app_name
+                job.executor_args['app_name'] = app_name
+
 
     def _configure_libE(self):
         self._set_dimension()
