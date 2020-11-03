@@ -81,7 +81,8 @@ class Configuration:
                 # If an input file is registered then copy to run dir, otherwise expect Python function defined or
                 # imported into input script
                 sym_link_files.append(job.setup['input_file'])
-            if job.code == 'user':
+
+            if job.code == 'user' or job.code == 'genesis':
                 sym_link_files.append(job.setup['file_definitions'])
 
                 if job.setup['input_file'] not in job.setup['file_mapping'].values():

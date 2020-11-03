@@ -79,12 +79,12 @@ class Job:
     @property
     def input_distribution(self):
         # Used by conversion: a Switchyard will write a file called 'input_distribution' for the job to use
-        return self._setup.get('input_distribution')
+        return self._setup.setup.get('input_distribution')
 
     @property
     def output_distribution(self):
         # Used by conversion: a Switchyard will read file called 'output_distribution' for a future job to use
-        return self._setup.get('output_distribution')
+        return self._setup.setup.get('output_distribution')
 
     @parameters.setter
     def parameters(self, parameters):
