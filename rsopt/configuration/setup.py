@@ -301,8 +301,12 @@ class Genesis(User):
 
         # Overwrite input_file to wrapper name so it is copied into run directories
         self.setup['input_file'] = self.WRAPPER_NAME
+        
+        shell_command = "/bin/sh"
+        if self.setup.get('execution_type') == 'shifter':
+            shell_command = ' '.join([self.SHIFTER_COMMAND, shell_command])
 
-        return "/bin/sh"
+        return shell_command
 
 
 
