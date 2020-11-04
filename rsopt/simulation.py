@@ -87,7 +87,8 @@ class SimulationFunction:
             job._setup.generate_input_file(kwargs, '.')  # TODO: Worker needs to be in their own directory
 
             if self.switchyard and job.input_distribution:
-                self.switchyard.write(job.input_distribution, job.code)
+                _default_species_name = 'species_0'
+                self.switchyard.write(job.input_distribution, _default_species_name)
 
             if job.executor:
                 # MPI Job or non-Python executable
