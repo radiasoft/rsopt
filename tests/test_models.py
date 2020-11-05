@@ -10,12 +10,12 @@ class TestElegantModels(unittest.TestCase):
         self.test_dir = tempfile.TemporaryDirectory()
 
     def test_one(self):
-        Elegant.parse_input_file('support/linac_files/first.ele')
+        Elegant.parse_input_file('support/linac_files/first.ele', shifter=False)
 
     def test_two(self):
         setup = Elegant()
         setup.setup['input_file'] = 'e.ele'
-        setup.input_file_model = Elegant.parse_input_file('support/linac_files/first.ele')
+        setup.input_file_model = Elegant.parse_input_file('support/linac_files/first.ele', shifter=False)
 
         kwarg_dict = {
             'run_setup.default_order': 3,
