@@ -114,8 +114,6 @@ class Job:
 
         # Setup for Executor
         is_parallel = self.setup.get('cores', 1) > 1
-#         is_parallel = self.setup.get('execution_type', False) == 'parallel' or \
-#                       self.setup.get('execution_type', False) == 'rsmpi'
         self.full_path = self._setup.get_run_command(is_parallel=is_parallel)
         self.executor_args = create_executor_arguments(self._setup.setup)
 
