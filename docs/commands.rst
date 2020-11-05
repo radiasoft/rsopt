@@ -49,23 +49,33 @@ is in the file ``obj_func.py``.
     NOTE: Will need to make changes here when multi-objective is added and when Switchyard is added (dict passing)
     TODO: Add links to examples that use objective functions
 
-    The job dictionary ``J`` will always be passed to the objective function (even if empty) so the functiontion should
-    always accept a single argument. The return value should be a single ``float`` that will be passed to the optimizer.
-    So an example of a valid function would be:
-    .. code-block:: python
-        :linenos:
+The job dictionary ``J`` will always be passed to the objective function (even if empty) so the functiontion should
+always accept a single argument. If the previous job had ``setup.output_distribution`` specified the distribution
+will be stored in the ``Switchyard`` which will be available from ``J``.
+The return value should be a single ``float`` that will be passed to the optimizer.
+So an example of a valid function would be:
+.. code-block:: python
+:linenos:
 
-        def obj_f(J):
-            with open('my_sim_output.txt') as f:
-                result = f.readline()
+def obj_f(J):
+    import numpy as np
 
-            return float(result)
+    switchyard = J['switchyard']
+    distribution = switchyard.species['species_0']
+    enx = np.sqrt(np.average(distribution.x**2) * np.average(distribution.ux**2) - \
+                  np.average(distribution.x * distribution.ux)**2)
+    eny = np.sqrt(np.average(distribution.y**2) * np.average(distribution.uy**2) - \
+                  np.average(distribution.y * distribution.uy)**2)
 
-    Here the job dictionary is not used. Instead it is assumed that one of the jobs that was run produced an output file
-    ``my_sim_output.txt`` that contained some result of the simulation that could be read and processed by ``obj_f`` to
-    produce a value to be passed to the optimizer. Every time a set of jobs is run they will be stored in a common directory
-    to prevent data from being overwritten. The objective function will always be evaluated in the directory where the
-    set of jobs was just run so that there is easy access to any files written by your simulations.
+    obj = np.sqrt(enx**2 + eny**2)
+
+    return obj
+
+Here the job dictionary is not used. Instead it is assumed that one of the jobs that was run produced an output file
+``my_sim_output.txt`` that contained some result of the simulation that could be read and processed by ``obj_f`` to
+produce a value to be passed to the optimizer. Every time a set of jobs is run they will be stored in a common directory
+to prevent data from being overwritten. The objective function will always be evaluated in the directory where the
+set of jobs was just run so that there is easy access to any files written by your simulations.
 
 In the special case where you may only be running a serial ``python`` job or your last job in the ``codes`` list is
 a serial ``python`` job setting an ``objective_function`` is optional. You can just have the function set in your
