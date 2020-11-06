@@ -1,4 +1,5 @@
 import os
+import sys
 import jinja2
 import pickle
 import subprocess
@@ -167,6 +168,9 @@ class Python(Setup):
     @property
     def function(self):
         if self.setup.get('input_file'):
+            # libEnsemble workers change active directory - sys.path will not record locally available modules
+            sys.path.append('.')
+
             module = pkrunpy.run_path_as_module(self.setup['input_file'])
             function = getattr(module, self.setup['function'])
             return function
