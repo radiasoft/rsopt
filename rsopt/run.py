@@ -3,7 +3,7 @@
 # It is instantiated because nlopt was requested
 # THe executor will be setup separately based off 'execution_type' in YAML and registered with libEnsembleOptimizer
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
-from rsopt.libe_tools.sampler import GridSampler
+from rsopt.libe_tools.sampler import GridSampler, SingleSample
 from rsopt.libe_tools.optimizer_aposmm import AposmmOptimizer
 
 
@@ -15,6 +15,12 @@ def local_optimizer(config):
 
 def grid_sampler(config):
     sample = GridSampler()
+    sample.load_configuration(config)
+
+    return sample
+
+def single_sampler(config):
+    sample = SingleSample()
     sample.load_configuration(config)
 
     return sample

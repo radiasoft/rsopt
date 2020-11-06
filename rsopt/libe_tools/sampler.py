@@ -38,7 +38,11 @@ class GridSampler(libEnsembleOptimizer):
                                'in': [],
                                'out': gen_out,
                                'user': user_keys})
+
+        # Overwrite any use specified exit criteria and set based on scan
+        self._config.options.exit_criteria = None
         self.exit_criteria = {'sim_max': sim_max}
+
 
     def _configure_allocation(self):
         # If not setting alloc_specs it must be None and not empty dict
@@ -57,3 +61,40 @@ class GridSampler(libEnsembleOptimizer):
             size *= s
 
         return mesh_parameters, size
+
+class SingleSample(GridSampler):
+    # Run a single point using start values of parameters - or no parameters at all
+    # mesh_file is ignored, even if given
+    def _define_mesh_parameters(self):
+        mesh_parameters = []
+        size = 1
+
+        for lb, ub, s in zip(self.lb, self.ub, self.start):
+            mesh_parameters.append(s)
+        mesh_parameters = np.array(mesh_parameters).reshape(len(mesh_parameters), 1)
+
+        return mesh_parameters, size
+
+    def _configure_optimizer(self):
+        self.nworkers = 1
+
+        mesh, sim_max = self._define_mesh_parameters()
+
+        user_keys = {
+                     'mesh_definition': mesh,
+                     'exact_mesh': True
+                     }
+
+        gen_out = [set_dtype_dimension(dtype, len(mesh)) for dtype in mesh_sampler_gen_out]
+
+        # for key, val in self._options.items():
+        #     user_keys[key] = val
+
+        self.gen_specs.update({'gen_f': utility_generators.generate_mesh,
+                               'in': [],
+                               'out': gen_out,
+                               'user': user_keys})
+
+        # Overwrite any use specified exit criteria and set based on scan
+        self._config.options.exit_criteria = None
+        self.exit_criteria = {'sim_max': sim_max}
