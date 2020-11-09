@@ -83,9 +83,15 @@ class SimulationFunction:
         x = get_x_from_H(H)
 
         for job in self.jobs:
+            # Generate input values
             _, kwargs = compose_args(x, job.parameters, job.settings)
+            self.J['inputs'] = kwargs
+            # Call preprocessors
+            if job.pre_process:
+                for f_pre in job._setup._preprocess:
+                    f_pre(self.J)
+            # Generate input files for simulation
             job._setup.generate_input_file(kwargs, '.')  # TODO: Worker needs to be in their own directory
-
             if self.switchyard and job.input_distribution:
                 self.switchyard.write(job.input_distribution, job.code)
 
@@ -99,14 +105,17 @@ class SimulationFunction:
                     if task.finished:
                         if task.state == 'FINISHED':
                             sim_status = WORKER_DONE
+                            self.J['status'] = sim_status
                             f = None
                             break
                         elif task.state == 'FAILED':
                             sim_status = TASK_FAILED
+                            self.J['status'] = sim_status
                             break
                         else:
                             self.log.warning("Unknown task failure")
                             sim_status = TASK_FAILED
+                            self.J['status'] = sim_status
                             break
             else:
                 # Serial Python Job
@@ -119,7 +128,9 @@ class SimulationFunction:
                 self.switchyard = rsopt.conversion.create_switchyard(job.output_distribution, job.code)
                 self.J['switchyard'] = self.switchyard
 
-
+        if job.post_process:
+            for f_post in job._setup._postprocess:
+                f_post(self.J)
 
         if sim_status == WORKER_DONE:
             # Use objective function is present

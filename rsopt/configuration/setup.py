@@ -80,6 +80,10 @@ class Setup:
         }
         self.input_file_model = None
         self.validators = {'execution_type': _validate_execution_type}
+        self.handlers = {'preprocess': self._handle_preprocess,
+                         'postprocess': self._handle_preprocess}
+        self._preprocess = []
+        self._postprocess = []
 
     @classmethod
     def get_setup(cls, setup, code):
@@ -134,6 +138,7 @@ class Setup:
 
     def parse(self, name, value):
         self.validate_input(name, value)
+        self.process_input(name, value)
         self.setup[name] = value
 
     def validate_input(self, key, value):
@@ -143,6 +148,14 @@ class Setup:
                 return
             else:
                 raise ValueError(f'{value} is not a recognized value for f{key}')
+
+    def process_input(self, key, value):
+        # Handling for special inputs
+        if self.handlers.get(key):
+            return self.handlers[key](value)
+        else:
+            return value
+
 
     def get_run_command(self, is_parallel):
         # There is an argument for making this a method of the Job class
@@ -157,6 +170,22 @@ class Setup:
             run_command = ' '.join([self.SHIFTER_COMMAND, run_command])
 
         return run_command
+
+    def _handle_preprocess(self, value):
+        # Run in the rsopt calling directory, not worker directories
+        module_path, function_name = value
+        module = pkrunpy.run_path_as_module(module_path)
+        function = getattr(module, function_name)
+        self._preprocess.append(function)
+        return True
+
+    def _handle_postprocess(self, value):
+        # Run in the rsopt calling directory, not worker directories
+        module_path, function_name = value
+        module = pkrunpy.run_path_as_module(module_path)
+        function = getattr(module, function_name)
+        self._postprocess.append(function)
+        return True
 
 
 class Python(Setup):

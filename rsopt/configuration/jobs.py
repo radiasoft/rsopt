@@ -53,8 +53,6 @@ class Job:
         self._settings = Settings()
         self._setup = None
         self.full_path = None
-        self.pre_process = None
-        self.post_process = None
 
         self.executor = None  # Name of the executor registered with libEnsemble
         self.executor_args = {}  # Arguments configured by Job for the libEnsemble Executor.submit
@@ -84,6 +82,14 @@ class Job:
     def output_distribution(self):
         # Used by conversion: a Switchyard will read file called 'output_distribution' for a future job to use
         return self._setup.setup.get('output_distribution')
+
+    @property
+    def pre_process(self):
+        return self._setup.setup.get('preprocess')
+
+    @property
+    def post_process(self):
+        return self._setup.setup.get('postprocess')
 
     @parameters.setter
     def parameters(self, parameters):
