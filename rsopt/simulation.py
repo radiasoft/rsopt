@@ -14,7 +14,7 @@ _PENALTY = 1e9
 def get_x_from_H(H):
     # Assumes vector data
     x = H['x'][0]
-    return x
+    return x.tolist()
 
 def get_signature(parameters, settings):
     # TODO: signature just means dict with settings and params. This should be renamed if it is kept.
@@ -35,6 +35,10 @@ def _parse_x(x, parameters):
     for val, name in zip(x, parameters.keys()):
         x_struct[name] = val
 
+    # Remove used parameters
+    for _ in parameters.keys():
+        x.pop(0)
+
     return x_struct
 
 def compose_args(x, parameters, settings):
@@ -45,7 +49,7 @@ def compose_args(x, parameters, settings):
     for key in kwargs.keys():
         if key in x_struct:
             kwargs[key] = x_struct[key]
-
+    print(parameters, settings, args, kwargs)
     return args, kwargs
 
 def format_evaluation(sim_specs, container):
