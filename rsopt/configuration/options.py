@@ -11,6 +11,9 @@ class Options:
         self.executor_options = {}
         self.method = ''
         self.sym_links = []
+        self.use_worker_dirs = False
+        self.sim_dirs_make = False
+        self.run_dir = './ensemble'
 
     @classmethod
     def get_option(cls, options):

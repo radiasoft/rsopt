@@ -160,6 +160,7 @@ class libEnsembleOptimizer(Optimizer):
         # Persistent generator + local optimization eval = 2 workers always
         self.comms = 'local'
 
+        # Directory structure setup
         for job in self._config.jobs:
             if job.code in _USE_WORKER_DIRS_DEFAULT or (job.code == 'python' and job.setup['cores'] > 1):
                 # TODO: Move these checks into configuration
@@ -167,11 +168,12 @@ class libEnsembleOptimizer(Optimizer):
                 self.libE_specs.setdefault('sim_dirs_make', True)
                 break
         else:
-            self.libE_specs.setdefault('use_worker_dirs', False)
-            self.libE_specs.setdefault('sim_dirs_make', False)
+            self.libE_specs['use_worker_dirs'] = self._config.options.use_worker_dirs
+            self.libE_specs['sim_dirs_make'] = self._config.options.sim_dirs_make
 
+        self.libE_specs['ensemble_dir_path'] = self._config.options.run_dir
 
-
+        # Files needed for each simulation
         self.libE_specs['sim_dir_symlink_files'] = self._config.get_sym_link_list()
 
         self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
@@ -216,7 +218,7 @@ class libEnsembleOptimizer(Optimizer):
 
         if not self.exit_criteria:
             print('No libEnsemble exit criteria set. Optimizer will terminate when finished.')
-            self.exit_criteria = {'sim_max': int(1e9)}
+            self.exit_criteria = {'sim_max': int(1e6)}
         else:
             self._config.options.exit_criteria = self.exit_criteria
 

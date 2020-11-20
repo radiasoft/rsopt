@@ -49,7 +49,7 @@ def compose_args(x, parameters, settings):
     for key in kwargs.keys():
         if key in x_struct:
             kwargs[key] = x_struct[key]
-    print(parameters, settings, args, kwargs)
+
     return args, kwargs
 
 def format_evaluation(sim_specs, container):
