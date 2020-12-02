@@ -275,9 +275,13 @@ class Elegant(Setup):
         model.write_files(directory)
 
 
-class Opal(Setup):
+class Opal(Elegant):
     __REQUIRED_KEYS = ('input_file',)
     RUN_COMMAND = 'opal'
+    SERIAL_RUN_COMMAND = 'opal'
+    PARALLEL_RUN_COMMAND = 'opal'
+    NAME = 'opal'
+
 
 
 class User(Python):
