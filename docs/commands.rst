@@ -129,4 +129,9 @@ Sampler Software
 Valid entries for samplers in ``software`` are given below. Please see the links for a description of the sampler and
 any additional setup required.
 
-- mesh_scan
+- mesh_scan: Samples a points on a uniform mesh. The mesh is either constructed from (min, max, samples), taking equally
+    spaced `samples` between `min` and `max` or can be from a user defined mesh stored in NumPy's default `.npy` format.
+    For N parameters and M `samples` this will result in the evaluation of N*M points in total.
+- start: Can be used with `rsopt sample start` to run the configuration file on just the start point for each parameter.
+    This is also useful as a method to help with debugging errors during simulation chains. It will ignore most other
+    run configuration such as `nworkers` and `software`.
