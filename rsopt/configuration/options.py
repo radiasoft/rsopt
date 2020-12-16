@@ -114,7 +114,6 @@ class Aposmm(Options):
     #     return options_dict
 
 
-
 class Mesh(Options):
     NAME = 'mesh_scan'
     REQUIRED_KEYS = ()
@@ -124,9 +123,22 @@ class Mesh(Options):
         self.nworkers = 1
         self.mesh_file = ''
 
+
+class LH(Options):
+    NAME = 'lh_scan'
+    REQUIRED_KEYS = ('batch_size',)
+
+    def __init__(self):
+        super().__init__()
+        self.nworkers = 1
+        self.seed = None
+        self.batch_size = 0
+
+
 option_classes = {
     'nlopt': Nlopt,
     'aposmm': Aposmm,
-    'mesh_scan': Mesh
+    'mesh_scan': Mesh,
+    'lh_scan': LH
 }
 

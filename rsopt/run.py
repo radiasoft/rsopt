@@ -3,7 +3,7 @@
 # It is instantiated because nlopt was requested
 # THe executor will be setup separately based off 'execution_type' in YAML and registered with libEnsembleOptimizer
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
-from rsopt.libe_tools.sampler import GridSampler, SingleSample
+from rsopt.libe_tools.sampler import GridSampler, SingleSample, LHSampler
 from rsopt.libe_tools.optimizer_aposmm import AposmmOptimizer
 
 
@@ -25,6 +25,12 @@ def single_sampler(config):
 
     return sample
 
+def lh_sampler(config):
+    sample = LHSampler()
+    sample.load_configuration(config)
+
+    return sample
+
 def aposmm_optimizer(config):
     opt = AposmmOptimizer()
     opt.load_configuration(config)
@@ -36,4 +42,9 @@ def aposmm_optimizer(config):
 run_modes = {
     'nlopt': local_optimizer,
     'aposmm': aposmm_optimizer
+}
+
+sample_modes = {
+    'mesh_scan': grid_sampler,
+    'lh_scan': lh_sampler
 }

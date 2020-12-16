@@ -1,19 +1,20 @@
 import rsopt.parse as parse
 import os
-from rsopt.run import grid_sampler, single_sampler
+from rsopt.run import sample_modes, single_sampler
 from libensemble.tools import save_libE_output
 
 def configuration(config):
     config_yaml = parse.read_configuration_file(config)
     _config = parse.parse_yaml_configuration(config_yaml)
 
+    sampler_type = _config.options.NAME
     try:
         nworkers = _config.options.nworkers
     except AttributeError:
         # Sampler defaults to 1 worker if not set
         nworkers = 1
 
-    runner = grid_sampler(_config)
+    runner = sample_modes[sampler_type](_config)
 
     H, persis_info, _ = runner.run()
 
