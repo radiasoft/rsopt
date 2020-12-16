@@ -257,7 +257,7 @@ class Elegant(Setup):
                 id = commands[field.lower()][int(index)-1 if index else 0]
                 model.models.commands[id][name] = v
             elif field.upper() in elements:
-                id = elements[field][0]
+                id = elements[field.upper()][0]
                 if model.models.elements[id].get(name) is not None:
                     model.models.elements[id][name] = v
                 else:
