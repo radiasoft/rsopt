@@ -156,13 +156,12 @@ class Setup:
         else:
             return value
 
-
     def get_run_command(self, is_parallel):
         # There is an argument for making this a method of the Job class
         # if it continues to grow in complexity it is worth moving out to a higher level
         # class that has more information about the run configuration
         if is_parallel:
-            run_command =  self.PARALLEL_RUN_COMMAND
+            run_command = self.PARALLEL_RUN_COMMAND
         else:
             run_command = self.SERIAL_RUN_COMMAND
 
@@ -228,6 +227,18 @@ class Python(Setup):
 
         with open(file_path, 'w') as ff:
             ff.write(output_template)
+
+    def get_run_command(self, is_parallel):
+        # Python has no serial run command. Force the parallel run mode if using shifter.
+        if is_parallel:
+            run_command = self.PARALLEL_RUN_COMMAND
+        else:
+            run_command = self.SERIAL_RUN_COMMAND
+
+        if self.setup.get('execution_type') == 'shifter':
+            run_command = ' '.join([self.SHIFTER_COMMAND, self.PARALLEL_RUN_COMMAND])
+
+        return run_command
 
 
 class Elegant(Setup):
