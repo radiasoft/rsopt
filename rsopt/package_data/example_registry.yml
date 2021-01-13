@@ -1,0 +1,4 @@
+examples:
+  start:
+    - rsopt_example.py
+    - rsopt_example.yml
