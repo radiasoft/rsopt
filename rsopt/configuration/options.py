@@ -9,6 +9,7 @@ class Options:
         self.exit_criteria = {}
         self.software_options = {}
         self.executor_options = {}
+        self.software = ''
         self.method = ''
         self.sym_links = []
         self.use_worker_dirs = False
@@ -70,6 +71,7 @@ class Options:
 
         return function
 
+
 class Nlopt(Options):
     NAME = 'nlopt'
     # Ordering of required keys matters to validate method assignment is correct
@@ -85,6 +87,44 @@ class Nlopt(Options):
         proposed_method = options.get(cls.REQUIRED_KEYS[0])
         assert proposed_method in cls.ALLOWED_METHODS, \
             f"{proposed_method} not available for use in software {cls.NAME}"
+
+
+class Scipy(Options):
+    NAME = 'scipy'
+    # Ordering of required keys matters to validate method assignment is correct
+    REQUIRED_KEYS = ('method', 'exit_criteria')
+    # Only can allow what aposmm_localopt_support handles right now
+    # SciPy routines are internally named ['scipy_Nelder-Mead', 'scipy_COBYLA', 'scipy_BFGS']
+    # Will use same aliases as scipy uses in keeping with nlopt, and prefix here
+    ALLOWED_METHODS = ('Nelder-Mead', 'COBYLA', 'BFGS')
+
+    _opt_return_codes = {'Nelder-Mead': [0],
+                         'COBYLA': [1],
+                         'BFGS': [0]}
+
+    @classmethod
+    def _check_options(cls, options):
+        for key in cls.REQUIRED_KEYS:
+            assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
+        proposed_method = options.get(cls.REQUIRED_KEYS[0])
+        assert proposed_method in cls.ALLOWED_METHODS, \
+            f"{proposed_method} not available for use in software {cls.NAME}"
+
+        if 'software_options' in options.keys():
+            options['software_options'].setdefault('opt_return_codes', cls._opt_return_codes[options.get('method')])
+        else:
+            options['software_options']['opt_return_codes'] = cls._opt_return_codes[options.get('method')]
+
+
+class Dfols(Options):
+    NAME = 'dfols'
+    # Ordering of required keys matters to validate method assignment is correct
+    REQUIRED_KEYS = ('exit_criteria', )
+
+    @classmethod
+    def _check_options(cls, options):
+        for key in cls.REQUIRED_KEYS:
+            assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
 
 
 class Aposmm(Options):
@@ -138,6 +178,8 @@ class LH(Options):
 option_classes = {
     'nlopt': Nlopt,
     'aposmm': Aposmm,
+    'dfols': Dfols,
+    'scipy': Scipy,
     'mesh_scan': Mesh,
     'lh_scan': LH
 }

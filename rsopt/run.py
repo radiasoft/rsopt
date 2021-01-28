@@ -1,7 +1,3 @@
-# Functions to run a call from originating from pkcli
-# This is just a temporary setup. libEnsembleOptimizer shouldn't actually be tied to execution mode
-# It is instantiated because nlopt was requested
-# THe executor will be setup separately based off 'execution_type' in YAML and registered with libEnsembleOptimizer
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 from rsopt.libe_tools.sampler import GridSampler, SingleSample, LHSampler
 from rsopt.libe_tools.optimizer_aposmm import AposmmOptimizer
@@ -41,6 +37,8 @@ def aposmm_optimizer(config):
 # Another place where shared names are imported from common source
 run_modes = {
     'nlopt': local_optimizer,
+    'dfols': local_optimizer,
+    'scipy': local_optimizer,
     'aposmm': aposmm_optimizer
 }
 

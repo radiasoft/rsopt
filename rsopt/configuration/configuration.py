@@ -37,6 +37,9 @@ class Configuration:
     @property
     def method(self):
         return self._options.method
+    @property
+    def software(self):
+        return self._options.NAME
 
     def set_jobs(self, jobs):
         if hasattr(jobs, '__iter__'):

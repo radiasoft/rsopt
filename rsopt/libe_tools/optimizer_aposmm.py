@@ -30,7 +30,7 @@ class AposmmOptimizer(optimizer.libEnsembleOptimizer):
         user_keys = {'lb': self.lb,
                      'ub': self.ub,
                      'initial_sample_size': self._config.options.initial_sample_size,
-                     'localopt_method': get_local_optimizer_method(self._config.method, 'nlopt'),
+                     'localopt_method': get_local_optimizer_method(self._config.method, self._config.software),
                      **self._config.options.software_options}
 
         for key, val in self._options.items():

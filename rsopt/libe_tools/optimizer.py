@@ -137,7 +137,7 @@ class libEnsembleOptimizer(Optimizer):
                      'ub': self.ub,
                      'initial_sample_size': 1,
                      'xstart': self.start,
-                     'localopt_method': get_local_optimizer_method(self._config.method, 'nlopt'),
+                     'localopt_method': get_local_optimizer_method(self._config.method, self._config.software),
                      **self._config.options.software_options}
 
         for key, val in self._options.items():
