@@ -11,10 +11,12 @@ from collections import Iterable
 _POLL_TIME = 1  # seconds
 _PENALTY = 1e9
 
+
 def get_x_from_H(H):
     # Assumes vector data
     x = H['x'][0]
     return x.tolist()
+
 
 def get_signature(parameters, settings):
     # TODO: signature just means dict with settings and params. This should be renamed if it is kept.
@@ -27,6 +29,7 @@ def get_signature(parameters, settings):
         signature[key] = None
 
     return signature
+
 
 def _parse_x(x, parameters):
     x_struct = {}
@@ -41,6 +44,7 @@ def _parse_x(x, parameters):
 
     return x_struct
 
+
 def compose_args(x, parameters, settings):
     args = None  # Not used for now
     x_struct = _parse_x(x, parameters)
@@ -52,6 +56,7 @@ def compose_args(x, parameters, settings):
 
     return args, kwargs
 
+
 def format_evaluation(sim_specs, container):
     if not hasattr(container, '__iter__'):
         container = (container,)
@@ -62,6 +67,7 @@ def format_evaluation(sim_specs, container):
         output[spec] = value
 
     return output
+
 
 class SimulationFunction:
 
@@ -76,7 +82,6 @@ class SimulationFunction:
         self.jobs = jobs
         self.objective_function = objective_function
         self.switchyard = None
-
 
     def __call__(self, H, persis_info, sim_specs, libE_info):
         self.H = H

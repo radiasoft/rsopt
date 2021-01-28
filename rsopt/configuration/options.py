@@ -118,13 +118,21 @@ class Scipy(Options):
 
 class Dfols(Options):
     NAME = 'dfols'
-    # Ordering of required keys matters to validate method assignment is correct
-    REQUIRED_KEYS = ('exit_criteria', )
+    REQUIRED_KEYS = ('exit_criteria', 'components')
+
+    def __init__(self):
+        super().__init__()
+        self.components = 1
 
     @classmethod
     def _check_options(cls, options):
         for key in cls.REQUIRED_KEYS:
             assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
+
+        if 'software_options' in options.keys():
+            options['software_options'].setdefault('components', options.get('components'))
+        else:
+            options['software_options']['components'] = options.get('components')
 
 
 class Aposmm(Options):
