@@ -1,4 +1,13 @@
+# CONFIG FILE MUST ALWAYS BE LAST in `files` LIST
 examples:
   start:
-    - rsopt_example.py
-    - rsopt_example.yml
+    files:
+      - rsopt_example.py
+      - rsopt_example.yml
+    result: -1.0316284450007094
+  python_dfols:
+    files:
+      - chwirut.py
+      - config_chwirut.yaml
+    result: 2384.477139309358
+

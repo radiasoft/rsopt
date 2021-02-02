@@ -10,7 +10,7 @@ _EXAMPLE_REGISTRY = pkio.py_path(pkresource.filename('example_registry.yml'))
 
 def _get_example_file_list(example_name):
     registry = pkyaml.load_file(_EXAMPLE_REGISTRY)
-    return registry['examples'][example_name]
+    return registry['examples'][example_name]['files']
 
 
 def start():
