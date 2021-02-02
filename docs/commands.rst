@@ -18,7 +18,7 @@ As a quick example, here is how one could use the nlopt software package with th
 
     options:
         software: nlopt
-        method: nelder-mead
+        method: LN_NELDERMEAD
         software_options:
             ftol_abs: 1e-6
         objective_function: [obj_func.py, obj_f]
@@ -37,7 +37,7 @@ name of a function defined in the Python file. Showing the previous example::
 
     options:
         software: nlopt
-        method: nelder-mead
+        method: LN_NELDERMEAD
         software_options:
             ftol_abs: 1e-6
         objective_function: [obj_func.py, obj_f]
@@ -55,21 +55,21 @@ will be stored in the ``Switchyard`` which will be available from ``J``.
 The return value should be a single ``float`` that will be passed to the optimizer.
 So an example of a valid function would be:
 .. code-block:: python
-:linenos:
+    :linenos:
 
-def obj_f(J):
-    import numpy as np
+    def obj_f(J):
+        import numpy as np
 
-    switchyard = J['switchyard']
-    distribution = switchyard.species['species_0']
-    enx = np.sqrt(np.average(distribution.x**2) * np.average(distribution.ux**2) - \
-                  np.average(distribution.x * distribution.ux)**2)
-    eny = np.sqrt(np.average(distribution.y**2) * np.average(distribution.uy**2) - \
-                  np.average(distribution.y * distribution.uy)**2)
+        switchyard = J['switchyard']
+        distribution = switchyard.species['species_0']
+        enx = np.sqrt(np.average(distribution.x**2) * np.average(distribution.ux**2) - \
+                      np.average(distribution.x * distribution.ux)**2)
+        eny = np.sqrt(np.average(distribution.y**2) * np.average(distribution.uy**2) - \
+                      np.average(distribution.y * distribution.uy)**2)
 
-    obj = np.sqrt(enx**2 + eny**2)
+        obj = np.sqrt(enx**2 + eny**2)
 
-    return obj
+        return obj
 
 Here the job dictionary is not used. Instead it is assumed that one of the jobs that was run produced an output file
 ``my_sim_output.txt`` that contained some result of the simulation that could be read and processed by ``obj_f`` to
@@ -92,11 +92,74 @@ Optimizer Software
 ~~~~~~~~~~~~~~~~~~
 .. _opt_software:
 
-Valid entries for optimizers in ``software`` are given below. Please see the links for details of available
-methods and options for each type.
+Valid entries for optimizers in ``software`` are given below. Some libraries may have different algorithms to choose from.
+The algorithm used may be specified with the  ``method`` option. See below for a listing of supported algorithms in
+each library.
 
-- nlopt
-- aposmm
+``nlopt``: NLopt [1]_ is an open-source library of non-linear optimization algorithms. Currently, only a subset of algorithms
+from NLopt are available in rsopt. For more detailed description of each algorithm please see the 'NLopt manual'_.
+.. _NLopt manual: https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/
+Method names are based upon NLopt's Python API naming scheme.
+
+**Gradient-free methods** - these algorithms do not make use of the objective function gradient. The objective function
+or setup.function, in the case of Python evaluation, should just return a single float that will be interpreted as
+objective function value at the observation point.
+
+    - ``LN_NELDERMEAD``: The well known Nelder-Mead method, sometimes just referred to as "simplex method".
+    - ``LN_BOBYQA``: Bound Optimization BY Quadratic Approximation. A trust-region based method that uses a quadratic model of the objective.
+    - ``LN_SBPLX``: A variant of Nelder-Mead that uses Nelder-Mead on a sequence of subspaces.
+    - ``LN_COBYLA``: Constrained Optimization BY Linear Approximations. This is another trust-region method. COBYLA generally supports
+      inequality and equality constraints, however, rsopt does not have an interface to pass constrains at this time.
+    - ``LN_NEWUOA``: NEW Unconstrained Optimization Algorithm. NEWUOA performs unconstrained optimization using
+      an iteratively constructed quadratic approximation for the objective function. Despite the name the NLopt manual
+      notes that is generally better to use the even newer BOBYQA algorithm.
+
+**Gradient-based methods** - these require passing gradient information for the objective function at the observation point.
+For these methods the objective function or setup.function, in the case of Python evaluation, should return a tuple of
+(f, fgrad) where f is the value of the objective function at the observation point x as a float and fgrad is the
+gradient of f at x, fgrad should be an array of floats with the same dimension as x.
+
+    - ``LD_MMA``: Method of Moving Asymptotes.
+
+``scipy``: Several methods from the optimization module of the popular SciPy [2]_ library are available. For details
+of the algorithms see the 'SciPy manual'_.
+.. _SciPy manual: https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
+Method names are based on SciPy's API naming scheme.
+
+**Gradient-free methods** - these algorithms do not make use of the objective function gradient. The objective function
+or setup.function, in the case of Python evaluation, should just return a single float that will be interpreted as
+objective function value at the observation point.
+
+    - ``Nelder-Mead``: The well known Nelder-Mead method, sometimes just referred to as "simplex method".
+    - ``COBYLA``: Constrained Optimization BY Linear Approximations. This is another trust-region method. COBYLA generally supports
+      inequality and equality constraints, however, rsopt does not have an interface to pass constrains at this time.
+
+**Gradient-based methods** - these require passing gradient information for the objective function at the observation point.
+For these methods the objective function or setup.function, in the case of Python evaluation, should return a tuple of
+(f, fgrad) where f is the value of the objective function at the observation point x as a float and fgrad is the
+gradient of f at x, fgrad should be an array of floats with the same dimension as x.
+
+    - ``BFGS``: The Broyden-Fletcher-Goldfarb-Shanno algorithm. Can also be used like a gradient free method.
+      If no gradient information is passed then BFGS will use a first-difference estimate.
+
+``dfols``: The Derivative-Free Optimizer for Least-Squares (DFO-LS) [3]_ is an algorithm especially constructed to handle
+objective functions formuated as least-squares problems.  Note that it is a single algorithm, and the ``method`` field
+should also be set to ``dfols``. Note: you must supply the number of terms in the least-squares objective using
+the field ``components`` under ``options``.
+
+``aposmm``: The Asynchronously Parallel Optimization Solver for finding Multiple Minima (APOSMM) [4]_ is a global optimization
+algorithm that coordinates concurrent local optimization runs in order to identify many local minima. APOSMM is included
+in the libEnsemble library, for a description of its setup and options there see: https://libensemble.readthedocs.io/en/master/examples/aposmm.html.
+However, rsopt automates much of the routine setup for APOSMM so a brief listing of relevant options is given below:
+
+    - ``initial_sample_size``: Number of uniformly sampled points must be returned (non-nan value) before a local opt run is started.
+    - ``max_active_runs``: Bound on number of runs APOSMM is advancing.
+    - The optional values for ``gen_specs['user']`` may be passed to APOSMM through the ``software_options`` dictionary
+      with the exception of ``sample_points`` which is not currently supported in the rsopt interface.
+
+You must also supply a local optimization method that APOSMM will use with the ``method`` field. Currently just the NLopt
+algorithms are available for use with APOSMM in rsopt. That is: ``LN_NELDERMEAD``, ``LN_BOBYQA``, ``LN_SBPLX``, ``LN_COBYLA``,
+``LN_NEWUOA``, and ``LD_MMA``.
 
 Parameter Scans
 ---------------
@@ -129,9 +192,15 @@ Sampler Software
 Valid entries for samplers in ``software`` are given below. Please see the links for a description of the sampler and
 any additional setup required.
 
-- mesh_scan: Samples a points on a uniform mesh. The mesh is either constructed from (min, max, samples), taking equally
-spaced `samples` between `min` and `max` or can be from a user defined mesh stored in NumPy's default `.npy` format.
-For N parameters and M `samples` this will result in the evaluation of N*M points in total.
-- start: Can be used with `rsopt sample start` to run the configuration file on just the start point for each parameter.
-This is also useful as a method to help with debugging errors during simulation chains. It will ignore most other
-run configuration such as `nworkers` and `software`.
+- ``mesh_scan``: Samples a points on a uniform mesh. The mesh is either constructed from (min, max, samples), taking equally
+  spaced `samples` between `min` and `max` or can be from a user defined mesh stored in NumPy's default `.npy` format.
+  For N parameters and M `samples` this will result in the evaluation of N*M points in total.
+- ``start``: Can be used with `rsopt sample start` to run the configuration file on just the start point for each parameter.
+  This is also useful as a method to help with debugging errors during simulation chains. It will ignore most other
+  run configuration such as `nworkers` and `software`.
+
+
+.. [1] https://github.com/stevengj/nlopt
+.. [2] https://www.scipy.org/
+.. [3] https://github.com/numericalalgorithmsgroup/dfols
+.. [4] https://doi.org/10.1007/s12532-017-0131-4
