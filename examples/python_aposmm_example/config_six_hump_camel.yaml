@@ -17,12 +17,10 @@ options:
   nworkers: 4
   initial_sample_size: 50
   max_active_runs: 3
-  software: scipy
-  method: Nelder-Mead
-  software_options: {nu: 1e-8,
-                     mu: 1e-8}
-#  software_options: {'ftol_abs': 1.0e-4,
-#                     'dist_to_bound_multiple': 0.5}
+  software: aposmm
+  method: LN_BOBYQA
+  software_options: {'ftol_abs': 1.0e-4,
+                     'dist_to_bound_multiple': 0.5}
   exit_criteria:
     sim_max: 400
   objective_function: None
