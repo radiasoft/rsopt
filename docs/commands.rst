@@ -54,8 +54,9 @@ always accept a single argument. If the previous job had ``setup.output_distribu
 will be stored in the ``Switchyard`` which will be available from ``J``.
 The return value should be a single ``float`` that will be passed to the optimizer.
 So an example of a valid function would be:
+
 .. code-block:: python
-    :linenos:
+ :linenos:
 
     def obj_f(J):
         import numpy as np

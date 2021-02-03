@@ -9,13 +9,14 @@ The first to install Pykern, which is needed to run the rsopt installation, and 
     pip install pykern
     pip install git+https://github.com/radiasoft/rsopt
 
-For more more details on rsopt installation and instructions for NERSC see the :ref:`Installation<installation_ref>`
+For more more details on rsopt installation and instructions for NERSC see the :doc:`Installation</installation>`
 
 Once rsopt is installed you can try it out by running in a terminal::
 
     rsopt quickstart start
 
 This will create two files in the directory where it is run.
+
     - ``rsopt_example.yml``: An example configuration file, written in YAML, that can be used to run he same optimization
             problem.
     - ``rsopt_example.py``: An example Python file that will run a simple optimization problem
