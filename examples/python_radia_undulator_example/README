@@ -1,0 +1,24 @@
+Run a parameter scan using parallel-enabled Radia over a range pole widths for a hybrid undulator
+
+Files:
+hybrid_undulator.py - Simulation function, preprocessing function, and objective function
+rsopt_scan_width.yml - YAML file defining rsopt setup
+plot_scan.py - Can be run after the scan to plot the result (NOTE: You may need to change
+the file name loaded by plot_scan.py as it is set automatically based on the scan setup)
+
+To run, execute in command line:
+rsopt sample configuration rsopt_scan_width.yml
+
+To test with a single point (will just run the start point and not the whole scan):
+rsopt sample start rsopt_scan_width.yml
+
+
+Note:
+This example can be run in serial as well by changing `execution_type` to serial. In this case you can uncomment
+the `preprocess` option, or leave as is. See hybrid_undulator.py and rsopt_scan_width.yml for more commens on this.
+
+When run in parallel  the return value does not get passed back to rsopt because it is run in a new process.
+Hence the `objective_function` is used to load the result from file and pass it to rsopt.
+The `objective_function` line can be commented out if you are running in serial.
+
+
