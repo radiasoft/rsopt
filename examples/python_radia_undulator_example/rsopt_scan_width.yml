@@ -30,7 +30,7 @@ codes:
                 samples: 12
         setup:
             execution_type: parallel  # serial or parallel normally
-            cores: 16  # number of cores when parallel execution is used
+            cores: 4  # number of cores when parallel execution is used
             input_file: hybrid_undulator.py  # File where Python function is defined
             # All values in `settings` will be passed to the `function` and values of parameter as selected
             #  at run time (by an optimizer or sampling function) will be passed
