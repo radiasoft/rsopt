@@ -158,9 +158,11 @@ However, rsopt automates much of the routine setup for APOSMM so a brief listing
     - The optional values for ``gen_specs['user']`` may be passed to APOSMM through the ``software_options`` dictionary
       with the exception of ``sample_points`` which is not currently supported in the rsopt interface.
 
-You must also supply a local optimization method that APOSMM will use with the ``method`` field. Currently just the NLopt
+You must also supply a local optimization method that APOSMM will use with the ``method`` field.
+The command must distinguish the local optimizer software and method in the form: ``software.method``
+Currently just the NLopt
 algorithms are available for use with APOSMM in rsopt. That is: ``LN_NELDERMEAD``, ``LN_BOBYQA``, ``LN_SBPLX``, ``LN_COBYLA``,
-``LN_NEWUOA``, and ``LD_MMA``.
+``LN_NEWUOA``, and ``LD_MMA``. To use LN_NELDERMEAD for example one should have ``method: nlopt.LN_NELDERMEAD``.
 
 Parameter Scans
 ---------------

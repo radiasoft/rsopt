@@ -18,7 +18,7 @@ options:
   initial_sample_size: 50
   max_active_runs: 3
   software: aposmm
-  method: LN_BOBYQA
+  method: nlopt.LN_BOBYQA
   software_options: {'ftol_abs': 1.0e-4,
                      'dist_to_bound_multiple': 0.5}
   exit_criteria:

@@ -2,7 +2,7 @@ from rsopt.libe_tools import optimizer
 from rsopt.libe_tools.interface import get_local_optimizer_method
 from libensemble.gen_funcs.persistent_aposmm import aposmm
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
-
+import os
 # TODO: make set_optimizer a member of Optimizer and have a Setup like class selection scheme
 #  based on arguments of set_optimizer
 
@@ -11,6 +11,12 @@ from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_al
 # dimension for x and x_on_cube set at run time
 aposmm_gen_out =  [('x', float, None), ('x_on_cube', float, None), ('sim_id', int),
            ('local_min', bool), ('local_pt', bool)]
+
+
+def split_method(method_name):
+    software, method = method_name.split('.')
+    return software, method
+
 
 class AposmmOptimizer(optimizer.libEnsembleOptimizer):
 
@@ -27,10 +33,11 @@ class AposmmOptimizer(optimizer.libEnsembleOptimizer):
     def _configure_optimizer(self):
         gen_out = [optimizer.set_dtype_dimension(dtype, self.dimension) for dtype in aposmm_gen_out]
 
+        software, method = split_method(self._config.method)
         user_keys = {'lb': self.lb,
                      'ub': self.ub,
                      'initial_sample_size': self._config.options.initial_sample_size,
-                     'localopt_method': get_local_optimizer_method(self._config.method, self._config.software),
+                     'localopt_method': get_local_optimizer_method(method, software),
                      **self._config.options.software_options}
 
         for key, val in self._options.items():
