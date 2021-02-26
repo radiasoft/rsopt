@@ -18,9 +18,9 @@ Once rsopt is installed you can try it out by running in a terminal::
 This will create two files in the directory where it is run.
 
     - ``rsopt_example.yml``: An example configuration file, written in YAML, that can be used to run he same optimization
-            problem.
+      problem.
     - ``rsopt_example.py``: An example Python file that will run a simple optimization problem
-        through rsopt.
+      through rsopt.
 
 The canonical format for setting up an rsopt run is to write configuration files in YAML that are used
 to setup and execute the job sequence. Setting up your rsopt job through a configuration file offers the full range
