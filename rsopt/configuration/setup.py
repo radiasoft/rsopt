@@ -332,7 +332,7 @@ class User(Python):
 
 # Genesis requires wrapping command names into shell script so it is broken out as a special variant of user
 class Genesis(User):
-    __REQUIRED_KEYS = ('input_file', 'file_mapping', 'file_definitions')
+    __REQUIRED_KEYS = ('input_file', )
     NAME = 'genesis'
     SERIAL_RUN_COMMAND = 'genesis'
     PARALLEL_RUN_COMMAND = 'genesis_mpi'
@@ -355,6 +355,51 @@ class Genesis(User):
             shell_command = ' '.join([self.SHIFTER_COMMAND, shell_command])
 
         return shell_command
+
+    @classmethod
+    def parse_input_file(cls, input_file, shifter):
+        # assumes lume-genesis can best installed locally - shifter execution not needed
+        import genesis.parsers
+        d = genesis.parsers.parse_main_inputfile(input_file)
+
+        return d
+
+    def _edit_input_file_schema(self, kwarg_dict):
+        # Name cases:
+        # ELEMENT NAMES
+        # ELEMENT TYPES
+        # element parameters
+        # command _type
+        # command parameters
+
+        commands, elements = _get_model_fields(self.input_file_model)
+        model = deepcopy(self.input_file_model)
+
+        for n, v in kwarg_dict.items():
+            field, index, name = _parse_name(n)
+            name = name.lower()  # element/command parameters are always lower
+            if field.lower() in commands.keys():
+                assert index or len(commands[field.lower()]) == 1, \
+                    "{} is not unique in {}. Please add identifier".format(n, self.setup['input_file'])
+                id = commands[field.lower()][int(index)-1 if index else 0]
+                model.models.commands[id][name] = v
+            elif field.upper() in elements:
+                id = elements[field.upper()][0]
+                if model.models.elements[id].get(name) is not None:
+                    model.models.elements[id][name] = v
+                else:
+                    ele_type = model.models.elements[id]["type"]
+                    ele_name = model.models.elements[id]["name"]
+                    raise NameError(f"Parameter: {name} is not found for element {ele_name} with type {ele_type}")
+            else:
+                raise ValueError("{} was not found in loaded .ele or .lte files".format(n))
+
+        return model
+
+    def generate_input_file(self, kwarg_dict, directory):
+        model = self._edit_input_file_schema(kwarg_dict)
+
+        model.write_files(directory)
 
 
 

@@ -30,7 +30,8 @@ pksetup.setup(
                     ],
         'full': [
             'rsbeams@git+https://github.com/radiasoft/rsbeams',
-            'sirepo@git+https://github.com/radiasoft/sirepo'
+            'sirepo@git+https://github.com/radiasoft/sirepo',
+            'sirepo@git+https://github.com/slaclab/lume-genesis'
         ]
     },
     license='http://www.apache.org/licenses/LICENSE-2.0.html',
