@@ -90,6 +90,11 @@ class Configuration:
                     # If file name in file_mapping then input_file being created dynamically, otherwise copy here
                     sym_link_files.append(job.setup['input_file'])
 
+            if job.code == 'genesis':
+                distfile = job.setup.input_file_model.get['distfile']
+                if distfile:
+                    sym_link_files.append(distfile)
+
         # Add user specified file names
         sym_link_files.extend(self._options.sym_links)
 
