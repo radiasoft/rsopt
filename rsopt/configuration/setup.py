@@ -339,7 +339,7 @@ class Genesis(Elegant):
     def parse_input_file(cls, input_file, shifter):
         # assumes lume-genesis can best installed locally - shifter execution not needed
         import genesis
-        d = genesis.Genesis(input_file, use_tempdir=False)
+        d = genesis.Genesis(input_file, use_tempdir=False, expand_paths=False)
 
         return d
 
