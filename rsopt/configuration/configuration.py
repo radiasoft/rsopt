@@ -91,7 +91,7 @@ class Configuration:
                     sym_link_files.append(job.setup['input_file'])
 
             if job.code == 'genesis':
-                distfile = job.setup.input_file_model.get['distfile']
+                distfile = job._setup.input_file_model.param.get('distfile')
                 if distfile:
                     sym_link_files.append(distfile)
 
