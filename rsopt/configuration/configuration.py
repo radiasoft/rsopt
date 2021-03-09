@@ -85,7 +85,7 @@ class Configuration:
                 # imported into input script
                 sym_link_files.append(job.setup['input_file'])
 
-            if job.code == 'user' or job.code == 'genesis':
+            if job.code == 'user':
                 if job.setup['input_file'] not in job.setup['file_mapping'].values():
                     # If file name in file_mapping then input_file being created dynamically, otherwise copy here
                     sym_link_files.append(job.setup['input_file'])

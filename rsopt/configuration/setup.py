@@ -2,7 +2,6 @@ import os
 import sys
 import jinja2
 import pickle
-import subprocess
 from rsopt.codes import _TEMPLATED_CODES
 from copy import deepcopy
 from pykern import pkrunpy
@@ -362,11 +361,12 @@ class Genesis(Elegant):
 
     def generate_input_file(self, kwarg_dict, directory):
         model = self._edit_input_file_schema(kwarg_dict)
-
+        model.configure_genesis(workdir='.')
         model.write_input_file()
         model.write_beam()
         model.write_lattice()
-
+        # lume-genesis hard codes the input file name it write to as "genesis.in"
+        os.rename('genesis.in', self.setup['input_file'])
 
 
 
