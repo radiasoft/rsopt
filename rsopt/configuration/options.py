@@ -1,5 +1,6 @@
 from pykern import pkrunpy
 
+
 class Options:
     __REQUIRED_KEYS = ('software',)
     REQUIRED_KEYS = ()
@@ -151,6 +152,8 @@ class Aposmm(Options):
         super().__init__()
 
         self.nworkers = 2
+        self.load_start_sample = ''
+
         for key, val in self.SOFTWARE_OPTIONS.items():
             self.__setattr__(key, val)
 

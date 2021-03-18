@@ -1,8 +1,7 @@
 from libensemble.libE import libE
 from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_local_opt
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
-from libensemble.executors.mpi_executor import MPIExecutor
-from rsopt.libe_tools.executors import SerialExecutor, register_rsmpi_executor
+from libensemble.tools import check_inputs
 from libensemble.tools import add_unique_random_streams
 from rsopt.optimizer import Optimizer, OPTIONS_ALLOWED
 from rsopt.libe_tools.interface import get_local_optimizer_method
@@ -25,8 +24,10 @@ LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims',
 _USE_WORKER_DIRS_DEFAULT = ['elegant', 'opal', 'genesis']
 _LIBENSEMBLE_DIRECTORY = './ensemble'
 
+
 def _configure_executor(job, name, executor):
     executor.register_calc(full_path=job.full_path, app_name=name, calc_type='sim')
+
 
 def _set_app_names(config):
     codes = {}
@@ -44,7 +45,6 @@ def _set_app_names(config):
     return app_names
 
 
-
 class libEnsembleOptimizer(Optimizer):
     # Configurationf or Local Optimization through uniform_or_localopt
     # Just sets up a local optimizer for now
@@ -54,6 +54,7 @@ class libEnsembleOptimizer(Optimizer):
     def __init__(self):
         super(libEnsembleOptimizer, self).__init__()
         self.options = []
+        self.H0 = None
         self.executor = None  # Set by method
         self.nworkers = 2  # Always 2 for local optimizer (1 for sim worker and 1 for persis generator)
         self.working_directory = _LIBENSEMBLE_DIRECTORY
@@ -124,9 +125,12 @@ class libEnsembleOptimizer(Optimizer):
     def run(self, clean_work_dir=False):
         self.clean_working_directory = clean_work_dir
         self._configure_libE()
+        # Check of H0 needs to be run after sim/alloc/gen specs are finalized
+        if self.H0 is not None:
+            check_inputs(H0=self.H0, sim_specs=self.sim_specs, alloc_specs=self.alloc_specs, gen_specs=self.gen_specs)
 
         H, persis_info, flag = libE(self.sim_specs, self.gen_specs, self.exit_criteria, self.persis_info,
-                                    self.alloc_specs, self.libE_specs)
+                                    self.alloc_specs, self.libE_specs, H0=self.H0)
 
         return H, persis_info, flag
 
@@ -210,7 +214,6 @@ class libEnsembleOptimizer(Optimizer):
                 job.executor = app_name
                 job.executor_args['app_name'] = app_name
 
-
     def _configure_libE(self):
         self._set_dimension()
         self._configure_optimizer()
@@ -235,8 +238,6 @@ class libEnsembleOptimizer(Optimizer):
 
         if self.clean_working_directory and os.path.isdir(self.working_directory):
             shutil.rmtree(self.working_directory)
-
-
 
     def set_exit_criteria(self, exit_criteria):
         """

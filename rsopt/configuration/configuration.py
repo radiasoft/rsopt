@@ -2,6 +2,7 @@ from rsopt.configuration import Options
 from rsopt.configuration.setup import _EXECUTION_TYPES
 _EXECUTORS = {'parallel'}
 
+
 class Configuration:
     def __init__(self):
         self.jobs = []
