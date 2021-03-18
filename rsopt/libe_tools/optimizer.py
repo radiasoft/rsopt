@@ -196,8 +196,21 @@ class libEnsembleOptimizer(Optimizer):
                                    'in': ['x'],
                                    'out': [('f', float), ]})
 
-    def _configure_executor(self):
+    def _configure_executors(self):
         app_names = _set_app_names(self._config)
+
+        # If the job has a run command then that job should use an executor
+        for app_name, job in zip(app_names, self._config.jobs):
+            if not job.full_path:
+                pass
+            else:
+                if not self.executor:
+                    self._create_executor()
+                _configure_executor(job, app_name, self.executor)
+                job.executor = app_name
+                job.executor_args['app_name'] = app_name
+
+    def _create_executor(self):
         if self._config.options.executor_options:
             executor_setup = self._config.options.executor_options
         else:
@@ -205,22 +218,13 @@ class libEnsembleOptimizer(Optimizer):
 
         self.executor = self._config.create_exector(**executor_setup)
 
-        # If the job has a run command then that job should use an executor
-        for app_name, job in zip(app_names, self._config.jobs):
-            if not job.full_path:
-                pass
-            else:
-                _configure_executor(job, app_name, self.executor)
-                job.executor = app_name
-                job.executor_args['app_name'] = app_name
-
     def _configure_libE(self):
         self._set_dimension()
         self._configure_optimizer()
         self._configure_allocation()
         self._configure_specs()
         self._configure_persistant_info()
-        self._configure_executor()
+        self._configure_executors()
         self._configure_sim()
         self._cleanup()
 
