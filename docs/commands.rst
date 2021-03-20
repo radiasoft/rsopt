@@ -204,6 +204,20 @@ any additional setup required.
   This is also useful as a method to help with debugging errors during simulation chains. It will ignore most other
   run configuration such as `nworkers` and `software`.
 
+Miscellaneous
+-------------
+.. _misc_commands:
+
+Other useful helper commands.
+
+- ``pack``: Can be used to create a tarball including all local files needed to run the configuration file specified.
+  Will include all simulation run files and Python scripts defined in the config file directory. If the included Python scripts
+  have imports locally defined the import module files will also be included. Imports defined or installed elsewhere will
+  not be included in the tarball.
+  Full command is ``rsopt pack configuration config_name``.
+
+
+
 
 .. [1] https://github.com/stevengj/nlopt
 .. [2] https://www.scipy.org/
