@@ -112,7 +112,7 @@ class Setup:
         if shifter:
             import shlex
             from subprocess import Popen, PIPE
-            run_string = f"shifter --image={_SHIFTER_IMAGE} /bin/bash {_SHIFTER_BASH_FILE} python {_SHIFTER_SIREPO_SCRIPT}"
+            run_string = f"srun --ntasks 1 --nodes 1 shifter --image={_SHIFTER_IMAGE} /bin/bash {_SHIFTER_BASH_FILE} python {_SHIFTER_SIREPO_SCRIPT}"
             run_string = ' '.join([run_string, cls.NAME, input_file])
             cmd = Popen(shlex.split(run_string), stderr=PIPE, stdout=PIPE)
             out, err = cmd.communicate()
