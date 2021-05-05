@@ -16,6 +16,7 @@ class Options:
         self.use_worker_dirs = False
         self.sim_dirs_make = False
         self.run_dir = './ensemble'
+        self.record_interval = 0
 
     @classmethod
     def get_option(cls, options):

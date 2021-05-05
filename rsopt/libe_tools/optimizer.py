@@ -179,7 +179,8 @@ class libEnsembleOptimizer(Optimizer):
 
         # Files needed for each simulation
         self.libE_specs['sim_dir_symlink_files'] = self._config.get_sym_link_list()
-
+        if self._config.options.record_interval:
+            self.libE_specs['save_every_k_sims'] = self._config.options.record_interval
         self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
 
     def _configure_sim(self):
