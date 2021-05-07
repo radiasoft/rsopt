@@ -22,8 +22,8 @@ class EvolutionaryOptimizer(optimizer.libEnsembleOptimizer):
 
         gen_out = [optimizer.set_dtype_dimension(dtype, self.dimension) for dtype in nsga2_gen_out]
 
-        user_keys = {'lb': self.lb,
-                     'ub': self.ub,
+        user_keys = {'lb': list(self.lb),  # DEAP requires lists
+                     'ub': list(self.ub),
                      'pop_size': self._config.options.pop_size,
                      **self._config.options.software_options}
 
