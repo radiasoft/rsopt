@@ -165,28 +165,31 @@ class Aposmm(Options):
     #
     #     return options_dict
 
+
 class Nsga2(Options):
     NAME = 'nsga2'
-    REQUIRED_KEYS = ('software_options', 'exit_criteria', )
-    SOFTWARE_OPTIONS = {
-        'n_objectives': None  # Must be set by user
-    }
+    REQUIRED_KEYS = ('n_objectives', 'exit_criteria', )
+    SOFTWARE_OPTIONS = {}
+
     def __init__(self):
         super().__init__()
-        for key, val in self.SOFTWARE_OPTIONS.items():
-            self.__setattr__(key, val)
+        self.n_objectives = 0
+        self.nworkers = 2
+        self.pop_size = 100
+        # for key, val in self.SOFTWARE_OPTIONS.items():
+        #     self.__setattr__(key, val)
 
-    @classmethod
-    def _check_options(cls, options):
-        for key in cls.REQUIRED_KEYS:
-            assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
-        assert options['software_options'].get('n_objectives'), "The number of objectives for NSGA-II must be " \
-                                                                "specified in options: software_options: n_objectives"
-        try:
-            int(options['software_options'].get('n_objectives'))
-        except ValueError:
-            nobj = repr(options['software_options'].get('n_objectives'))
-            raise ValueError('{} is not a valid number of objectives for `n_objectives'.format(nobj))
+    # @classmethod
+    # def _check_options(cls, options):
+    #     for key in cls.REQUIRED_KEYS:
+    #         assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
+    #     try:
+    #         int(options['software_options'].get('n_objectives'))
+    #         if options['software_options'].get('n_objectives') == 0:
+    #             raise ValueError('The option `n_objectives` must be set to a non-zero value for NSGA2')
+    #     except ValueError:
+    #         nobj = repr(options['software_options'].get('n_objectives'))
+    #         raise ValueError('{} is not a valid number of objectives for `n_objectives'.format(nobj))
 
 
 class Mesh(Options):
@@ -213,6 +216,7 @@ class LH(Options):
 option_classes = {
     'nlopt': Nlopt,
     'aposmm': Aposmm,
+    'nsga2': Nsga2,
     'dfols': Dfols,
     'scipy': Scipy,
     'mesh_scan': Mesh,
