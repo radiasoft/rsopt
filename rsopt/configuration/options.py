@@ -73,6 +73,14 @@ class Options:
 
         return function
 
+    def get_sim_specs(self):
+        sim_specs = {
+            'in': ['x'],
+            'out': [('f', float), ]
+        }
+
+        return sim_specs
+
 
 class Nlopt(Options):
     NAME = 'nlopt'
@@ -136,6 +144,14 @@ class Dfols(Options):
         else:
             options['software_options']['components'] = options.get('components')
 
+    def get_sim_specs(self):
+        sim_specs = {
+            'in': ['x'],
+            'out': [('f', float), ('fvec', float, self.components)]
+        }
+
+        return sim_specs
+
 
 class Aposmm(Options):
     NAME = 'aposmm'
@@ -178,6 +194,15 @@ class Nsga2(Options):
         self.pop_size = 100
         # for key, val in self.SOFTWARE_OPTIONS.items():
         #     self.__setattr__(key, val)
+
+    def get_sim_specs(self):
+        sim_specs = {
+            'in': ['individual'],
+            'out': [('fitness_values', float, self.n_objectives)]
+        }
+
+        return sim_specs
+
 
     # @classmethod
     # def _check_options(cls, options):
