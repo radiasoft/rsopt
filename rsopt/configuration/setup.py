@@ -1,5 +1,7 @@
 import os
+import sys
 import jinja2
+import pickle
 from rsopt.codes import _TEMPLATED_CODES
 from copy import deepcopy
 from pykern import pkrunpy
@@ -13,6 +15,7 @@ _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
 _TEMPLATE_PATH = pkio.py_path(pkresource.filename(''))
 _SHIFTER_BASH_FILE = pkio.py_path(pkresource.filename('shifter_exec.sh'))
+_SHIFTER_SIREPO_SCRIPT = pkio.py_path(pkresource.filename('shifter_sirepo.py'))
 _SHIFTER_IMAGE = 'radiasoft/sirepo:prod'
 _EXECUTION_TYPES = {'serial': MPIExecutor,  # Serial jobs executed in the shell use the MPIExecutor for simplicity
                     'parallel': MPIExecutor,
@@ -63,11 +66,6 @@ _SETUP_READERS = {
     dict: read_setup_dict
 }
 
-# Note to self: using classmethod for attributes that are set on a execution method basis and should never change
-# can organize by class and call the classmethod to find the value
-# Require keys is name mangled because technically any subclass should inherit the required
-# keys of the parent. This is probably not the best way to do this though...
-
 
 class Setup:
     __REQUIRED_KEYS = ('execution_type',)
@@ -81,6 +79,10 @@ class Setup:
         }
         self.input_file_model = None
         self.validators = {'execution_type': _validate_execution_type}
+        self.handlers = {'preprocess': self._handle_preprocess,
+                         'postprocess': self._handle_preprocess}
+        self._preprocess = []
+        self._postprocess = []
 
     @classmethod
     def get_setup(cls, setup, code):
@@ -105,11 +107,23 @@ class Setup:
         return cls.NAME in _TEMPLATED_CODES
 
     @classmethod
-    def parse_input_file(cls, input_file):
-        # Prevent Sirepo from being required for default install
-        # TODO: This could possibly be returned to a top level import if setup.py is split out by code
-        import sirepo.lib
-        d = sirepo.lib.Importer(cls.NAME).parse_file(input_file)
+    def parse_input_file(cls, input_file, shifter):
+
+        if shifter:
+            import shlex
+            from subprocess import Popen, PIPE
+            run_string = f"srun --ntasks 1 --nodes 1 shifter --image={_SHIFTER_IMAGE} /bin/bash {_SHIFTER_BASH_FILE} python {_SHIFTER_SIREPO_SCRIPT}"
+            run_string = ' '.join([run_string, cls.NAME, input_file])
+            cmd = Popen(shlex.split(run_string), stderr=PIPE, stdout=PIPE)
+            out, err = cmd.communicate()
+            if err:
+                print(err.decode())
+                raise Exception('Model load from Sirepo in Shifter failed.')
+            d = pickle.loads(out)
+
+        else:
+            import sirepo.lib
+            d = sirepo.lib.Importer(cls.NAME).parse_file(input_file)
 
         return d
 
@@ -123,6 +137,7 @@ class Setup:
 
     def parse(self, name, value):
         self.validate_input(name, value)
+        self.process_input(name, value)
         self.setup[name] = value
 
     def validate_input(self, key, value):
@@ -133,12 +148,19 @@ class Setup:
             else:
                 raise ValueError(f'{value} is not a recognized value for f{key}')
 
+    def process_input(self, key, value):
+        # Handling for special inputs
+        if self.handlers.get(key):
+            return self.handlers[key](value)
+        else:
+            return value
+
     def get_run_command(self, is_parallel):
         # There is an argument for making this a method of the Job class
         # if it continues to grow in complexity it is worth moving out to a higher level
         # class that has more information about the run configuration
         if is_parallel:
-            run_command =  self.PARALLEL_RUN_COMMAND
+            run_command = self.PARALLEL_RUN_COMMAND
         else:
             run_command = self.SERIAL_RUN_COMMAND
 
@@ -146,6 +168,22 @@ class Setup:
             run_command = ' '.join([self.SHIFTER_COMMAND, run_command])
 
         return run_command
+
+    def _handle_preprocess(self, value):
+        # Run in the rsopt calling directory, not worker directories
+        module_path, function_name = value
+        module = pkrunpy.run_path_as_module(module_path)
+        function = getattr(module, function_name)
+        self._preprocess.append(function)
+        return True
+
+    def _handle_postprocess(self, value):
+        # Run in the rsopt calling directory, not worker directories
+        module_path, function_name = value
+        module = pkrunpy.run_path_as_module(module_path)
+        function = getattr(module, function_name)
+        self._postprocess.append(function)
+        return True
 
 
 class Python(Setup):
@@ -157,6 +195,9 @@ class Python(Setup):
     @property
     def function(self):
         if self.setup.get('input_file'):
+            # libEnsemble workers change active directory - sys.path will not record locally available modules
+            sys.path.append('.')
+
             module = pkrunpy.run_path_as_module(self.setup['input_file'])
             function = getattr(module, self.setup['function'])
             return function
@@ -164,7 +205,7 @@ class Python(Setup):
         return self.setup['function']
 
     @classmethod
-    def parse_input_file(cls, input_file):
+    def parse_input_file(cls, input_file, shifter):
         # Python does not use text input files. Functions are dynamically imported by `function`.
         return None
 
@@ -185,6 +226,18 @@ class Python(Setup):
 
         with open(file_path, 'w') as ff:
             ff.write(output_template)
+
+    def get_run_command(self, is_parallel):
+        # Python has no serial run command. Force the parallel run mode if using shifter.
+        if is_parallel:
+            run_command = self.PARALLEL_RUN_COMMAND
+        else:
+            run_command = self.SERIAL_RUN_COMMAND
+
+        if self.setup.get('execution_type') == 'shifter':
+            run_command = ' '.join([self.SHIFTER_COMMAND, self.PARALLEL_RUN_COMMAND])
+
+        return run_command
 
 
 class Elegant(Setup):
@@ -214,7 +267,7 @@ class Elegant(Setup):
                 id = commands[field.lower()][int(index)-1 if index else 0]
                 model.models.commands[id][name] = v
             elif field.upper() in elements:
-                id = elements[field][0]
+                id = elements[field.upper()][0]
                 if model.models.elements[id].get(name) is not None:
                     model.models.elements[id][name] = v
                 else:
@@ -232,15 +285,89 @@ class Elegant(Setup):
         model.write_files(directory)
 
 
-class Opal(Setup):
+class Opal(Elegant):
     __REQUIRED_KEYS = ('input_file',)
     RUN_COMMAND = 'opal'
+    SERIAL_RUN_COMMAND = 'opal'
+    PARALLEL_RUN_COMMAND = 'opal'
+    NAME = 'opal'
 
 
-class Genesis(Setup):
+
+class User(Python):
+    __REQUIRED_KEYS = ('input_file', 'run_command', 'file_mapping', 'file_definitions')
+    NAME = 'user'
+
+    def __init__(self):
+        super().__init__()
+        self._BASE_RUN_PATH = pkio.py_path()
+
+    def get_run_command(self, is_parallel):
+        # run_command is provided by user so no check for serial or parallel run mode
+        run_command = self.setup['run_command']
+
+        # Hardcode genesis input syntax: 'genesis < input_file.txt'
+        if run_command.strip() in ['genesis', 'genesis_mpi']:
+            run_command = ' '.join([run_command, '<'])
+
+        if self.setup.get('execution_type') == 'shifter':
+            run_command = ' '.join([self.SHIFTER_COMMAND, run_command])
+
+        return run_command
+
+    def get_file_def_module(self):
+
+        module_path = os.path.join(self._BASE_RUN_PATH, self.setup['file_definitions'])
+        module = pkrunpy.run_path_as_module(module_path)
+        return module
+
+    def generate_input_file(self, kwarg_dict, directory):
+
+        # Get strings for each file and fill in arguments for this job
+        for key, val in self.setup['file_mapping'].items():
+            local_file_instance = self.get_file_def_module().__getattribute__(key).format(**kwarg_dict)
+            pkio.write_text(os.path.join(directory, val), local_file_instance)
+
+
+class Genesis(Elegant):
     __REQUIRED_KEYS = ('input_file', )
+    NAME = 'genesis'
     SERIAL_RUN_COMMAND = 'genesis'
     PARALLEL_RUN_COMMAND = 'genesis_mpi'
+
+    @classmethod
+    def parse_input_file(cls, input_file, shifter):
+        # assumes lume-genesis can best installed locally - shifter execution not needed
+        import genesis
+        d = genesis.Genesis(input_file, use_tempdir=False, expand_paths=False, check_executable=False)
+
+        return d
+
+    def _edit_input_file_schema(self, kwarg_dict):
+        # Name cases:
+        # All lower for lume-genesis
+        param, elements = self.input_file_model.param, self.input_file_model.lattice['eles']
+        model = deepcopy(self.input_file_model)
+
+        for name, value in kwarg_dict.items():
+
+            name = name.lower()  # lume-genesis makes all names lowercase
+            if name in param.keys():
+                model.param[name] = value
+            else:
+                raise ValueError("`{}` was not found in loaded input files".format(name))
+
+        return model
+
+    def generate_input_file(self, kwarg_dict, directory):
+        model = self._edit_input_file_schema(kwarg_dict)
+        model.configure_genesis(workdir='.')
+        model.write_input_file()
+        model.write_beam()
+        model.write_lattice()
+        # lume-genesis hard codes the input file name it write to as "genesis.in"
+        os.rename('genesis.in', self.setup['input_file'])
+
 
 
 
@@ -250,5 +377,6 @@ setup_classes = {
     'python': Python,
     'elegant': Elegant,
     'opal': Opal,
+    'user': User,
     'genesis': Genesis
 }

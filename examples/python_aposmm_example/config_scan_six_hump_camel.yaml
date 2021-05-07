@@ -5,23 +5,18 @@ codes:
           min: -3.
           max: 3.
           start: 0.08
+          samples: 5
         y:
           min: -2.
           max: 2.
           start: -0.7
+          samples: 5
       setup:
         input_file: six_hump_camel.py
         function: six_hump_camel_func
         execution_type: serial
 options:
+  software: mesh_scan
   nworkers: 4
-  initial_sample_size: 50
-  max_active_runs: 3
-  software: aposmm
-  method: nlopt.LN_BOBYQA
-  record_interval: 25
-  software_options: {'ftol_abs': 1.0e-4,
-                     'dist_to_bound_multiple': 0.5}
-  exit_criteria:
-    sim_max: 400
-  objective_function: None
+  run_dir: scan_data
+  sim_dirs_make: False  #  Set to True if each simulation should be run in a new subdirectory under `run_dir`

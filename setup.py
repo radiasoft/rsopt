@@ -20,6 +20,7 @@ pksetup.setup(
     ],
     extras_require={
         'nersc': ['rsbeams@git+https://github.com/radiasoft/rsbeams',
+                  'lume-genesis@git+https://github.com/cchall/lume-genesis',
                     # Inherited from sirepo
                     # sirepo binary build fails so it needs to be installed with --no-deps
                     'numconv',
@@ -30,7 +31,8 @@ pksetup.setup(
                     ],
         'full': [
             'rsbeams@git+https://github.com/radiasoft/rsbeams',
-            'sirepo@git+https://github.com/radiasoft/sirepo'
+            'sirepo@git+https://github.com/radiasoft/sirepo',
+            'lume-genesis@git+https://github.com/cchall/lume-genesis'
         ]
     },
     license='http://www.apache.org/licenses/LICENSE-2.0.html',

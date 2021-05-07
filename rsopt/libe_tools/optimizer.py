@@ -1,8 +1,7 @@
 from libensemble.libE import libE
 from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_local_opt
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
-from libensemble.executors.mpi_executor import MPIExecutor
-from rsopt.libe_tools.executors import SerialExecutor, register_rsmpi_executor
+from libensemble.tools import check_inputs
 from libensemble.tools import add_unique_random_streams
 from rsopt.optimizer import Optimizer, OPTIONS_ALLOWED
 from rsopt.libe_tools.interface import get_local_optimizer_method
@@ -22,11 +21,13 @@ LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims',
                       'use_worker_dirs': 'use_worker_dirs',
                       'working_directory': 'ensemble_dir_path'}
 # These codes normally need separate working directories or input files will overwrite
-_USE_WORKER_DIRS_DEFAULT = ['elegant', 'opal', 'python']
+_USE_WORKER_DIRS_DEFAULT = ['elegant', 'opal', 'genesis']
 _LIBENSEMBLE_DIRECTORY = './ensemble'
+
 
 def _configure_executor(job, name, executor):
     executor.register_calc(full_path=job.full_path, app_name=name, calc_type='sim')
+
 
 def _set_app_names(config):
     codes = {}
@@ -44,7 +45,6 @@ def _set_app_names(config):
     return app_names
 
 
-
 class libEnsembleOptimizer(Optimizer):
     # Configurationf or Local Optimization through uniform_or_localopt
     # Just sets up a local optimizer for now
@@ -54,6 +54,7 @@ class libEnsembleOptimizer(Optimizer):
     def __init__(self):
         super(libEnsembleOptimizer, self).__init__()
         self.options = []
+        self.H0 = None
         self.executor = None  # Set by method
         self.nworkers = 2  # Always 2 for local optimizer (1 for sim worker and 1 for persis generator)
         self.working_directory = _LIBENSEMBLE_DIRECTORY
@@ -124,9 +125,12 @@ class libEnsembleOptimizer(Optimizer):
     def run(self, clean_work_dir=False):
         self.clean_working_directory = clean_work_dir
         self._configure_libE()
+        # Check of H0 needs to be run after sim/alloc/gen specs are finalized
+        if self.H0 is not None:
+            check_inputs(H0=self.H0, sim_specs=self.sim_specs, alloc_specs=self.alloc_specs, gen_specs=self.gen_specs)
 
         H, persis_info, flag = libE(self.sim_specs, self.gen_specs, self.exit_criteria, self.persis_info,
-                                    self.alloc_specs, self.libE_specs)
+                                    self.alloc_specs, self.libE_specs, H0=self.H0)
 
         return H, persis_info, flag
 
@@ -137,7 +141,7 @@ class libEnsembleOptimizer(Optimizer):
                      'ub': self.ub,
                      'initial_sample_size': 1,
                      'xstart': self.start,
-                     'localopt_method': get_local_optimizer_method(self._config.method, 'nlopt'),
+                     'localopt_method': get_local_optimizer_method(self._config.method, self._config.software),
                      **self._config.options.software_options}
 
         for key, val in self._options.items():
@@ -160,26 +164,54 @@ class libEnsembleOptimizer(Optimizer):
         # Persistent generator + local optimization eval = 2 workers always
         self.comms = 'local'
 
+        # Directory structure setup
         for job in self._config.jobs:
-            if job.code in _USE_WORKER_DIRS_DEFAULT:
+            if job.code in _USE_WORKER_DIRS_DEFAULT or (job.code == 'python' and job.setup['cores'] > 1):
+                # TODO: Move these checks into configuration
                 self.libE_specs.setdefault('use_worker_dirs', True)
                 self.libE_specs.setdefault('sim_dirs_make', True)
-                if job.code == 'python' and job.setup.get('input_file'):
-                    # If an input file is registered then copy to run dir, otherwise expect Python function defined or
-                    # imported into input script
-                    self.libE_specs.setdefault('sim_dir_symlink_files', [job.setup['input_file'],])
                 break
+        else:
+            self.libE_specs['use_worker_dirs'] = self._config.options.use_worker_dirs
+            self.libE_specs['sim_dirs_make'] = self._config.options.sim_dirs_make
 
+        self.libE_specs['ensemble_dir_path'] = self._config.options.run_dir
+
+        # Files needed for each simulation
+        self.libE_specs['sim_dir_symlink_files'] = self._config.get_sym_link_list()
+        if self._config.options.record_interval:
+            self.libE_specs['save_every_k_sims'] = self._config.options.record_interval
         self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
 
     def _configure_sim(self):
         sim_function = SimulationFunction(self._config.jobs, self._config.options.get_objective_function())
-        self.sim_specs.update({'sim_f': sim_function,
-                               'in': ['x'],
-                               'out': [('f', float), ]})
 
-    def _configure_executor(self):
+        # TODO: sim_speces['out'] needs to be made a property of Options - probably as a dict based on method as keys
+        #  Then if statement can be removed
+        if self._config.software == 'dfols':
+            self.sim_specs.update({'sim_f': sim_function,
+                                   'in': ['x'],
+                                   'out': [('f', float), ('fvec', float, self._config.options.components)]})
+        else:
+            self.sim_specs.update({'sim_f': sim_function,
+                                   'in': ['x'],
+                                   'out': [('f', float), ]})
+
+    def _configure_executors(self):
         app_names = _set_app_names(self._config)
+
+        # If the job has a run command then that job should use an executor
+        for app_name, job in zip(app_names, self._config.jobs):
+            if not job.full_path:
+                pass
+            else:
+                if not self.executor:
+                    self._create_executor()
+                _configure_executor(job, app_name, self.executor)
+                job.executor = app_name
+                job.executor_args['app_name'] = app_name
+
+    def _create_executor(self):
         if self._config.options.executor_options:
             executor_setup = self._config.options.executor_options
         else:
@@ -187,21 +219,13 @@ class libEnsembleOptimizer(Optimizer):
 
         self.executor = self._config.create_exector(**executor_setup)
 
-        # If the job has a run command then that job should use an executor
-        for app_name, job in zip(app_names, self._config.jobs):
-            if not job.full_path:
-                pass
-            else:
-                _configure_executor(job, app_name, self.executor)
-                job.executor = app_name
-
     def _configure_libE(self):
         self._set_dimension()
         self._configure_optimizer()
         self._configure_allocation()
         self._configure_specs()
         self._configure_persistant_info()
-        self._configure_executor()
+        self._configure_executors()
         self._configure_sim()
         self._cleanup()
 
@@ -210,7 +234,7 @@ class libEnsembleOptimizer(Optimizer):
 
         if not self.exit_criteria:
             print('No libEnsemble exit criteria set. Optimizer will terminate when finished.')
-            self.exit_criteria = {'sim_max': int(1e9)}
+            self.exit_criteria = {'sim_max': int(1e6)}
         else:
             self._config.options.exit_criteria = self.exit_criteria
 
@@ -219,8 +243,6 @@ class libEnsembleOptimizer(Optimizer):
 
         if self.clean_working_directory and os.path.isdir(self.working_directory):
             shutil.rmtree(self.working_directory)
-
-
 
     def set_exit_criteria(self, exit_criteria):
         """

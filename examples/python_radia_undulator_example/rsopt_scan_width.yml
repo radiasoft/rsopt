@@ -1,0 +1,51 @@
+# Top level key is `codes` which should be a list (note the dash in front of `- python`) of codes to be executed to complete an evaluation
+codes:
+    - python:
+        # `settings` is an optional bookkeeping key. Values listed are always passed each execution.
+        # `settings` can also be used to set dummy values that are filled in by a pre-process function
+        #   at run time. This is illustrated in this example if serial execution is used (make sure to uncomment the `preprocess` line below in that case)
+        settings:
+            _gap: 4.0 
+            _gap_ofst: 0.0
+            _nper: 15 
+            _air: 0.05
+            _lp: [2.1, 19.5]
+            _ch_p: 0.1 
+            _np: [6, 6, [12, 0.18]] 
+            _np_tip: [6, 6, 1] 
+            _mp: False  # Set at run time
+            _cp: [1.0, 0.0, 1.0]
+            _lm: [45., 4.8, 27] 
+            _ch_m_xz: 3.0
+            _ch_m_yz: 0.05
+            _ch_m_yz_r: 1.7320508075688772  # sqrt(3.)
+            _nm: [3, 2, [6, 0.333333]]
+            _mm: False  # Set at run time
+            _cm: [0., 1.0, 1.0]
+        parameters:
+            _pole_width: 
+                min: 5.0
+                max: 40.0
+                start: 30.0
+                samples: 12
+        setup:
+            execution_type: parallel  # serial or parallel normally
+            cores: 4  # number of cores when parallel execution is used
+            input_file: hybrid_undulator.py  # File where Python function is defined
+            # All values in `settings` will be passed to the `function` and values of parameter as selected
+            #  at run time (by an optimizer or sampling function) will be passed
+            function: eval_hybrid_und  # Function name
+            ## Uncomment below to use preprocess - will not work if parallel evaluation is used
+            ## Parallel evaluation uses a dynamically created run script so all passed values must be output at text
+            ## Serial evaluation takes place inside the main rsopt process so any object may be passed directly
+            # preprocess: [hybrid_undulator.py, set_mag_properties]
+# `options` is the other top level key and normally contains the setup for the optimizer or sampler to be used
+#   as well as miscellanious options such as directory settings
+options:
+    software: mesh_scan  # Run a parameter scan on a uniform mesh defined by `parameters` above
+    # When running in parallel the return value of eval_hybrid_und is not accessible
+    #  The value should be saved and then can be loaded by `objective_function` and logged with rsopt
+    objective_function: [hybrid_undulator.py, get_bz]  # Used to load Bz value from file
+    nworkers: 3  # How many simultaneous evaluations to use in the scan - total cores needed will be nworkers * cores (from setup)
+    run_dir: scan_data  # name of output directory (default is "ensemble")
+        

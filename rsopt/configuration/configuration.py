@@ -2,6 +2,7 @@ from rsopt.configuration import Options
 from rsopt.configuration.setup import _EXECUTION_TYPES
 _EXECUTORS = {'parallel'}
 
+
 class Configuration:
     def __init__(self):
         self.jobs = []
@@ -37,6 +38,9 @@ class Configuration:
     @property
     def method(self):
         return self._options.method
+    @property
+    def software(self):
+        return self._options.NAME
 
     def set_jobs(self, jobs):
         if hasattr(jobs, '__iter__'):
@@ -73,3 +77,27 @@ class Configuration:
         executor = _EXECUTION_TYPES[executors[0]]
 
         return executor(**executor_options)
+
+    def get_sym_link_list(self):
+        sym_link_files = []
+        for job in self.jobs:
+            if job.code == 'python' and job.setup.get('input_file'):
+                # If an input file is registered then copy to run dir, otherwise expect Python function defined or
+                # imported into input script
+                sym_link_files.append(job.setup['input_file'])
+
+            if job.code == 'user':
+                if job.setup['input_file'] not in job.setup['file_mapping'].values():
+                    # If file name in file_mapping then input_file being created dynamically, otherwise copy here
+                    sym_link_files.append(job.setup['input_file'])
+
+            if job.code == 'genesis' and not job.input_distribution:
+                distfile = job._setup.input_file_model.param.get('distfile')
+                if distfile:
+                    sym_link_files.append(distfile)
+
+        # Add user specified file names
+        sym_link_files.extend(self._options.sym_links)
+
+        return sym_link_files
+

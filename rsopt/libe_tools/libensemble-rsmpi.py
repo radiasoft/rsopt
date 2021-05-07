@@ -10,12 +10,14 @@ parser = argparse.ArgumentParser(description="Wrap rsmpi for use by libensemble.
 
 parser.add_argument("-np", dest="n", required=True,
                      help="Pass number of processors to rsmpi")
-parser.add_argument("-machinefile", dest="machinefile", required=True,
-                    help="Location of machinefile that gives rsmpi server number on the first line")
 parser.add_argument("--ppn", dest="ppn", required=False,
                     help="Not required by rsmpi, but supplied by libEnsemble. Input is not used if given.")
 parser.add_argument('args', nargs=argparse.REMAINDER, help="All other arguments are appended after rsmpi")
-
+server_spec = parser.add_mutually_exclusive_group(required=True)
+server_spec.add_argument("-machinefile", dest="machinefile",
+                    help="Location of machinefile that gives rsmpi server number on the first line")
+server_spec.add_argument("-hosts", dest="hosts",
+                    help="Host number of rsmpi server")
 
 def get_host_from_machinefile(machinefile):
     with open(machinefile) as ff:
@@ -25,8 +27,10 @@ def get_host_from_machinefile(machinefile):
 
 
 parsed_args = parser.parse_args()
-
-h = get_host_from_machinefile(parsed_args.machinefile)
+if parsed_args.machinefile is not None:
+    h = get_host_from_machinefile(parsed_args.machinefile)
+else:
+    h = parsed_args.hosts
 args = ' '.join(parsed_args.args)
 
 formatted_run_string = run_string.format(n=parsed_args.n, h=h, args=args).split()

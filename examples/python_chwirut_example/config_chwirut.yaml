@@ -1,0 +1,35 @@
+codes:
+  - python:
+      parameters:
+        x1:
+          min: -2.3141592654  # (-2-pi/10)
+          max: 2.
+          start: 0.08
+        x2:
+          min: -2.3141592654
+          max: 2.
+          start: -0.7
+        x3:
+          min: -2.3141592654
+          max: 2.
+          start: 0.08
+      setup:
+        input_file: chwirut.py
+        function: eval_chwirut
+        execution_type: serial
+options:
+  nworkers: 4
+  initial_sample_size: 50
+  max_active_runs: 3
+  software: dfols
+  method: dfols
+  components: 214
+  software_options: {'do_logging': False,
+                     'rhoend': 1e-5,
+                     'user_params': {'model.abs_tol': 1e-10,
+                                     'model.rel_tol': 1e-4
+                                    }
+                     }
+  exit_criteria:
+    sim_max: 400
+  objective_function: None

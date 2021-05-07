@@ -21,6 +21,7 @@ codes:
           max: 25.
           start: -5.
       setup:
+        preprocess: [preprocess.py, f_pre]
         input_file: elegant.ele
         execution_type: parallel
         cores: 4
