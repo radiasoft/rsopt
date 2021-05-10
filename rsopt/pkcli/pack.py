@@ -11,7 +11,8 @@ def _get_local_modules(script_name):
     finder = modulefinder.ModuleFinder(path=['.', ])
     finder.run_script(script_name)
     for name, mod in finder.modules.items():
-        file_list.append(mod.__file__)
+        if mod.__file__:  # Skips standard library imports
+            file_list.append(mod.__file__)
 
     return file_list
 
@@ -51,7 +52,7 @@ def _get_files_from_job(job):
     if job.code == 'user' or job.code == 'genesis':
         raise NotImplementedError('Collection of files from `{}` jobs not implemented'.format(job.code))
     elif job.code == 'python':
-        files = _get_local_modules(job.setup.input_file)
+        files = _get_local_modules(job.setup['input_file'])
         file_list.extend(files)
     else:
         m = job._setup.input_file_model
@@ -78,6 +79,7 @@ def _create_tar(name, file_list):
     tarname = f'{name}.tar.gz'
     tar = tarfile.open(tarname, 'w:gz')
     for file in file_list:
+        print("Adding file to tarball: {}".format(file))
         tar.add(file)
 
     tar.close()
