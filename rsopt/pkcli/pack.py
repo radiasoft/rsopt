@@ -51,7 +51,7 @@ def _get_files_from_job(job):
     if job.code == 'user' or job.code == 'genesis':
         raise NotImplementedError('Collection of files from `{}` jobs not implemented'.format(job.code))
     elif job.code == 'python':
-        files = _get_local_modules(job.setup.input_file)
+        files = _get_local_modules(job.setup['input_file'])
         file_list.extend(files)
     else:
         m = job._setup.input_file_model
