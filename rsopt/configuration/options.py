@@ -13,6 +13,7 @@ class Options:
         self.software = ''
         self.method = ''
         self.sym_links = []
+        self.nworkers = 2
         self.use_worker_dirs = False
         self.sim_dirs_make = False
         self.run_dir = './ensemble'
@@ -152,7 +153,6 @@ class Aposmm(Options):
     def __init__(self):
         super().__init__()
 
-        self.nworkers = 2
         self.load_start_sample = ''
 
         for key, val in self.SOFTWARE_OPTIONS.items():

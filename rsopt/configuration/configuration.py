@@ -70,9 +70,12 @@ class Configuration:
         return formatter(attribute_list)
 
     # TODO: Shifter needs special handling, it is still MPIExecutor but needs to change app setup
-    def create_exector(self, **executor_options):
+    def create_exector(self):
         # Executor is created even for serial jobs
         # For serial Python the executor is not registerd with the Job and goes unused
+
+        for k, v in self.executor_defaults[self.comms].items():
+            self.options.executor_options.setdefault(k, v)
 
         # rsmpi is the only mutually exclusive option right now
         executors = [j.setup.get('execution_type') for j in self.jobs if j.setup.get('execution_type')]
@@ -82,7 +85,7 @@ class Configuration:
         # Right now we implicitly guarantee all executors will be same type
         executor = _EXECUTION_TYPES[executors[0]]
 
-        return executor(**executor_options)
+        return executor(**self.options.executor_options)
 
     def get_sym_link_list(self):
         sym_link_files = []

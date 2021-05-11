@@ -15,7 +15,8 @@ def startup_sequence(config):
         if _config.options.nworkers != mpi_environment['nworkers']:
             print("`nworkers` in Config file does not match MPI communicator size.")
             print("MPI communicator size will be used to set up {} workers".format(mpi_environment['nworkers']))
-        for k, v in mpi_environment:
+            _config.options.nworkers = mpi_environment['nworkers']
+        for k, v in mpi_environment.items():
             if hasattr(_config, k):
                 _config.__setattr__(k, v)
 
