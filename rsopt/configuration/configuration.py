@@ -4,9 +4,15 @@ _EXECUTORS = {'parallel'}
 
 
 class Configuration:
+    executor_defaults = {'local': {'central_mode': True, 'auto_resources': True},
+                         'mpi': {'central_mode': True, 'auto_resources': True}}
+
     def __init__(self):
         self.jobs = []
         self._options = Options()
+        self.comms = 'local'  # Will be either local or mpi
+        self.mpi_comm = None
+        self.is_manager = True
 
     @property
     def options(self):
