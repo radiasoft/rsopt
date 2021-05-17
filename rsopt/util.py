@@ -64,7 +64,7 @@ def return_unused_node():
     allocated_nodes = return_nodelist(nodelist_string)
     used_nodes = return_used_nodes()
 
-    if len(used_nodes):
+    if len(used_nodes) == 0:
         return None
 
     for node in allocated_nodes:
