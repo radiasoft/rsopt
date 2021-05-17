@@ -10,4 +10,18 @@ examples:
       - chwirut.py
       - config_chwirut.yaml
     result: 2384.477139309358
+  python_camel_aposmm:
+    files:
+      - six_hump_camel.py
+      - config_six_hump_camel.yaml
+    result: -1.0316271843445015
+  elegant_parallel:
+    files:
+      - elegant.ele
+      - elegant.lte
+      - obj_f_bunch_matching.py
+      - preprocess.py
+      - match_parallel.yml
+    result: 15.449707281828443  # 30 evaluations - not close to converged
+# python_radia_undulator_example takes too long to be run routinely
 
