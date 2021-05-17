@@ -1,7 +1,4 @@
-from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 from rsopt.libe_tools.sampler import GridSampler, SingleSample, LHSampler
-from rsopt.libe_tools.optimizer_aposmm import AposmmOptimizer
-from rsopt.libe_tools.optimizer_nsga2 import EvolutionaryOptimizer
 from rsopt import mpi
 from rsopt import parse
 
@@ -25,6 +22,7 @@ def startup_sequence(config):
 
 
 def local_optimizer(config):
+    from rsopt.libe_tools.optimizer import libEnsembleOptimizer
     opt = libEnsembleOptimizer()
     opt.load_configuration(config)
 
@@ -53,6 +51,7 @@ def lh_sampler(config):
 
 
 def aposmm_optimizer(config):
+    from rsopt.libe_tools.optimizer_aposmm import AposmmOptimizer
     opt = AposmmOptimizer()
     opt.load_configuration(config)
 
@@ -60,6 +59,7 @@ def aposmm_optimizer(config):
 
 
 def nsga2_optimizer(config):
+    from rsopt.libe_tools.optimizer_nsga2 import EvolutionaryOptimizer
     opt = EvolutionaryOptimizer()
     opt.load_configuration(config)
 
