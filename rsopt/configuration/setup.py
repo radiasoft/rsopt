@@ -2,6 +2,7 @@ import os
 import sys
 import jinja2
 import pickle
+from rsopt import util
 from rsopt.codes import _TEMPLATED_CODES
 from copy import deepcopy
 from pykern import pkrunpy
@@ -62,6 +63,29 @@ def _validate_execution_type(key):
     else:
         return False
 
+
+def _shifter_parse_model(name, input_file):
+    import shlex
+    from subprocess import Popen, PIPE
+
+    node_to_use = util.return_unused_node()
+    if node_to_use:
+        run_string = f"srun -w {node_to_use} --ntasks 1 --nodes 1 shifter --image={_SHIFTER_IMAGE} " \
+                     f"/bin/bash {_SHIFTER_BASH_FILE} python {_SHIFTER_SIREPO_SCRIPT}"
+        run_string = ' '.join([run_string, name, input_file])
+        cmd = Popen(shlex.split(run_string), stderr=PIPE, stdout=PIPE)
+        out, err = cmd.communicate()
+        if err:
+            print(err.decode())
+            raise Exception('Model load from Sirepo in Shifter failed.')
+        d = pickle.loads(out)
+    else:
+        d = None
+
+    return util.broadcast(d)
+
+
+
 _SETUP_READERS = {
     dict: read_setup_dict
 }
@@ -110,17 +134,7 @@ class Setup:
     def parse_input_file(cls, input_file, shifter):
 
         if shifter:
-            import shlex
-            from subprocess import Popen, PIPE
-            run_string = f"srun --ntasks 1 --nodes 1 shifter --image={_SHIFTER_IMAGE} /bin/bash {_SHIFTER_BASH_FILE} python {_SHIFTER_SIREPO_SCRIPT}"
-            run_string = ' '.join([run_string, cls.NAME, input_file])
-            cmd = Popen(shlex.split(run_string), stderr=PIPE, stdout=PIPE)
-            out, err = cmd.communicate()
-            if err:
-                print(err.decode())
-                raise Exception('Model load from Sirepo in Shifter failed.')
-            d = pickle.loads(out)
-
+            d = _shifter_parse_model(cls.NAME, input_file)
         else:
             import sirepo.lib
             d = sirepo.lib.Importer(cls.NAME).parse_file(input_file)

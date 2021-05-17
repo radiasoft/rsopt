@@ -2,6 +2,26 @@ from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 from rsopt.libe_tools.sampler import GridSampler, SingleSample, LHSampler
 from rsopt.libe_tools.optimizer_aposmm import AposmmOptimizer
 from rsopt.libe_tools.optimizer_nsga2 import EvolutionaryOptimizer
+from rsopt import mpi
+from rsopt import parse
+
+
+def startup_sequence(config):
+    config_yaml = parse.read_configuration_file(config)
+    _config = parse.parse_yaml_configuration(config_yaml)
+    mpi_environment = mpi.get_mpi_environment()
+    if not mpi_environment:
+        return _config
+    else:
+        if _config.options.nworkers != mpi_environment['nworkers']:
+            print("`nworkers` in Config file does not match MPI communicator size.")
+            print("MPI communicator size will be used to set up {} workers".format(mpi_environment['nworkers']))
+            _config.options.nworkers = mpi_environment['nworkers']
+        for k, v in mpi_environment.items():
+            if hasattr(_config, k):
+                _config.__setattr__(k, v)
+
+    return _config
 
 
 def local_optimizer(config):

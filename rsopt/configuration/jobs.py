@@ -16,13 +16,14 @@ def get_reader(obj, category):
 
 
 def create_executor_arguments(setup):
+    # Really creates Executor.submit() arguments
     args = {
         'num_procs': setup.get('cores', 1),
         'num_nodes': None,  # No user interface right now
         'ranks_per_node': None, # No user interface right now
-        'machinefile': None, # Add in  setup.machinefile if user wants to control
+        'machinefile': None,  # Add in  setup.machinefile if user wants to control
         'app_args': setup.get('input_file', None),
-        'hyperthreads': False, # Add in  setup.hyperthreads if this is needed
+        'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
         # 'app_name': None,  # Handled at optimizer setup
         # 'stdout': None,  # Handled at optimizer setup
         # 'stderr': None, # Handled at optimizer setup

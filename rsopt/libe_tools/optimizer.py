@@ -181,7 +181,10 @@ class libEnsembleOptimizer(Optimizer):
         self.libE_specs['sim_dir_symlink_files'] = self._config.get_sym_link_list()
         if self._config.options.record_interval:
             self.libE_specs['save_every_k_sims'] = self._config.options.record_interval
-        self.libE_specs.update({'nworkers': self.nworkers, 'comms': self.comms, **self.libE_specs})
+
+        self.libE_specs.update({'nworkers': self.nworkers, 'comms': self._config.comms, **self.libE_specs})
+        if self._config.mpi_comm:
+            self.libE_specs['mpi_comm'] = self._config.mpi_comm
 
     def _configure_sim(self):
         sim_function = SimulationFunction(self._config.jobs, self._config.options.get_objective_function())
@@ -203,12 +206,7 @@ class libEnsembleOptimizer(Optimizer):
                 job.executor_args['app_name'] = app_name
 
     def _create_executor(self):
-        if self._config.options.executor_options:
-            executor_setup = self._config.options.executor_options
-        else:
-            executor_setup = {'auto_resources': True}
-
-        self.executor = self._config.create_exector(**executor_setup)
+        self.executor = self._config.create_exector()
 
     def _configure_libE(self):
         self._set_dimension()
@@ -224,8 +222,9 @@ class libEnsembleOptimizer(Optimizer):
             self.set_exit_criteria(self._config.options.exit_criteria)
 
         if not self.exit_criteria:
-            print('No libEnsemble exit criteria set. Optimizer will terminate when finished.')
-            self.exit_criteria = {'sim_max': int(1e6)}
+            _def_max = 1e6
+            print(f'No libEnsemble exit criteria set. Optimizer will terminate at sim_max: {_def_max}.')
+            self.exit_criteria = {'sim_max': int(_def_max)}
         else:
             self._config.options.exit_criteria = self.exit_criteria
 

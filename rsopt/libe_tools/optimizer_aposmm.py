@@ -70,7 +70,7 @@ class AposmmOptimizer(optimizer.libEnsembleOptimizer):
         # local optimizer allocation
         self.alloc_specs.update({'alloc_f': persistent_aposmm_alloc,
                                  'out': [('given_back', bool)],
-                                 'user': {'batch_mode': True}})
+                                 'user': {}})
 
     def _configure_specs(self):
         self.nworkers = self._config.options.nworkers
