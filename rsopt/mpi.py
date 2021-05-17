@@ -1,6 +1,11 @@
 
 def get_mpi_environment():
-    from mpi4py import MPI
+    try:
+        from mpi4py import MPI
+    except ModuleNotFoundError:
+        # mpi4py not installed so it can't be used
+        return
+
     if not MPI.COMM_WORLD.Get_size() - 1:
         # MPI not being used
         # (if user did start MPI with size 1 this would be an illegal configuration since: main + 1 worker = 2 ranks)
