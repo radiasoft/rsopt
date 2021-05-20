@@ -46,7 +46,11 @@ def return_nodelist(nodelist_string):
 
 def return_used_nodes():
     """Returns all used processor names to rank 0 and an empty list elsewhere"""
-    from mpi4py import MPI
+    try:
+        from mpi4py import MPI
+    except ModuleNotFoundError:
+        # If MPI not being used to start rsopt then no nodes will have srun executed yet
+        return []
 
     rank = MPI.COMM_WORLD.Get_rank()
     name = MPI.Get_processor_name()
@@ -76,7 +80,11 @@ def return_unused_node():
 
 def broadcast(data, root_rank=0):
     """broadcast, or don't bother"""
-    from mpi4py import MPI
+    try:
+        from mpi4py import MPI
+    except ModuleNotFoundError:
+        # If MPI not available for import then assume it isn't needed
+        return data
 
     if MPI.COMM_WORLD.Get_size() == 1:
         return data
