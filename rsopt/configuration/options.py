@@ -74,6 +74,14 @@ class Options:
 
         return function
 
+    def get_sim_specs(self):
+        sim_specs = {
+            'in': ['x'],
+            'out': [('f', float), ]
+        }
+
+        return sim_specs
+
 
 class Nlopt(Options):
     NAME = 'nlopt'
@@ -137,6 +145,14 @@ class Dfols(Options):
         else:
             options['software_options']['components'] = options.get('components')
 
+    def get_sim_specs(self):
+        sim_specs = {
+            'in': ['x'],
+            'out': [('f', float), ('fvec', float, self.components)]
+        }
+
+        return sim_specs
+
 
 class Aposmm(Options):
     NAME = 'aposmm'
@@ -166,6 +182,41 @@ class Aposmm(Options):
     #     return options_dict
 
 
+class Nsga2(Options):
+    NAME = 'nsga2'
+    REQUIRED_KEYS = ('n_objectives', 'exit_criteria', )
+    SOFTWARE_OPTIONS = {}
+
+    def __init__(self):
+        super().__init__()
+        self.n_objectives = 0
+        self.nworkers = 2
+        self.pop_size = 100
+        # for key, val in self.SOFTWARE_OPTIONS.items():
+        #     self.__setattr__(key, val)
+
+    def get_sim_specs(self):
+        sim_specs = {
+            'in': ['individual'],
+            'out': [('fitness_values', float, self.n_objectives)]
+        }
+
+        return sim_specs
+
+
+    # @classmethod
+    # def _check_options(cls, options):
+    #     for key in cls.REQUIRED_KEYS:
+    #         assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
+    #     try:
+    #         int(options['software_options'].get('n_objectives'))
+    #         if options['software_options'].get('n_objectives') == 0:
+    #             raise ValueError('The option `n_objectives` must be set to a non-zero value for NSGA2')
+    #     except ValueError:
+    #         nobj = repr(options['software_options'].get('n_objectives'))
+    #         raise ValueError('{} is not a valid number of objectives for `n_objectives'.format(nobj))
+
+
 class Mesh(Options):
     NAME = 'mesh_scan'
     REQUIRED_KEYS = ()
@@ -190,6 +241,7 @@ class LH(Options):
 option_classes = {
     'nlopt': Nlopt,
     'aposmm': Aposmm,
+    'nsga2': Nsga2,
     'dfols': Dfols,
     'scipy': Scipy,
     'mesh_scan': Mesh,

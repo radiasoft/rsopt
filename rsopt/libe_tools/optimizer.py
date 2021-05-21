@@ -188,17 +188,8 @@ class libEnsembleOptimizer(Optimizer):
 
     def _configure_sim(self):
         sim_function = SimulationFunction(self._config.jobs, self._config.options.get_objective_function())
-
-        # TODO: sim_speces['out'] needs to be made a property of Options - probably as a dict based on method as keys
-        #  Then if statement can be removed
-        if self._config.software == 'dfols':
-            self.sim_specs.update({'sim_f': sim_function,
-                                   'in': ['x'],
-                                   'out': [('f', float), ('fvec', float, self._config.options.components)]})
-        else:
-            self.sim_specs.update({'sim_f': sim_function,
-                                   'in': ['x'],
-                                   'out': [('f', float), ]})
+        self.sim_specs.update({'sim_f': sim_function,
+                               **self._config.options.get_sim_specs()})
 
     def _configure_executors(self):
         app_names = _set_app_names(self._config)

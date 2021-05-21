@@ -12,9 +12,13 @@ _POLL_TIME = 1  # seconds
 _PENALTY = 1e9
 
 
-def get_x_from_H(H):
+def get_x_from_H(H, sim_specs):
+    # 'x' may have different name depending on software being used
     # Assumes vector data
-    x = H['x'][0]
+
+    x_name = sim_specs['in'][0]
+    x = H[x_name][0]
+
     return x.tolist()
 
 
@@ -89,7 +93,7 @@ class SimulationFunction:
         self.sim_specs = sim_specs
         self.libE_info = libE_info
 
-        x = get_x_from_H(H)
+        x = get_x_from_H(H, self.sim_specs)
 
         for job in self.jobs:
             # Generate input values

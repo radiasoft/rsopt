@@ -1,9 +1,1 @@
-
-
-"D1": DRIF,l=0.5
-"Q1": QUAD,l=0.15
-"Q2": QUAD,l=0.15
-"Q3": QUAD,l=0.15
-"Q4": QUAD,l=0.15
-"BL1": LINE=(D1,Q1,D1,Q2,D1,Q3,D1,Q4,D1)
-
+../../rsopt/package_data/examples/elegant.lte

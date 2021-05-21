@@ -51,17 +51,18 @@ def get_test_result():
 
 class TestExamples(unittest.TestCase):
     def test_all(self):
-        for example in _EXAMPLES.values():
+        for i, example in enumerate(_EXAMPLES.values()):
+            # If running with Pycharm test configuration make sure to use unittests
+            with self.subTest(i=i):
+                self.file_list = copy_example_files(example)
+                config_filename = self.file_list[-1]
+                run_test(config_filename)
+                test_result = get_test_result()
+                run_cleanup(self.file_list)
 
-            self.file_list = copy_example_files(example)
-            config_filename = self.file_list[-1]
-            run_test(config_filename)
-            test_result = get_test_result()
-            run_cleanup(self.file_list)
+                error_msg = f'Test of {config_filename} failed'
 
-            error_msg = f'Test of {config_filename} failed'
-
-            self.assertTrue(np.all(np.isclose(example['result'], test_result)), msg=error_msg)
+                self.assertTrue(np.all(np.isclose(example['result'], test_result)), msg=error_msg)
 
     def tearDown(self):
         try:
