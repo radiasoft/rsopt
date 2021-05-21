@@ -24,6 +24,7 @@ def create_executor_arguments(setup):
         'machinefile': None,  # Add in  setup.machinefile if user wants to control
         'app_args': setup.get('input_file', None),
         'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
+        'wait_on_run': True,
         # 'app_name': None,  # Handled at optimizer setup
         # 'stdout': None,  # Handled at optimizer setup
         # 'stderr': None, # Handled at optimizer setup

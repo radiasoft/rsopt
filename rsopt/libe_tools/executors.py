@@ -40,7 +40,9 @@ def register_rsmpi_executor(hosts='auto', cores_on_node=None, **kwargs):
                   'node_file': 'libe_nodes'}
 
     jobctrl = MPIExecutor(**kwargs, custom_info=customizer)
-
+    # Set longer fail time - rsmpi is relatively slow to start
+    jobctrl.fail_time = 8
+    
     return jobctrl
 
 
