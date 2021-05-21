@@ -67,6 +67,15 @@ _SETUP_READERS = {
 }
 
 
+def _create_sym_links(*args, link_location='default'):
+    for filepath in args:
+        if link_location == 'default':
+            filename = os.path.split(filepath)[-1]
+        else:
+            filename = link_location
+        os.symlink(filepath, filename)
+
+
 class Setup:
     __REQUIRED_KEYS = ('execution_type',)
     RUN_COMMAND = None
@@ -338,6 +347,7 @@ class Genesis(Elegant):
     @classmethod
     def parse_input_file(cls, input_file, shifter):
         # assumes lume-genesis can best installed locally - shifter execution not needed
+        # expand_paths is not used to ensure that generated input files are used if desired - otherwise rsopt symlinks them to run dir
         import genesis
         d = genesis.Genesis(input_file, use_tempdir=False, expand_paths=False, check_executable=False)
 
@@ -362,9 +372,19 @@ class Genesis(Elegant):
     def generate_input_file(self, kwarg_dict, directory):
         model = self._edit_input_file_schema(kwarg_dict)
         model.configure_genesis(workdir='.')
+        
         model.write_input_file()
         model.write_beam()
         model.write_lattice()
+        
+        # rad and dist files are not written by lume-genesis so we symlink them in if they exist in start directory
+        for filename in [model['distfile'], model['radfile']]:
+            full_path = os.path.join(model.original_path, filename)
+            if os.path.isfile(full_path):
+                _create_sym_links(os.path.relpath(full_path))
+            
+            
+        
         # lume-genesis hard codes the input file name it write to as "genesis.in"
         os.rename('genesis.in', self.setup['input_file'])
 
