@@ -141,9 +141,9 @@ class SimulationFunction:
                 self.switchyard = rsopt.conversion.create_switchyard(job.output_distribution, job.code)
                 self.J['switchyard'] = self.switchyard
 
-        if job.post_process:
-            for f_post in job._setup._postprocess:
-                f_post(self.J)
+            if job.post_process:
+                for f_post in job._setup._postprocess:
+                    f_post(self.J)
 
         if sim_status == WORKER_DONE:
             # Use objective function is present
