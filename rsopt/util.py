@@ -45,7 +45,7 @@ def return_nodelist(nodelist_string):
 
 
 def return_used_nodes():
-    """Returns all used processor names to rank 0 and an empty list elsewhere"""
+    """Returns all used processor names to rank 0 or an empty list if MPI not used. For ranks != 0  returns None."""
     try:
         from mpi4py import MPI
     except ModuleNotFoundError:
@@ -59,7 +59,7 @@ def return_used_nodes():
     if rank == 0:
         return all_names
     else:
-        return []
+        return None
 
 
 def return_unused_node():
@@ -68,9 +68,10 @@ def return_unused_node():
     allocated_nodes = return_nodelist(nodelist_string)
     used_nodes = return_used_nodes()
 
-    if len(used_nodes) == 0:
+    if used_nodes is None:
+        # Catches rank != 0 if MPI used
         return None
-
+    
     for node in allocated_nodes:
         if node not in used_nodes:
             return node
