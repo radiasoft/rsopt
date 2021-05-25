@@ -1,4 +1,5 @@
-import re, os
+import re
+import os
 
 SLURM_PREFIX = 'nid'
 
@@ -10,11 +11,14 @@ def _expand_idx(idx):
     indexes = []
     for part in idx_parts:
         if "-" in part:
+            # Assumes len(start) == len(stop)
             start, stop = part.split('-', 2)
+            length = len(start)
             indexes.extend(range(int(start), int(stop)+1))
+            indexes = [str(i).zfill(length) for i in indexes]
         else:
-            indexes.append(int(part))
-    indexes.sort()
+            indexes.append(part)
+    indexes.sort(key=int)
     return indexes
 
 
@@ -33,7 +37,7 @@ def return_nodelist(nodelist_string):
     :return: list
     """
 
-    index_pat = re.compile(r'((nid(\w+))(\d+|\[[\d\,\-]+\]),?)')
+    index_pat = re.compile(r'((nid(\w*))(\d+|\[[\d\,\-]+\]),?)')
     for match in index_pat.finditer(nodelist_string):
         prefix = match.group(2)
         node_type = match.group(3)
@@ -91,8 +95,4 @@ def broadcast(data, root_rank=0):
         return data
 
     return MPI.COMM_WORLD.bcast(data, root=root_rank)
-
-
-
-
 
