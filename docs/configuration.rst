@@ -1,3 +1,4 @@
+.. _configuration_ref:
 Configuration Files
 ===================
 

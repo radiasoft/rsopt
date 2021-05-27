@@ -36,8 +36,9 @@ codes:
             #  at run time (by an optimizer or sampling function) will be passed
             function: eval_hybrid_und  # Function name
             ## Uncomment below to use preprocess - will not work if parallel evaluation is used
-            ## Parallel evaluation uses a dynamically created run script so all passed values must be output at text
-            ## Serial evaluation takes place inside the main rsopt process so any object may be passed directly
+            ## Parallel evaluation uses a dynamically created run script so magnet properties are repeatedly calculated
+            ## at each step. Serial evaluation takes place inside the main rsopt process
+            ## so any object may be passed directly, allowing this calculation o take place once at run start.
             # preprocess: [hybrid_undulator.py, set_mag_properties]
 # `options` is the other top level key and normally contains the setup for the optimizer or sampler to be used
 #   as well as miscellanious options such as directory settings

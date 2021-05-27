@@ -13,11 +13,13 @@ To test with a single point (will just run the start point and not the whole sca
 rsopt sample start rsopt_scan_width.yml
 
 
-Note:
-This example can be run in serial as well by changing `execution_type` to serial. In this case you can uncomment
-the `preprocess` option, or leave as is. See hybrid_undulator.py and rsopt_scan_width.yml for more commens on this.
+Notes:
+- This example can be run in serial as well by changing `execution_type` to serial. In this case you can uncomment
+the `preprocess` option (ln 42 in rsop_scan_width.yml). This has the advantage of only needing to run
+magnet property calculations once, at the run start, but is not required.
+See hybrid_undulator.py and rsopt_scan_width.yml for more comments on this.
 
-When run in parallel  the return value does not get passed back to rsopt because it is run in a new process.
+- When run in parallel  the return value does not get passed back to rsopt because it is run in a new process.
 Hence the `objective_function` is used to load the result from file and pass it to rsopt.
 The `objective_function` line can be commented out if you are running in serial.
 
