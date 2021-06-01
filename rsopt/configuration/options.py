@@ -124,7 +124,7 @@ class Scipy(Options):
         if 'software_options' in options.keys():
             options['software_options'].setdefault('opt_return_codes', cls._opt_return_codes[options.get('method')])
         else:
-            options['software_options']['opt_return_codes'] = cls._opt_return_codes[options.get('method')]
+            options['software_options'] = {'opt_return_codes': cls._opt_return_codes[options.get('method')]}
 
 
 class Dfols(Options):
@@ -143,7 +143,7 @@ class Dfols(Options):
         if 'software_options' in options.keys():
             options['software_options'].setdefault('components', options.get('components'))
         else:
-            options['software_options']['components'] = options.get('components')
+            options['software_options'] = {'components': options.get('components')}
 
     def get_sim_specs(self):
         sim_specs = {

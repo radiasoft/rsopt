@@ -82,7 +82,14 @@ class TestOptionsReaders(unittest.TestCase):
                                'exit_criteria': 'fill'},
                      'aposmm': {'method': 'LN_COBYLA',
                                 'exit_criteria': 'fill'},
-                     'mesh_scan': {}}
+                     'mesh_scan': {},
+                     'nsga2': {'n_objectives': 2,
+                               'exit_criteria': 'fill'},
+                     'dfols': {'components': 128,
+                               'exit_criteria': 'fill'},
+                     'scipy': {'method': 'Nelder-Mead',
+                               'exit_criteria': 'fill'},
+                     'lh_scan': {'batch_size': 512}}
 
     def test_options_set(self):
         for option_name, option_class in config.options.option_classes.items():
