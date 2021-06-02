@@ -22,6 +22,6 @@ examples:
       - obj_f_bunch_matching.py
       - preprocess.py
       - match_parallel.yml
-    result: 15.449707281828443  # 30 evaluations - not close to converged
+    result: 4.2644972852249e-18
 # python_radia_undulator_example takes too long to be run routinely
 
