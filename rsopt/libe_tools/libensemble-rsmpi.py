@@ -19,6 +19,7 @@ server_spec.add_argument("-machinefile", dest="machinefile",
 server_spec.add_argument("-hosts", dest="hosts",
                     help="Host number of rsmpi server")
 
+
 def get_host_from_machinefile(machinefile):
     with open(machinefile) as ff:
         host = ff.readline().strip()
@@ -46,5 +47,4 @@ if out:
 if err:
     sys.stderr.write(err.decode())
     sys.stderr.flush()
-    sys.exit(1)
-sys.exit(0)
+sys.exit(run_status.returncode)
