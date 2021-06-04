@@ -67,6 +67,11 @@ def format_evaluation(sim_specs, container):
     # FUTURE: Type check for container values against spec
     outspecs = sim_specs['out']
     output = np.zeros(1, dtype=outspecs)
+
+    if len(outspecs) == 1:
+        output[output.dtype.names[0]] = container
+        return output
+
     for spec, value in zip(output.dtype.names, container):
         output[spec] = value
 
