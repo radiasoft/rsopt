@@ -217,6 +217,16 @@ class Nsga2(Options):
     #         raise ValueError('{} is not a valid number of objectives for `n_objectives'.format(nobj))
 
 
+class pySOT(Options):
+    NAME = 'pysot'
+    REQUIRED_KEYS = ('exit_criteria',)
+    SOFTWARE_OPTIONS = {}
+
+    def __init__(self):
+        super().__init__()
+        self.nworkers = 2
+
+
 class Mesh(Options):
     NAME = 'mesh_scan'
     REQUIRED_KEYS = ()
@@ -244,6 +254,7 @@ option_classes = {
     'nsga2': Nsga2,
     'dfols': Dfols,
     'scipy': Scipy,
+    'pysot': pySOT,
     'mesh_scan': Mesh,
     'lh_scan': LH
 }

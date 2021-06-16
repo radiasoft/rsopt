@@ -164,6 +164,21 @@ Currently just the NLopt
 algorithms are available for use with APOSMM in rsopt. That is: ``LN_NELDERMEAD``, ``LN_BOBYQA``, ``LN_SBPLX``, ``LN_COBYLA``,
 ``LN_NEWUOA``, and ``LD_MMA``. To use LN_NELDERMEAD for example one should have ``method: nlopt.LN_NELDERMEAD``.
 
+
+``pySOT``: Python Surrogate Optimization Toolbox (pySOT) [5]_ implements a collection of surrogate optimization algorithms
+with several variations in surrogate model, optimization strategy, and experimental plan provided.
+pySOT includes support for asynchronous use of all optimization algorithms which is utilized by rsopt.
+
+
+Currently rsopt
+implements a fixed choice for the three components and  uses:
+``RBFInterpolant`` for the surrogate model, ``SRBFStrategy`` for the strategy, and ``SymmetricLatinHypercube`` for the
+experimental plan. The user can pass the following through ``software_options`` to configure pySOT:
+
+    - ``num_pts``: Sets the number of points that will be evaluated as part of the experimental planning phase before
+      before optimization begins. Defaults to 2 * (PARAMETER_DIMENSION + 1) if not set.
+
+
 Parameter Scans
 ---------------
 
@@ -223,3 +238,4 @@ Other useful helper commands.
 .. [2] https://www.scipy.org/
 .. [3] https://github.com/numericalalgorithmsgroup/dfols
 .. [4] https://doi.org/10.1007/s12532-017-0131-4
+.. [5] https://github.com/dme65/pySOT
