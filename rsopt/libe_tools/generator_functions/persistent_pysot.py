@@ -1,8 +1,7 @@
-from multiprocessing import Event, Process, Queue
 import numpy as np
 
 
-from poap.controller import ThreadController, ProcessWorkerThread
+from poap.controller import EvalRecord
 from pySOT.experimental_design import SymmetricLatinHypercube
 from pySOT.strategy import SRBFStrategy
 from pySOT.surrogate import CubicKernel, LinearTail, RBFInterpolant
@@ -29,45 +28,48 @@ class Problem(OptimizationProblem):
         pass
 
 
-class Manager(ProcessWorkerThread):
-
-    #     communicator = communicator_pysot
-
-    def __init__(self, controller, comm_queue, parent_can_read, child_can_read, my_id):
-        super().__init__(controller)
-        self.local_comm_queue = comm_queue
-        self.local_parent_can_read = parent_can_read
-        self.local_child_can_read = child_can_read
-        self.local_id = my_id
-
-    def handle_eval(self, x):
-        f = communicator_pysot(x.params, self.local_id, self.local_comm_queue, self.local_parent_can_read, self.local_child_can_read)
-        self.finish_success(x, f)
-
-
-def run_pysot_in_process(dim, lb, ub, max_evals, num_pts, num_threads, comm_queues, parent_can_read, child_can_read):
+def configure_pysot(problem, num_pts, max_evals):
     # pySOT Setup
-    # sys.stdout = open(str(os.getpid()) + ".out", "w")
-    # sys.stderr = open(str(os.getpid()) + ".err", "w")
 
-    strategy_manager = Problem(dim, lb, ub)
-
-    rbf = RBFInterpolant(dim=dim, lb=lb, ub=ub, kernel=CubicKernel(), tail=LinearTail(dim))
-    slhd = SymmetricLatinHypercube(dim=dim, num_pts=num_pts)
-    # Create a strategy and a controller
-    controller = ThreadController()
-    controller.strategy = SRBFStrategy(
-        max_evals=max_evals, opt_prob=strategy_manager, exp_design=slhd, surrogate=rbf, asynchronous=True
+    surrogate = RBFInterpolant(dim=problem.dim, lb=problem.lb, ub=problem.ub,
+                               kernel=CubicKernel(), tail=LinearTail(problem.dim))
+    exp_design = SymmetricLatinHypercube(dim=problem.dim, num_pts=num_pts)
+    strategy = SRBFStrategy(
+        max_evals=max_evals, opt_prob=problem, exp_design=exp_design, surrogate=surrogate, asynchronous=True
     )
 
-    # Launch the threads and give them access to the objective function
-    for i in range(num_threads):
-        controller.launch_worker(Manager(controller, comm_queues[i], parent_can_read[i], child_can_read[i], i))
+    return strategy
 
-    controller.run()
+
+def get_proposal(strategy):
+    """Get a new action proposal from strategy and perform setup if it is an eval action. Will return action or None."""
+    new_action = strategy.propose_action()
+    if new_action:
+        if new_action.action == 'eval':
+            new_action.record = EvalRecord(new_action.args, extra_args=None, status='pending')
+            # new_action.record.worker = 1
+            new_action.accept()
+
+    return new_action
 
 
 def persistent_pysot(H, persis_info, gen_specs, libE_info):
+    """
+    Asynchronous evaluation with pySOT
+
+    Notes:
+     If a large number of experimental points (num_pts) are requested relative to max_evals
+      (there is also a dependence on nworkers here) then pySOT may call
+     for a termination before max_eval number of points are evaluated by libEnsemble. This is because pySOT
+     preallocates num_pts for evaluation which are part of the max_eval budget. Once dim+1 points are evaluated though
+     pySOT can start providing optimization points, even if there are still may experimental points left. This results
+     in max_eval budget being reached without the full number of evaluations being carried out.
+    :param H:
+    :param persis_info:
+    :param gen_specs:
+    :param libE_info:
+    :return:
+    """
 
     # libEnsemble Setup
     libE_comm = libE_info['comm']
@@ -77,120 +79,88 @@ def persistent_pysot(H, persis_info, gen_specs, libE_info):
     ub = gen_specs['user']['ub']
     # pySOT causes problems terminating - setting max evals to always be larger by the thread count
     #  should guarantee that pySOT will run until libEnsemble stops the process
-    max_evals = gen_specs['user']['max_evals'] + gen_specs['user']['threads']
+    max_evals = gen_specs['user']['max_evals']
     num_pts = gen_specs['user'].get('num_pts') or 2 * (dim + 1)
-    num_threads = gen_specs['user']['threads']
+    assert max_evals >= num_pts, f"Number of initial evaluation points: num_pts={num_pts} is inconsistent " \
+                                 f"with maximum allowed evaluations: max_evals={max_evals}"
 
-    # Communication Setup
-    comm_queues, parent_can_read, child_can_read = [], [], []
-    for i in range(num_threads):
-        new_queue = Queue()
-        comm_queues.append(new_queue)
-
-        parent_read_event = Event()
-        parent_can_read.append(parent_read_event)
-
-        child_read_event = Event()
-        child_can_read.append(child_read_event)
+    problem = Problem(dim, lb, ub)
 
     # Start pySOT
-    print('Starting pySOT optimization')
-    result = Process(target=run_pysot_in_process, args=(dim, lb, ub, max_evals, num_pts, num_threads,
-                                                        comm_queues, parent_can_read, child_can_read,))
-    result.start()
+    pysot = configure_pysot(problem, num_pts, max_evals)
+    surrogate_tail_dim = pysot.surrogate.ntail
+
+    assert surrogate_tail_dim <= num_pts, f"Insufficient initial points to construct surrogate. " \
+                                          f"Set num_pts > {surrogate_tail_dim}"
+
     try:
         # Initialize Worker communication and Begin
         local_H = np.zeros(len(H), dtype=H.dtype)
-        # Stores assignments of sim_id to thread Manager ID
-        thread_log = {}
-        start_data = []  # Entries are tuples of (x, thread_id)
+        proposals = []  # Entries are proposals from Strategy
 
-        # Get initial round of points from all pySOT threads
-        for i in range(num_threads):
-            data_in = get_pysot_point(comm_queues[i])
-            start_data.append(data_in)
+        for _ in range(num_pts):
+            # We do not check for terminations during the first round
+            new_action = get_proposal(pysot)
+            proposals.append(new_action)
 
-        add_to_local_H(local_H, start_data, thread_log)
-        send_mgr_worker_msg(libE_comm, local_H[-len(start_data):][[i[0] for i in gen_specs['out']]])
+        add_to_local_H(local_H, proposals)
+        send_mgr_worker_msg(libE_comm, local_H[-len(proposals):][[i[0] for i in gen_specs['out']]])
 
         # Start work loop
+        stop_generator = False
+
         while True:
             # Get results back from libE workers
             tag, Work, calc_in = get_mgr_worker_msg(libE_comm)
             if tag in [STOP_TAG, PERSIS_STOP]:
-                result.terminate()
+                break
+            # Send all results to pySOT that we got from libE workers
+            for row in calc_in:
+                for i in range(len(proposals)):
+                    if proposals[i].record.sim_id == row['sim_id']:
+                        break
+                else:
+                    raise ValueError("No matching sim_id found in proposal list")
+
+                proposal = proposals.pop(i)
+                proposal.record.complete(row['f'])
+
+            # Provide new evaluations for workers to work on
+            new_proposals = 0
+            for _ in range(calc_in.size):
+                # Check if it is safe to request a new point
+                if pysot.num_evals > surrogate_tail_dim or len(pysot.batch_queue) > 0:
+                    # pysot may return a terminate proposal or None at this point
+                    new_action = get_proposal(pysot)
+                    if not new_action or new_action.action == 'terminate':
+                        stop_generator = True
+
+                    proposals.append(new_action)
+                    new_proposals += 1
+
+            if stop_generator:
+                # If there is a batch of proposals that includes a terminate we don't process any proposals in batch
                 break
 
-            # Send all results to pySOT that we got from libE workers
-            data_for_workers = []
-            for row in calc_in:
-                thread_id = thread_log.pop(row['sim_id'])
-                # threads are started sequentially so their id is the index in comm lists
-                give_pysot_result(row['f'], comm_queues[thread_id],
-                                  parent_can_read[thread_id], child_can_read[thread_id])
-                # get new point to evaluate from the thread
-                data_in = get_pysot_point(comm_queues[thread_id])
-                data_for_workers.append(data_in)
-
             # Send new points to allocator - if any
-            if data_for_workers:
-                add_to_local_H(local_H, data_for_workers, thread_log)
-                send_mgr_worker_msg(libE_comm, local_H[-len(data_for_workers):][[i[0] for i in gen_specs['out']]])
+            if new_proposals > 0:
+                add_to_local_H(local_H, proposals[-calc_in.size:])
+                send_mgr_worker_msg(libE_comm, local_H[-calc_in.size:][[i[0] for i in gen_specs['out']]])
 
         return local_H, persis_info, FINISHED_PERSISTENT_GEN_TAG
     finally:
-        result.terminate()
+        # TODO: Is there cleanup to do?
+        pass
 
 
-def separate_data_in(data):
-    x_vals, id_vals = [], []
-    for datum in data:
-        x, id = datum
-        x_vals.append(x)
-        id_vals.append(id)
-
-    return x_vals, id_vals
-
-
-def add_to_local_H(local_H, points, log):
-    x, ids = separate_data_in(points)
+def add_to_local_H(local_H, points):
     len_local_H = len(local_H)
     num_pts = len(points)
 
     local_H.resize(len(local_H)+num_pts, refcheck=False)  # Adds num_pts rows of zeros to O
-    local_H['x'][-num_pts:] = x
-    local_H['sim_id'][-num_pts:] = np.arange(len_local_H, len_local_H+num_pts)
+    local_H['x'][-num_pts:] = [point.record.params[0] for point in points]
+    sim_ids = np.arange(len_local_H, len_local_H+num_pts)
+    local_H['sim_id'][-num_pts:] = sim_ids
 
-    for sim_id, id, in zip(local_H['sim_id'][-num_pts:], ids):
-        log[sim_id] = id
-
-
-def get_pysot_point(comm_queue):
-    """This function gets messages from the pySOT communicator for the generator"""
-    return comm_queue.get()
-
-
-def give_pysot_result(f, comm_queue, parent_can_read, child_can_read):
-    """This function gives messages from the generator to the pySOT thread"""
-    parent_can_read.clear()
-
-    comm_queue.put(f)
-
-    child_can_read.set()
-    parent_can_read.wait()
-
-
-def communicator_pysot(x, my_id, comm_queue, parent_can_read, child_can_read):
-    """This communicator is used by pySOT handle_eval to send messages out to the main generator process"""
-    print(f"{my_id} is putting a value in the queue")
-    comm_queue.put((x[0], my_id))
-    print(f"{my_id} has told the parent to read")
-    parent_can_read.set()
-    print(f"{my_id} is going to wait")
-    child_can_read.wait()
-    print(f"{my_id} is free")
-    values = comm_queue.get()
-    print(f"{my_id} got back", values)
-    child_can_read.clear()
-
-    return values
+    for sim_id, point in zip(sim_ids, points):
+        point.record.sim_id = sim_id
