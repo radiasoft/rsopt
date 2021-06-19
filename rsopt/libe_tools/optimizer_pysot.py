@@ -18,7 +18,6 @@ class PysotOptimizer(optimizer.libEnsembleOptimizer):
                      'ub': self.ub,
                      'dim': self._config.get_dimension(),
                      'max_evals': np.max([val for val in self._config.options.exit_criteria.values()]).astype(int).astype(object),
-                     'threads': self._config.options.nworkers - 1,
                      **self._config.options.software_options}
 
         self.gen_specs.update({'gen_f': persistent_pysot,
@@ -31,3 +30,7 @@ class PysotOptimizer(optimizer.libEnsembleOptimizer):
         self.alloc_specs.update({'alloc_f': only_persistent_gens,
                                  'out': [('given_back', bool)],
                                  'user': {'async_return': True, 'active_recv_gen': True}})
+
+    def _configure_specs(self):
+        self.nworkers = self._config.options.nworkers
+        super(PysotOptimizer, self)._configure_specs()
