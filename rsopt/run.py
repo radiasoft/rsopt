@@ -65,6 +65,14 @@ def nsga2_optimizer(config):
 
     return opt
 
+
+def pysot_optimizer(config):
+    from rsopt.libe_tools.optimizer_pysot import PysotOptimizer
+    opt = PysotOptimizer()
+    opt.load_configuration(config)
+
+    return opt
+
 # These names have to line up with accepted values for setup.execution_type
 # Another place where shared names are imported from common source
 run_modes = {
@@ -72,7 +80,8 @@ run_modes = {
     'dfols': local_optimizer,
     'scipy': local_optimizer,
     'aposmm': aposmm_optimizer,
-    'nsga2': nsga2_optimizer
+    'nsga2': nsga2_optimizer,
+    'pysot': pysot_optimizer
 }
 
 sample_modes = {
