@@ -20,7 +20,7 @@ class DlibOptimizer(optimizer.libEnsembleOptimizer):
                      'workers': self._config.options.nworkers - 1,
                      **self._config.options.software_options}
 
-        self.gen_specs.update({'gen_f': persistent_dlib(),
+        self.gen_specs.update({'gen_f': persistent_dlib,
                                'in': [],
                                'out': gen_out,
                                'user': user_keys})
