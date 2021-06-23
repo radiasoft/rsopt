@@ -123,7 +123,11 @@ def persistent_pysot(H, persis_info, gen_specs, libE_info):
                     raise ValueError("No matching sim_id found in proposal list")
 
                 proposal = proposals.pop(i)
-                proposal.record.complete(row['f'])
+                if np.isnan(row['f']):
+                    print('found nan')
+                    proposal.record.cancel()
+                else:
+                    proposal.record.complete(row['f'])
 
             # Provide new evaluations for workers to work on
             new_proposals = 0

@@ -14,10 +14,10 @@ codes:
         function: six_hump_camel_func
         execution_type: serial
 options:
-  nworkers: 4
+  nworkers: 2
   software: pysot
   software_options:
-    num_pts: 35
+    num_pts: 40
 #  record_interval: 25
   exit_criteria:
-    sim_max: 200
+    sim_max: 50
