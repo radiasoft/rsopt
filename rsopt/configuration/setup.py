@@ -48,11 +48,11 @@ def _get_model_fields(model):
     for i, c in enumerate(model.models.commands):
         if c['_type'] not in command_types:
             command_types.append(c['_type'])
-            commands[c['_type']] = [i]
+            commands[c['_type'].upper()] = [i]
         else:
-            commands[c['_type']].append(i)
+            commands[c['_type'].upper()].append(i)
     for i, e in enumerate(model.models.elements):
-        elements[e['name']] = [i]
+        elements[e['name'].upper()] = [i]
 
     return commands, elements
 
