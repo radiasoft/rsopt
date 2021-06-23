@@ -227,6 +227,16 @@ class pySOT(Options):
         self.nworkers = 2
 
 
+class Dlib(Options):
+    NAME = 'dlib'
+    REQUIRED_KEYS = ('exit_criteria',)
+    SOFTWARE_OPTIONS = {}
+
+    def __init__(self):
+        super().__init__()
+        self.nworkers = 2
+
+
 class Mesh(Options):
     NAME = 'mesh_scan'
     REQUIRED_KEYS = ()
@@ -255,6 +265,7 @@ option_classes = {
     'dfols': Dfols,
     'scipy': Scipy,
     'pysot': pySOT,
+    'dlib': Dlib,
     'mesh_scan': Mesh,
     'lh_scan': LH
 }

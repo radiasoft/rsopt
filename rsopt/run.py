@@ -73,6 +73,15 @@ def pysot_optimizer(config):
 
     return opt
 
+
+def dlib_optimizer(config):
+    from rsopt.libe_tools.optimizer_dlib import DlibOptimizer
+    opt = DlibOptimizer()
+    opt.load_configuration(config)
+
+    return opt
+
+
 # These names have to line up with accepted values for setup.execution_type
 # Another place where shared names are imported from common source
 run_modes = {
@@ -81,7 +90,8 @@ run_modes = {
     'scipy': local_optimizer,
     'aposmm': aposmm_optimizer,
     'nsga2': nsga2_optimizer,
-    'pysot': pysot_optimizer
+    'pysot': pysot_optimizer,
+    'dlib': dlib_optimizer
 }
 
 sample_modes = {
