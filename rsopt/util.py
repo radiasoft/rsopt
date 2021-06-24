@@ -68,7 +68,10 @@ def return_used_nodes():
 
 def return_unused_node():
     """Check where MPI processes are running and return the first unused node from SLURM nodelist"""
-    nodelist_string = os.environ['SLURM_JOB_NODELIST']
+    try:
+        nodelist_string = os.environ['SLURM_JOB_NODELIST']
+    except KeyError:
+        raise KeyError('Cannot find SLURM_JOB_NODELIST. Shifter execution may not be available.')
     allocated_nodes = return_nodelist(nodelist_string)
     used_nodes = return_used_nodes()
 
