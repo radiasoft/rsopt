@@ -1,6 +1,4 @@
-*
 !.gitignore
 !_static/
 !_templates/
-!index.rst
-!configuration.rst
+

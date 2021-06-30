@@ -40,7 +40,7 @@ should be located in the same directory. rsopt will handle reading and parsing b
 parameter sweeps. If multiple workers can be used for the rsopt run then they will always work in separate directories for
 each new job to prevent overwriting files.
 
-
+.. _elegant_name_mangling:
 Output file name mangling
 -------------------------
 
