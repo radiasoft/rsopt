@@ -41,6 +41,7 @@ parameter sweeps. If multiple workers can be used for the rsopt run then they wi
 each new job to prevent overwriting files.
 
 .. _elegant_name_mangling:
+
 Output file name mangling
 -------------------------
 
