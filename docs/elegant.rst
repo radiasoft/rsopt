@@ -41,6 +41,25 @@ parameter sweeps. If multiple workers can be used for the rsopt run then they wi
 each new job to prevent overwriting files.
 
 
+Output file name mangling
+-------------------------
+
+When ``elegant`` input files are written by the Sirepo parser at run time output file names will be changed in the
+rsopt run directories (your original input file copy is not edited). File names are changed to always be in the form of
+``command_name.parameter_name.sdds`` or ``element_name.parameter_name.sdds`` for commands (in a .ele file) or elements
+(in a lattice file) respectively. For example::
+
+    &run_setup
+        sigma = "run1.sig"
+
+Would become::
+
+    &run_setup
+        sigma = "run_setup.sigma.sdds"
+
+This is important to be aware of when writing post-processing scripts and objective functions that will be used during
+your rsopt run to ensure the correct file name is used.
+
 Providing an objective value
 ----------------------------
 When using ``elegant`` as part of an optimization run in rsopt you will need to provide an objective function in the
