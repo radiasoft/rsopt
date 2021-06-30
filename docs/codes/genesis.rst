@@ -53,3 +53,6 @@ Providing an objective value
 When using ``elegant`` as part of an optimization run in rsopt you will need to provide an objective function in the
 ``options.objective_function`` field. The objective function is always executed in the same directory that ``elegant``
 was run in for each new job and so can easily be used to read any output from elegant to perform required calculations.
+
+.. [1] http://genesis.web.psi.ch/
+.. [2] https://github.com/slaclab/lume-genesis
