@@ -1,3 +1,4 @@
+from pykern import pkrunpy
 import sys
 import os
 
@@ -69,7 +70,7 @@ class Options:
         if len(self.objective_function) == 2:
             module_path, function = self.objective_function
             sys.path.append(os.getcwd())
-            module = __import__(module_path, fromlist=[function])
+            module = pkrunpy.run_path_as_module(module_path)
             function = getattr(module, function)
         else:
             function = None
