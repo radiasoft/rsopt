@@ -1,9 +1,9 @@
 .. _opal_ref:
 
 ``OPAL``
-===========
+========
 
-The particle accelerator tracking code ``OPAL`` [1]_ has special support in rsopt provided by the Sirepo library.
+The particle accelerator tracking code ``OPAL`` [1]_ [2]_ has special support in rsopt provided by the Sirepo library.
 Using Sirepo, rsopt can parse ``OPAL`` input files, automatically replacing and updating values given
 for parameters and settings with no additional work required by the user. An example setup is shown below::
 
@@ -35,3 +35,14 @@ within the given input file (the CALL command is not currently supported by the 
 rsopt will handle reading and parsing both files during optimization or
 parameter sweeps. If multiple workers can be used for the rsopt run then they will always work in separate directories for
 each new job to prevent overwriting files.
+
+Providing an objective value
+----------------------------
+When using ``elegant`` as part of an optimization run in rsopt you will need to provide an objective function in the
+``options.objective_function`` field. The objective function is always executed in the same directory that ``elegant``
+was run in for each new job and so can easily be used to read any output from elegant to perform required calculations.
+
+
+.. [1] Adelmann, Andreas, et al. "OPAL a versatile tool for charged particle accelerator simulations."
+       arXiv preprint arXiv:1905.06654 (2019).
+.. [2] https://gitlab.psi.ch/OPAL/src/-/wikis/home

@@ -22,7 +22,7 @@ These are special commands that must be included in the ``setup`` portion of the
     job. Each file should be entered as a string with entries that will be formatted by rsopt at run time. The variable
     name for each string should be listed in ``file_mapping``.
 
-* ``file_mapping``: A dictionary that describes how the variables from ``file_definitions`` will be written to files
+* ``file_mapping``: A mapping that describes how the variables from ``file_definitions`` will be written to files
     at run time for each job. The keys of the dictionary should be the variables from ``file_defitions``. The value
     of each key should be the desired file name without any additional path information. rsopt will handle the path
     setup for the files.

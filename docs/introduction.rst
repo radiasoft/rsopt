@@ -14,5 +14,6 @@ provided for codes with input file parsers, as well as Python functions.
 
 * :ref:`Python<python_ref>`
 * :ref:`elegant<elegant_ref>`
+* :ref:`OPAL<opal_ref>`
 * :ref:`Genesis1.3<genesis_ref>`
 * :ref:`User<user_ref>`
