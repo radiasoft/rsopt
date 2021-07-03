@@ -47,9 +47,9 @@ def _get_model_fields(model):
     for i, c in enumerate(model.models.commands):
         if c['_type'] not in command_types:
             command_types.append(c['_type'])
-            commands[c['_type'].upper()] = [i]
+            commands[c['_type']] = [i]
         else:
-            commands[c['_type'].upper()].append(i)
+            commands[c['_type']].append(i)
     for i, e in enumerate(model.models.elements):
         elements[e['name'].upper()] = [i]
 
@@ -270,28 +270,32 @@ class Elegant(Setup):
     NAME = 'elegant'
 
     def _edit_input_file_schema(self, kwarg_dict):
-        # Name cases:
-        # ELEMENT NAMES
+        # Name cases in the Sirepo model:
+        # eLeMENt NAmeS
         # ELEMENT TYPES
         # element parameters
         # command _type
         # command parameters
 
-        commands, elements = _get_model_fields(self.input_file_model)
+        # While exact element name case is kept at model read all elements are written to upper case. I think elegant
+        # doesn't distinguish case anyway. For the element parser we'll assume element names are unique regardless of
+        # case.
+
+        commands, elements = _get_model_fields(self.input_file_model)  # modifies element name case to UPPER
         model = deepcopy(self.input_file_model)
 
         for n, v in kwarg_dict.items():
             field, index, name = _parse_name(n)
-            name = name.lower()  # element/command parameters are always lower
+
             if field.lower() in commands.keys():
                 assert index or len(commands[field.lower()]) == 1, \
                     "{} is not unique in {}. Please add identifier".format(n, self.setup['input_file'])
                 id = commands[field.lower()][int(index) - 1 if index else 0]
-                model.models.commands[id][name] = v
-            elif field.upper() in elements:
+                model.models.commands[id][name.lower()] = v
+            elif field.upper() in elements:  # Sirepo maintains element name case so we standardize to upper here
                 id = elements[field.upper()][0]
-                if model.models.elements[id].get(name) is not None:
-                    model.models.elements[id][name] = v
+                if model.models.elements[id].get(name.lower()) is not None:
+                    model.models.elements[id][name.lower()] = v
                 else:
                     ele_type = model.models.elements[id]["type"]
                     ele_name = model.models.elements[id]["name"]
