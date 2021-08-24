@@ -254,7 +254,7 @@ def set_dtype_dimension(dtype, dimension):
     if len(dtype) == 2:
         return dtype
     elif len(dtype) == 3:
-        new_dtype = (dtype[0], dtype[1], dimension)
+        new_dtype = dtype[0], dtype[1], (dimension,)
         return new_dtype
     else:
         raise IndexError('size of dtype cannot be set')
