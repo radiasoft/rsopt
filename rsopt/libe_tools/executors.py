@@ -33,7 +33,7 @@ def register_rsmpi_executor(hosts='auto', cores_on_node=None, **kwargs):
 
     _generate_rsmpi_node_file(hosts)
 
-    cores_on_node = (16, 16) if not cores_on_node else cores_on_node
+    cores_on_node = (20, 20) if not cores_on_node else cores_on_node
     customizer = {'mpi_runner': 'mpich',
                   'runner_name': 'libensemble-rsmpi',
                   'cores_on_node': cores_on_node,

@@ -11,7 +11,6 @@ from pykern import pkresource
 from libensemble.executors.mpi_executor import MPIExecutor
 from rsopt.libe_tools.executors import register_rsmpi_executor
 
-
 _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
 _TEMPLATE_PATH = pkio.py_path(pkresource.filename(''))
@@ -83,7 +82,6 @@ def _shifter_parse_model(name, input_file):
         d = None
 
     return util.broadcast(d)
-
 
 
 _SETUP_READERS = {
@@ -233,7 +231,8 @@ class Python(Setup):
         return None
 
     def generate_input_file(self, kwarg_dict, directory):
-        is_parallel =  self.setup.get('execution_type', False) == 'parallel' or self.setup.get('execution_type', False) == 'rsmpi'
+        is_parallel = self.setup.get('execution_type', False) == 'parallel' or self.setup.get('execution_type',
+                                                                                              False) == 'rsmpi'
         if not is_parallel:
             return None
 
@@ -271,28 +270,32 @@ class Elegant(Setup):
     NAME = 'elegant'
 
     def _edit_input_file_schema(self, kwarg_dict):
-        # Name cases:
-        # ELEMENT NAMES
+        # Name cases in the Sirepo model:
+        # eLeMENt NAmeS
         # ELEMENT TYPES
         # element parameters
         # command _type
         # command parameters
 
-        commands, elements = _get_model_fields(self.input_file_model)
+        # While exact element name case is kept at model read all elements are written to upper case. I think elegant
+        # doesn't distinguish case anyway. For the element parser we'll assume element names are unique regardless of
+        # case.
+
+        commands, elements = _get_model_fields(self.input_file_model)  # modifies element name case to UPPER
         model = deepcopy(self.input_file_model)
 
         for n, v in kwarg_dict.items():
             field, index, name = _parse_name(n)
-            name = name.lower()  # element/command parameters are always lower
+
             if field.lower() in commands.keys():
                 assert index or len(commands[field.lower()]) == 1, \
                     "{} is not unique in {}. Please add identifier".format(n, self.setup['input_file'])
-                id = commands[field.lower()][int(index)-1 if index else 0]
-                model.models.commands[id][name] = v
-            elif field.upper() in elements:
+                id = commands[field.lower()][int(index) - 1 if index else 0]
+                model.models.commands[id][name.lower()] = v
+            elif field.upper() in elements:  # Sirepo maintains element name case so we standardize to upper here
                 id = elements[field.upper()][0]
-                if model.models.elements[id].get(name) is not None:
-                    model.models.elements[id][name] = v
+                if model.models.elements[id].get(name.lower()) is not None:
+                    model.models.elements[id][name.lower()] = v
                 else:
                     ele_type = model.models.elements[id]["type"]
                     ele_name = model.models.elements[id]["name"]
@@ -314,7 +317,6 @@ class Opal(Elegant):
     SERIAL_RUN_COMMAND = 'opal'
     PARALLEL_RUN_COMMAND = 'opal'
     NAME = 'opal'
-
 
 
 class User(Python):
@@ -353,7 +355,7 @@ class User(Python):
 
 
 class Genesis(Elegant):
-    __REQUIRED_KEYS = ('input_file', )
+    __REQUIRED_KEYS = ('input_file',)
     NAME = 'genesis'
     SERIAL_RUN_COMMAND = 'genesis'
     PARALLEL_RUN_COMMAND = 'genesis_mpi'
@@ -386,23 +388,19 @@ class Genesis(Elegant):
     def generate_input_file(self, kwarg_dict, directory):
         model = self._edit_input_file_schema(kwarg_dict)
         model.configure_genesis(workdir='.')
-        
+
         model.write_input_file()
         model.write_beam()
         model.write_lattice()
-        
+
         # rad and dist files are not written by lume-genesis so we symlink them in if they exist in start directory
         for filename in [model['distfile'], model['radfile']]:
             full_path = os.path.join(model.original_path, filename)
             if os.path.isfile(full_path):
                 _create_sym_links(os.path.relpath(full_path))
-            
-            
-        
+
         # lume-genesis hard codes the input file name it write to as "genesis.in"
         os.rename('genesis.in', self.setup['input_file'])
-
-
 
 
 # This maybe should be linked to rsopt.codes._SUPPORTED_CODES,

@@ -1,4 +1,6 @@
 from pykern import pkrunpy
+import sys
+import os
 
 
 class Options:
@@ -67,6 +69,7 @@ class Options:
     def get_objective_function(self):
         if len(self.objective_function) == 2:
             module_path, function = self.objective_function
+            sys.path.append(os.getcwd())
             module = pkrunpy.run_path_as_module(module_path)
             function = getattr(module, function)
         else:
