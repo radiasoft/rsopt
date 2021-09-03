@@ -1,0 +1,23 @@
+codes:
+  - python:
+      parameters:
+        x:
+          min: -3.
+          max: 3.
+          start: 0.08
+        y:
+          min: -2.
+          max: 2.
+          start: -0.7
+      setup:
+        input_file: six_hump_camel.py
+        function: six_hump_camel_func
+        execution_type: serial
+options:
+  nworkers: 2
+  software: pysot
+  software_options:
+    num_pts: 40
+#  record_interval: 25
+  exit_criteria:
+    sim_max: 50

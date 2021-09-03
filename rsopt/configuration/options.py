@@ -1,3 +1,4 @@
+from pykern import pkrunpy
 import sys
 import os
 
@@ -69,7 +70,7 @@ class Options:
         if len(self.objective_function) == 2:
             module_path, function = self.objective_function
             sys.path.append(os.getcwd())
-            module = __import__(module_path, fromlist=[function])
+            module = pkrunpy.run_path_as_module(module_path)
             function = getattr(module, function)
         else:
             function = None
@@ -219,6 +220,26 @@ class Nsga2(Options):
     #         raise ValueError('{} is not a valid number of objectives for `n_objectives'.format(nobj))
 
 
+class pySOT(Options):
+    NAME = 'pysot'
+    REQUIRED_KEYS = ('exit_criteria',)
+    SOFTWARE_OPTIONS = {}
+
+    def __init__(self):
+        super().__init__()
+        self.nworkers = 2
+
+
+class Dlib(Options):
+    NAME = 'dlib'
+    REQUIRED_KEYS = ('exit_criteria',)
+    SOFTWARE_OPTIONS = {}
+
+    def __init__(self):
+        super().__init__()
+        self.nworkers = 2
+
+
 class Mesh(Options):
     NAME = 'mesh_scan'
     REQUIRED_KEYS = ()
@@ -246,6 +267,8 @@ option_classes = {
     'nsga2': Nsga2,
     'dfols': Dfols,
     'scipy': Scipy,
+    'pysot': pySOT,
+    'dlib': Dlib,
     'mesh_scan': Mesh,
     'lh_scan': LH
 }
