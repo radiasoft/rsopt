@@ -1,7 +1,9 @@
 ### rsopt
 
 rsopt is a Python framework for testing and running black box optimization problems. It is intended to provide a 
-high degree of modularity in user choice of optimization algorithms and code execution methods. 
+high degree of modularity in user choice of optimization algorithms and code execution methods. Run management and 
+simulation execution is handled through the xSDK library [libEnsemble](https://github.com/Libensemble/libensemble) to provide platform-independent execution and scaling
+to massively parallel systems.
 This allows for users to easily move their code execution between computational 
 environments and utilize algorithms from multiple libraries without having to refactor their own code.
 
