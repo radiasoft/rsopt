@@ -165,7 +165,7 @@ algorithms are available for use with APOSMM in rsopt. That is: ``LN_NELDERMEAD`
 ``LN_NEWUOA``, and ``LD_MMA``. To use LN_NELDERMEAD for example one should have ``method: nlopt.LN_NELDERMEAD``.
 
 
-``pySOT``: Python Surrogate Optimization Toolbox (pySOT) [5]_ implements a collection of surrogate optimization algorithms
+``pysot``: Python Surrogate Optimization Toolbox (pySOT) [5]_ implements a collection of surrogate optimization algorithms
 with several variations in surrogate model, optimization strategy, and experimental plan provided.
 pySOT includes support for asynchronous use of all optimization algorithms which is utilized by rsopt.
 
@@ -177,7 +177,12 @@ experimental plan. The user can pass the following through ``software_options`` 
 
     - ``num_pts``: Sets the number of points that will be evaluated as part of the experimental planning phase before
       before optimization begins. Defaults to 2 * (PARAMETER_DIMENSION + 1) if not set.
+Also supports use of arbitrary numbers of workers ``nworkers`` in ``options``.
 
+``dlib``: Implements the global_function_search method from dlib [6]_. This method is based on using the approximated
+ Lipschitz constant to define an upper bound on the search space that guides the optimization. This method is particularly
+attractive because it requires no hyper parameter choices. For a very nice description of the method's operation see
+here_. Supports use of arbitrary numbers of workers ``nworkers`` in ``options``.
 
 Parameter Scans
 ---------------
@@ -239,3 +244,5 @@ Other useful helper commands.
 .. [3] https://github.com/numericalalgorithmsgroup/dfols
 .. [4] https://doi.org/10.1007/s12532-017-0131-4
 .. [5] https://github.com/dme65/pySOT
+.. [6] https://github.com/davisking/dlib
+.. _here http://blog.dlib.net/2017/12/a-global-optimization-algorithm-worth.html
