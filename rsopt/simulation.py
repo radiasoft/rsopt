@@ -100,6 +100,9 @@ class SimulationFunction:
 
         x = get_x_from_H(H, self.sim_specs)
 
+        timeout_sec = 600.
+        stop_job = False
+
         for job in self.jobs:
             # Generate input values
             _, kwargs = compose_args(x, job.parameters, job.settings)
@@ -130,6 +133,12 @@ class SimulationFunction:
                             sim_status = TASK_FAILED
                             self.J['status'] = sim_status
                             break
+                        elif task.runtime > timeout_sec:
+                            self.log.warning('Task Timed out, aborting Job chain')
+                            sim_status = TASK_FAILED
+                            task.kill()  # Timeout
+                            stop_job = True
+                            break
                         else:
                             self.log.warning("Unknown task failure")
                             sim_status = TASK_FAILED
@@ -142,6 +151,9 @@ class SimulationFunction:
                 # NOTE: Right now f is not passed to the objective function. Would need to go inside J. Or pass J into
                 #       function job.execute(**kwargs)
 
+            if stop_job:
+                break
+
             if job.output_distribution:
                 self.switchyard = rsopt.conversion.create_switchyard(job.output_distribution, job.code)
                 self.J['switchyard'] = self.switchyard
@@ -150,7 +162,8 @@ class SimulationFunction:
                 for f_post in job._setup._postprocess:
                     f_post(self.J)
 
-        if sim_status == WORKER_DONE:
+        # TODO: Failures other than timeout do not interrupt the job chain right now
+        if sim_status == WORKER_DONE and not stop_job:
             # Use objective function is present
             if self.objective_function:
                 val = self.objective_function(self.J)
