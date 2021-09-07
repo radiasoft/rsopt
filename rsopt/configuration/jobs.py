@@ -121,7 +121,12 @@ class Job:
             self._setup.parse(name, value)
 
         # Setup for Executor
-        is_parallel = (self.setup.get('cores', 1) > 1) & (self.setup.get('execution_type') != 'serial')
+        is_parallel = ((self.setup.get('cores', 1) > 1) & (self.setup.get('execution_type') != 'serial')) or \
+                        self.setup.get('force_executor')
+        # TODO: Probably a cleaner way of making sure cores is set for this case
+        if self.setup.get('force_executor') and not self.setup.get('cores'):
+            self.setup['cores'] = 1
+
         if (not is_parallel) & (self.setup.get('cores', 1) > 1):
             print('Warning! serial execution requested with more than 1 core. Serial execution will be used.')
         self.full_path = self._setup.get_run_command(is_parallel=is_parallel)
