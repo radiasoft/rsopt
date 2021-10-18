@@ -62,9 +62,11 @@ class Job:
     @property
     def parameters(self):
         return self._parameters.parameters
+
     @property
     def settings(self):
         return self._settings.settings
+
     @property
     def setup(self):
         if self._setup:
@@ -92,9 +94,6 @@ class Job:
     @property
     def post_process(self):
         return self._setup.setup.get('postprocess')
-    @property
-    def temp_dir(self):
-        return self._setup.setup.get('temporary_directory')
 
     @property
     def timeout(self):

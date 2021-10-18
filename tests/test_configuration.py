@@ -82,6 +82,8 @@ class TestOptionsReaders(unittest.TestCase):
                                'exit_criteria': 'fill'},
                      'aposmm': {'method': 'LN_COBYLA',
                                 'exit_criteria': 'fill'},
+                     'pysot': {'exit_criteria': 'fill'},
+                     'dlib': {'exit_criteria': 'fill'},
                      'mesh_scan': {},
                      'nsga2': {'n_objectives': 2,
                                'exit_criteria': 'fill'},

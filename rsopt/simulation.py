@@ -1,9 +1,7 @@
 import logging
 import time
 import numpy as np
-import tempfile
 import os
-import shutil
 import rsopt.conversion
 from libensemble.message_numbers import WORKER_DONE, WORKER_KILL, TASK_FAILED
 from libensemble.executors.executor import Executor
@@ -134,10 +132,6 @@ class SimulationFunction:
                             sim_status = WORKER_DONE
                             self.J['status'] = sim_status
                             f = None
-                            if job.temp_dir:
-                                for filename in os.listdir(temp_dir.name):
-                                    shutil.copyfile(os.path.join(temp_dir.name, filename), os.path.join(os.getcwd(), filename))
-                                temp_dir.cleanup()
                             break
                         elif task.state == 'FAILED':
                             sim_status = TASK_FAILED
