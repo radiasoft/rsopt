@@ -92,6 +92,14 @@ class Job:
     @property
     def post_process(self):
         return self._setup.setup.get('postprocess')
+    @property
+    def temp_dir(self):
+        return self._setup.setup.get('temporary_directory')
+
+    @property
+    def timeout(self):
+        timeout =  self._setup.setup.get('timeout') or 1e10
+        return timeout
 
     @parameters.setter
     def parameters(self, parameters):

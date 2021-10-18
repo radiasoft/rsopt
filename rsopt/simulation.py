@@ -1,6 +1,9 @@
 import logging
 import time
 import numpy as np
+import tempfile
+import os
+import shutil
 import rsopt.conversion
 from libensemble.message_numbers import WORKER_DONE, WORKER_KILL, TASK_FAILED
 from libensemble.executors.executor import Executor
@@ -100,8 +103,7 @@ class SimulationFunction:
 
         x = get_x_from_H(H, self.sim_specs)
 
-        timeout_sec = 600.
-        stop_job = False
+        halt_job_sequence = False
 
         for job in self.jobs:
             # Generate input values
@@ -114,8 +116,12 @@ class SimulationFunction:
             # Generate input files for simulation
             job._setup.generate_input_file(kwargs, '.')  # TODO: Worker needs to be in their own directory
             if self.switchyard and job.input_distribution:
+                if os.path.exists(job.input_distribution):
+                    os.remove(job.input_distribution)
                 self.switchyard.write(job.input_distribution, job.code)
-
+            
+            job_timeout_sec = job.timeout
+            
             if job.executor:
                 # MPI Job or non-Python executable
                 exctr = Executor.executor
@@ -128,22 +134,26 @@ class SimulationFunction:
                             sim_status = WORKER_DONE
                             self.J['status'] = sim_status
                             f = None
+                            if job.temp_dir:
+                                for filename in os.listdir(temp_dir.name):
+                                    shutil.copyfile(os.path.join(temp_dir.name, filename), os.path.join(os.getcwd(), filename))
+                                temp_dir.cleanup()
                             break
                         elif task.state == 'FAILED':
                             sim_status = TASK_FAILED
                             self.J['status'] = sim_status
-                            break
-                        elif task.runtime > timeout_sec:
-                            self.log.warning('Task Timed out, aborting Job chain')
-                            sim_status = TASK_FAILED
-                            task.kill()  # Timeout
-                            stop_job = True
                             break
                         else:
                             self.log.warning("Unknown task failure")
                             sim_status = TASK_FAILED
                             self.J['status'] = sim_status
                             break
+                    elif task.runtime > job_timeout_sec:
+                        self.log.warning('Task Timed out, aborting Job chain')
+                        sim_status = TASK_FAILED
+                        task.kill()  # Timeout
+                        halt_job_sequence = True
+                        break
             else:
                 # Serial Python Job
                 f = job.execute(**kwargs)
@@ -151,7 +161,7 @@ class SimulationFunction:
                 # NOTE: Right now f is not passed to the objective function. Would need to go inside J. Or pass J into
                 #       function job.execute(**kwargs)
 
-            if stop_job:
+            if halt_job_sequence:
                 break
 
             if job.output_distribution:
@@ -163,7 +173,7 @@ class SimulationFunction:
                     f_post(self.J)
 
         # TODO: Failures other than timeout do not interrupt the job chain right now
-        if sim_status == WORKER_DONE and not stop_job:
+        if sim_status == WORKER_DONE and not halt_job_sequence:
             # Use objective function is present
             if self.objective_function:
                 val = self.objective_function(self.J)
