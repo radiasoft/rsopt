@@ -63,9 +63,9 @@ your rsopt run to ensure the correct file name is used.
 
 Providing an objective value
 ----------------------------
-When using ``elegant`` as part of an optimization run in rsopt you will need to provide an objective function in the
+When using ``elegant`` as the final code of an optimization run in rsopt you will need to provide an objective function in the
 ``options.objective_function`` field. The objective function is always executed in the same directory that ``elegant``
-was run in for each new job and so can easily be used to read any output from elegant to perform required calculations.
+was run in for each new job and so can easily be used to read any output from ``elegant`` to perform required calculations.
 
 
 .. [1]  M. Borland, ”elegant: A Flexible SDDS-Compliant Code for Accelerator Simulation,” AdvancedPhoton Source LS-287, September 2000.

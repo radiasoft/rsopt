@@ -38,9 +38,9 @@ each new job to prevent overwriting files.
 
 Providing an objective value
 ----------------------------
-When using ``elegant`` as part of an optimization run in rsopt you will need to provide an objective function in the
-``options.objective_function`` field. The objective function is always executed in the same directory that ``elegant``
-was run in for each new job and so can easily be used to read any output from elegant to perform required calculations.
+When using ``opal`` as the final code of an optimization run in rsopt you will need to provide an objective function in the
+``options.objective_function`` field. The objective function is always executed in the same directory that ``opal``
+was run in for each new job and so can easily be used to read any output from ``opal`` to perform required calculations.
 
 
 .. [1] Adelmann, Andreas, et al. "OPAL a versatile tool for charged particle accelerator simulations."
