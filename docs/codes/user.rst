@@ -27,3 +27,5 @@ These are special commands that must be included in the ``setup`` portion of the
     of each key should be the desired file name without any additional path information. rsopt will handle the path
     setup for the files.
 
+The usual setup for serial or parallel execution may also be included in ``setup`` with ``user``. See
+* :ref:`Execution Methods<exec_methods>` for a description of these options.
