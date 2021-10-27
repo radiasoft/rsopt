@@ -16,7 +16,8 @@ pksetup.setup(
         'libEnsemble',
         'numpy',
         'nlopt',
-        'mpmath'
+        'mpmath',
+        'docutils==0.17'  # docutils>=0.18 may be breaking documentation build
     ],
     extras_require={
         'nersc': ['rsbeams@git+https://github.com/radiasoft/rsbeams',
