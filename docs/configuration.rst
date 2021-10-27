@@ -90,48 +90,19 @@ This corresponds to the input for the ``-n`` flag in the usual ``mpiexec`` comma
 
 .. _jupyter.radiasoft.org: https://jupyter.radiasoft.org/
 
+Options Block
+-------------
+The ``options`` block is used to select what algorithm will be used for the optimization or parameter scan
+and is where configuration related to broader rsopt run may be set. At a minimum it is normally required that ``software``
+be set under the options block. For example::
+
+    ...
+    options:
+        software: mesh_scan
+
+For a detailed description of available options see :ref:`Options<options_ref>`and for a detailed list of available ``software`` see :ref:`Software<opt_software>`
+
 Accepted Codes
 --------------
-Currently accepted code names are:
-
-* ``python``
-    See :ref:`here<python_ref>` for details on using your Python code as an evaluation function in rsopt.::
-
-        codes:
-            - python:
-                setup:
-                    input_file: /a_path/a_module.py
-                    function: foo  # Name of a function in `input_file` to be executed
-                    execution_type: serial  # Choose execution mode
-
-    Required ``setup`` fields for ``python`` are:
-
-    * ``input_file``: The path to a Python module, either absolute or relative to execution directory.
-    * ``function``: Name of a function in `input_file` to be executed
-    * ``execution_type``: Method to use when executing the Python code. See :ref:`Execution Methods<exec_methods>` for accepted types and any additional requirements.
-
-* ``elegant``
-    See :ref:`here<elegant_ref>` for details on using elegant to perform evaluations in rsopt. Example configuration setup::
-
-        codes:
-            - elegant:
-                setup:
-                    input_file: command_file.ele
-                    execution_type: parallel  # Choose execution mode
-                    cores: 16  # Should be given if using some form of parallel execution
-
-    Required ``setup`` fields for ``python`` are:
-
-    * ``input_file``: The path to a Python module, either absolute or relative to execution directory.
-    * ``execution_type``: Method to use when executing elegant (Pelegant if running in parallel). See :ref:`Execution Methods<exec_methods>` for accepted types and any additional requirements.
-
-* ``opal``
-    In progress...
-
-* ``user``
-    Coming Soon...?
-
-    rsopt has been designed with the possibility for execution of arbitrary, user-supplied executables. However, this feature has not been
-    fully implemented. If this is something you would like to see right now, please, `let me know`_.
-
-.. _let me know: https://github.com/radiasoft/rsopt/issues
+For a list of currently accepted codes and details of their configuration see:
+Codes<codes>
