@@ -1,7 +1,7 @@
 .. _genesis_ref:
 
 ``Genesis1.3``
-===========
+==============
 
 The FEL modeling code Genesis1.3 [1]_ can be parsed in rsopt through the lume-genesis library [2]_.
  rsopt can parse Genesis1.3 command files, automatically replacing and updating values given
@@ -22,7 +22,6 @@ for parameters with no additional work required by the user. An example setup is
                 input_file: genesis.in
                 execution_type: parallel
                 cores: 8
-
 
 
 Distribution Piping
@@ -47,7 +46,6 @@ For example::
                 input_distribution: distribution.dist
                 execution_type: parallel
                 cores: 4
-
 
 
 Providing an objective value
