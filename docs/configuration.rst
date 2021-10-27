@@ -100,7 +100,7 @@ be set under the options block. For example::
     options:
         software: mesh_scan
 
-For a detailed description of available options see :doc:`Options</options>`and for a detailed list of available ``software`` see :doc:`Software</commands>`
+For a detailed description of available options see :doc:`Options</options>` and for a detailed list of available ``software`` see :ref:`Software</opt_software>`
 
 Accepted Codes
 --------------
