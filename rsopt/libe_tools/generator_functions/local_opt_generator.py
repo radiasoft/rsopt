@@ -24,14 +24,14 @@ libensemble.gen_funcs.rc.aposmm_optimizers = available_opt
 
 import numpy as np
 from libensemble.gen_funcs.aposmm_localopt_support import LocalOptInterfacer, ConvergedMsg, simulate_recv_from_manager
-
-from libensemble.message_numbers import STOP_TAG, PERSIS_STOP, FINISHED_PERSISTENT_GEN_TAG
-from libensemble.tools.gen_support import send_mgr_worker_msg, get_mgr_worker_msg
+from libensemble.message_numbers import STOP_TAG, PERSIS_STOP, FINISHED_PERSISTENT_GEN_TAG, EVAL_GEN_TAG
+from libensemble.tools.persistent_support import PersistentSupport
 
 
 def persistent_local_opt(H, persis_info, gen_specs, libE_info):
     try:
         # Setup
+        persistent = PersistentSupport(libE_info, EVAL_GEN_TAG)
         user_specs = gen_specs['user']
         n, n_s, comm, local_H = initialize_local_opt(H, user_specs, libE_info)
         x_start = (user_specs['xstart']-user_specs['lb'])/(user_specs['ub']-user_specs['lb'])
@@ -41,8 +41,8 @@ def persistent_local_opt(H, persis_info, gen_specs, libE_info):
         # Intialize first point
         add_to_local_H(local_H, x_start, user_specs, local_flag=0, on_cube=True)
         # pass list of points in H (just one in our case)
-        send_mgr_worker_msg(comm, local_H[[-1]][[i[0] for i in gen_specs['out']]])
-        tag, Work, calc_in = get_mgr_worker_msg(comm)
+        persistent.send(local_H[[-1]][[i[0] for i in gen_specs['out']]])
+        tag, Work, calc_in = persistent.recv()
         n_s, n_r = update_local_H_after_receiving(local_H, n, n_s, user_specs, Work, calc_in, fields_to_pass)
 
         # Start the local optimizer
@@ -52,10 +52,10 @@ def persistent_local_opt(H, persis_info, gen_specs, libE_info):
         pass_to_local_opter = local_H[0][fields_to_pass]
         x_new = local_opter.iterate(pass_to_local_opter)
         add_to_local_H(local_H, x_new, user_specs, local_flag=1, on_cube=True)
-        send_mgr_worker_msg(comm, local_H[[-1]][[i[0] for i in gen_specs['out']]])
+        persistent.send(local_H[[-1]][[i[0] for i in gen_specs['out']]])
 
         while True:
-            tag, Work, calc_in = get_mgr_worker_msg(comm)
+            tag, Work, calc_in = persistent.recv()
             if tag in [STOP_TAG, PERSIS_STOP]:
                 clean_up_and_stop(local_opter)
                 persis_info['run_order'] = run_order
@@ -69,7 +69,7 @@ def persistent_local_opt(H, persis_info, gen_specs, libE_info):
                 break
             else:
                 add_to_local_H(local_H, x_new, user_specs, local_flag=1, on_cube=True)
-                send_mgr_worker_msg(comm, local_H[[-1]][[i[0] for i in gen_specs['out']]])
+                persistent.send(local_H[[-1]][[i[0] for i in gen_specs['out']]])
 
         return local_H, persis_info, FINISHED_PERSISTENT_GEN_TAG
 
