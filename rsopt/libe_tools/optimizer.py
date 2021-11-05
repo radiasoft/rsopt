@@ -6,11 +6,11 @@ from libensemble.tools import add_unique_random_streams
 from rsopt.optimizer import Optimizer, OPTIONS_ALLOWED
 from rsopt.libe_tools.interface import get_local_optimizer_method
 from rsopt.simulation import SimulationFunction
-from pykern import pkio
-from pykern import pkresource
 from pykern import pkyaml
+from rsopt import _EXECUTOR_SCHEMA, _OPTIMIZER_SCHEMA
 
-_OPT_SCHEMA = pkyaml.load_file(pkio.py_path(pkresource.filename('optimizer_schema.yml')))
+OPT_SCHEMA = pkyaml.load_file(_OPTIMIZER_SCHEMA)
+EXECUTOR_SCHEMA = pkyaml.load_file(_EXECUTOR_SCHEMA)
 
 # dimension for x needs to be set
 persistent_local_opt_gen_out = [('x', float, None),
@@ -54,7 +54,7 @@ class libEnsembleOptimizer(Optimizer):
     # Just sets up a local optimizer for now
     _NAME = 'libEnsemble'
     _SPECIFICATION_DICTS = ['gen_specs', 'libE_specs', 'sim_specs', 'alloc_specs']
-    _OPT_SCHEMA = _OPT_SCHEMA
+    _OPT_SCHEMA = OPT_SCHEMA
 
     def __init__(self):
         super(libEnsembleOptimizer, self).__init__()
@@ -189,6 +189,14 @@ class libEnsembleOptimizer(Optimizer):
         self.libE_specs.update({'nworkers': self.nworkers, 'comms': self._config.comms, **self.libE_specs})
         if self._config.mpi_comm:
             self.libE_specs['mpi_comm'] = self._config.mpi_comm
+
+        self.libE_specs['dedicated_mode'] = True  # This used to be called 'central_mode' and was set in Executor
+        self.libE_specs['disable_resource_manager'] = False  # This used to be called 'auto_resources and was set in Executor
+
+        if self._config.rsmpi_executor:
+            self.libE_specs['resource_info'] = {'cores_on_node': (EXECUTOR_SCHEMA['cores_on_node']['physical_cores'],
+                                                                  EXECUTOR_SCHEMA['cores_on_node']['logical_cores']),
+                                                'node_file': EXECUTOR_SCHEMA['node_file']}
 
     def _configure_sim(self):
         sim_function = SimulationFunction(self._config.jobs, self._config.options.get_objective_function())

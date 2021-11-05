@@ -38,7 +38,7 @@ def create_executor_arguments(setup):
 
     # Cannot be overridden
     args['calc_type'] = 'sim'
-    args['wait_on_run'] = True
+    args['wait_on_start'] = True
 
     return args
 

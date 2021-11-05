@@ -4,8 +4,6 @@ _EXECUTORS = {'parallel'}
 
 
 class Configuration:
-    executor_defaults = {'local': {'central_mode': True, 'auto_resources': True},
-                         'mpi': {'central_mode': True, 'auto_resources': True}}
 
     def __init__(self):
         self.jobs = []
@@ -13,6 +11,7 @@ class Configuration:
         self.comms = 'local'  # Will be either local or mpi
         self.mpi_comm = None
         self.is_manager = True
+        self.rsmpi_executor = False  # Is set to true if any executor uses rsmpi
 
     @property
     def options(self):
@@ -74,13 +73,12 @@ class Configuration:
         # Executor is created even for serial jobs
         # For serial Python the executor is not registerd with the Job and goes unused
 
-        for k, v in self.executor_defaults[self.comms].items():
-            self.options.executor_options.setdefault(k, v)
-
         # rsmpi is the only mutually exclusive option right now
         executors = [j.setup.get('execution_type') for j in self.jobs if j.setup.get('execution_type')]
         if executors.count('rsmpi') != len(executors) and executors.count('rsmpi') != 0:
             raise NotImplementedError("rsmpi is not supported in combination with other executors")
+        if executors.count('rsmpi') != 0:
+            self.rsmpi_executor = True
 
         # Right now we implicitly guarantee all executors will be same type
         executor = _EXECUTION_TYPES[executors[0]]

@@ -3,7 +3,7 @@ import numpy as np
 import os
 from rsopt.pkcli.optimize import configuration
 from rsopt.pkcli import cleanup
-from rsopt.pkcli.quickstart import _EXAMPLE_SYMLINK, _EXAMPLE_REGISTRY
+from rsopt import _EXAMPLE_SYMLINK, _EXAMPLE_REGISTRY
 from pykern import pkyaml
 import shutil
 import glob

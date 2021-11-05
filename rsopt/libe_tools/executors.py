@@ -4,12 +4,15 @@ import logging
 from libensemble.executors.mpi_executor import MPIExecutor
 from libensemble.executors.executor import Executor, Task, ExecutorException
 from libensemble.resources.resources import Resources
+from pykern import pkyaml
+from rsopt import _EXECUTOR_SCHEMA
 
+EXECUTOR_SCHEMA = pkyaml.load_file(_EXECUTOR_SCHEMA)
 logger = logging.getLogger(__name__)
 # To change logging level for just this module
 # logger.setLevel(logging.DEBUG)
 
-_CONFIG_PATH = '/home/vagrant/jupyter/.rsmpi/ssh_config'
+_RSMPI_CONFIG_PATH = EXECUTOR_SCHEMA['rsmpi']['config_path']
 
 
 def register_rsmpi_executor(hosts='auto', cores_on_node=None, **kwargs):
@@ -23,6 +26,7 @@ def register_rsmpi_executor(hosts='auto', cores_on_node=None, **kwargs):
 
     :return: libensemble.executors.mpi_executor.MPIExecutor object
     """
+    schema = EXECUTOR_SCHEMA['rsmpi']
 
     if type(hosts) == int:
         hosts = int(hosts)
@@ -33,23 +37,18 @@ def register_rsmpi_executor(hosts='auto', cores_on_node=None, **kwargs):
 
     _generate_rsmpi_node_file(hosts)
 
-    cores_on_node = (20, 20) if not cores_on_node else cores_on_node
-    customizer = {'mpi_runner': 'mpich',
-                  'runner_name': 'libensemble-rsmpi',
-                  'cores_on_node': cores_on_node,
-                  'node_file': 'libe_nodes'}
-
+    customizer = {k:  schema[k] for k in ('mpi_runner', 'runner_name', 'subgroup_launch')}
     jobctrl = MPIExecutor(**kwargs, custom_info=customizer)
     # Set longer fail time - rsmpi is relatively slow to start
-    jobctrl.fail_time = 8
+    jobctrl.fail_time = schema['fail_time']
     
     return jobctrl
 
 
 def _detect_rsmpi_resources():
     hosts = 0
-    assert os.path.isfile(_CONFIG_PATH), "rsmpi configuration does not exist"
-    with open(_CONFIG_PATH, 'r') as ff:
+    assert os.path.isfile(_RSMPI_CONFIG_PATH), "rsmpi configuration does not exist"
+    with open(_RSMPI_CONFIG_PATH, 'r') as ff:
         for line in ff.readlines():
             if 'Host' in line:
                 hosts += 1
@@ -91,7 +90,7 @@ class SerialExecutor(Executor):
 
     def submit(self, calc_type=None, app_name=None,
                app_args=None, stdout=None, stderr=None,
-               dry_run=False, wait_on_run=False):
+               dry_run=False, wait_on_start=False):
         if app_name is not None:
             app = self.get_app(app_name)
         elif calc_type is not None:
@@ -111,7 +110,7 @@ class SerialExecutor(Executor):
             task._set_complete(dry_run=True)
         else:
             # Launch Task
-            self._launch_with_retries(task, runline, subgroup_launch=False, wait_on_run=wait_on_run)
+            self._launch_with_retries(task, runline, subgroup_launch=False, wait_on_start=wait_on_start)
             if not task.timer.timing:
                 task.timer.start()
                 task.submit_time = task.timer.tstart  # Time not date - may not need if using timer.

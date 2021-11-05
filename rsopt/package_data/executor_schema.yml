@@ -1,0 +1,11 @@
+# custom executor settings
+rsmpi:
+  mpi_runner: 'mpich'
+  runner_name: 'libensemble-rsmpi'
+  cores_on_node:
+    physical_cores: 20
+    logical_cores: 20
+  node_file: 'libe_nodes'
+  subgroup_launch: True
+  config_path: '/home/vagrant/jupyter/.rsmpi/ssh_config'
+  fail_time: 8  # seconds

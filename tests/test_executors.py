@@ -18,7 +18,7 @@ class TestExecutorrsmpi(unittest.TestCase):
 
     def setUp(self):
         self.test_config_file = tempfile.NamedTemporaryFile()
-        execs._CONFIG_PATH = self.test_config_file.name
+        execs._RSMPI_CONFIG_PATH = self.test_config_file.name
         self.test_config_file.write(_SSH_CONFIG.encode())
         self.test_config_file.flush()
 
