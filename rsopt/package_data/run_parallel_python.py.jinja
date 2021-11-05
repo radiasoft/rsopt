@@ -4,6 +4,9 @@ input_dict = {
 {% for key, value in dict_item.items() %}
     '{{key}}': {{value}}{% if not loop.last %},{% endif %}
 {% endfor %}
+{% for key, value in dict_item_str.items() %}
+    '{{key}}': '{{value}}'{% if not loop.last %},{% endif %}
+{% endfor %}
 }
 
 m = run_path_as_module('{{full_input_file_path}}')

@@ -241,6 +241,13 @@ class Python(Setup):
         template_env = jinja2.Environment(loader=template_loader)
         template = template_env.get_template(_PARALLEL_PYTHON_TEMPLATE)
 
+        dict_item_str = {}
+        for k, v in kwarg_dict.items():
+            if type(v) == str:
+                dict_item_str[k] = v
+        for k in dict_item_str.keys():
+            kwarg_dict.pop(k)
+
         output_template = template.render(dict_item=kwarg_dict, full_input_file_path=self.setup['input_file'],
                                           function=self.setup['function'])
 
