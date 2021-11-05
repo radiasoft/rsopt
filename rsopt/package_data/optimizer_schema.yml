@@ -78,3 +78,6 @@ pysot:
       persis_in:
         - f
         - sim_id
+aposmm:
+  type: global
+  methods:  # aposmm uses other software and methods. AposmmOptimizer checks for aposmm_support and handles config.
