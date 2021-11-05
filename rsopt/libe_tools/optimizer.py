@@ -6,7 +6,11 @@ from libensemble.tools import add_unique_random_streams
 from rsopt.optimizer import Optimizer, OPTIONS_ALLOWED
 from rsopt.libe_tools.interface import get_local_optimizer_method
 from rsopt.simulation import SimulationFunction
+from pykern import pkio
+from pykern import pkresource
+from pykern import pkyaml
 
+_OPT_SCHEMA = pkyaml.load_file(pkio.py_path(pkresource.filename('optimizer_schema.yml')))
 
 # dimension for x needs to be set
 persistent_local_opt_gen_out = [('x', float, None),
@@ -43,6 +47,15 @@ def _set_app_names(config):
         codes[code] = index
 
     return app_names
+
+
+def _set_persis_in(software, method):
+    # method name should be returned from get_local_optimizer_method
+    # only sets the unique (to the method) portion of the persis_in fiel
+    s = _OPT_SCHEMA[software]
+    m = s['methods'][method]
+
+    return m['persis_in']
 
 
 class libEnsembleOptimizer(Optimizer):
@@ -135,27 +148,26 @@ class libEnsembleOptimizer(Optimizer):
         return H, persis_info, flag
 
     def _configure_optimizer(self):
-        # TODO: The generator creation procedure needs to generalized and set up separately
+        local_opt_method = get_local_optimizer_method(self._config.method, self._config.software)
         gen_out = [set_dtype_dimension(dtype, self.dimension) for dtype in persistent_local_opt_gen_out]
         user_keys = {'lb': self.lb,
                      'ub': self.ub,
                      'initial_sample_size': 1,
                      'xstart': self.start,
-                     'localopt_method': get_local_optimizer_method(self._config.method, self._config.software),
+                     'localopt_method': local_opt_method,
                      **self._config.options.software_options}
 
         for key, val in self._options.items():
             user_keys[key] = val
         self.gen_specs.update({'gen_f': persistent_local_opt,
-                     'in': [],
-                     'out': gen_out,
-                     'user': user_keys})
+                               'persis_in': _set_persis_in(self._config.method, local_opt_method) +
+                                            [n[0] for n in gen_out],
+                               'out': gen_out,
+                               'user': user_keys})
 
     def _configure_allocation(self):
         # local optimizer allocation
-        self.alloc_specs.update({'alloc_f': persistent_aposmm_alloc,
-                                 'out': [('given_back', bool)],
-                                 'user': {}})
+        self.alloc_specs.update({'alloc_f': persistent_aposmm_alloc})
 
     def _configure_persistant_info(self):
         self.persis_info = add_unique_random_streams({}, self.nworkers + 1)

@@ -1,0 +1,62 @@
+nlopt:
+  type: local
+  methods:
+    LN_SBPLX:
+      aposmm_support: True
+      local_support: True
+      persis_in:
+        - f
+    LN_BOBYQA:
+      aposmm_support: True
+      local_support: True
+      persis_in:
+        - f
+    LN_COBYLA:
+      aposmm_support: True
+      local_support: True
+      persis_in:
+        - f
+    LN_NEWUOA:
+      aposmm_support: True
+      local_support: True
+      persis_in:
+        - f
+    LN_NELDERMEAD:
+      aposmm_support: True
+      local_support: True
+      persis_in:
+        - f
+    LD_MMA:
+      aposmm_support: True
+      local_support: True
+      persis_in:
+        - f
+        - grad
+dfols:
+  type: local
+  methods:
+    dfols:
+      aposmm_support: True
+      local_support: True
+      persis_in:
+        - f
+        - fvec
+scipy:
+  type: local
+  methods:
+    scipy_Nelder-Mead:
+      aposmm_support: True
+      local_support: True
+      persis_in:
+        - f
+    scipy_COBYLA:
+      aposmm_support: True
+      local_support: True
+      persis_in:
+        - f
+    scipy_BFGS:
+      aposmm_support: True
+      local_support: True
+      persis_in:
+        - f
+        - grad

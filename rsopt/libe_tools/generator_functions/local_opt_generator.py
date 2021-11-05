@@ -6,11 +6,14 @@ https://github.com/Libensemble/libensemble/blob/a870bd4beffccbc863f79dfd7ab3940f
 """
 
 from importlib import util
-# TODO: If libEnsemble is updated can import optimizer list
-# from libensemble.gen_funcs import aposmm_optimizer_list
-aposmm_optimizer_list = ['nlopt', 'dfols', 'scipy', 'external']
+from pykern import pkio
+from pykern import pkresource
+from pykern import pkyaml
+
+_OPT_SCHEMA = pkyaml.load_file(pkio.py_path(pkresource.filename('optimizer_schema.yml')))
+allowed_optimizer_list = [s for s, v in _OPT_SCHEMA.items() if v['type'] == 'local']
 available_opt = []
-for optimizer in aposmm_optimizer_list:
+for optimizer in allowed_optimizer_list:
     if optimizer == 'external':
         continue
     if util.find_spec(optimizer):
@@ -136,7 +139,7 @@ def update_local_H_after_receiving(local_H, n, n_s, user_specs, Work, calc_in, f
 
     for name in ['f', 'x_on_cube', 'grad', 'fvec']:
         if name in fields_to_pass:
-            assert name in calc_in.dtype.names, name + " must be returned to persistent_aposmm for localopt_method: " + user_specs['localopt_method']
+            assert name in calc_in.dtype.names, name + " must be returned to persistent_local_opt for localopt_method: " + user_specs['localopt_method']
 
     for name in calc_in.dtype.names:
         local_H[name][Work['libE_info']['H_rows']] = calc_in[name]
