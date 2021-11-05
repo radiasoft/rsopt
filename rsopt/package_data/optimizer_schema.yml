@@ -69,3 +69,12 @@ dlib:
       persis_in:
         - f
         - sim_id
+pysot:
+  type: global
+  methods:
+    pysot:
+      aposmm_support: False
+      local_support: False
+      persis_in:
+        - f
+        - sim_id

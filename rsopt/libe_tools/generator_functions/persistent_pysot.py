@@ -10,8 +10,8 @@ from pySOT.optimization_problems import OptimizationProblem
 import logging
 logger = logging.getLogger()
 
-from libensemble.message_numbers import STOP_TAG, PERSIS_STOP, FINISHED_PERSISTENT_GEN_TAG
-from libensemble.tools.gen_support import send_mgr_worker_msg, get_mgr_worker_msg
+from libensemble.message_numbers import STOP_TAG, PERSIS_STOP, FINISHED_PERSISTENT_GEN_TAG, EVAL_GEN_TAG
+from libensemble.tools.persistent_support import PersistentSupport
 
 
 class Problem(OptimizationProblem):
@@ -72,6 +72,8 @@ def persistent_pysot(H, persis_info, gen_specs, libE_info):
     """
 
     # libEnsemble Setup
+    persistent = PersistentSupport(libE_info, EVAL_GEN_TAG)
+
     libE_comm = libE_info['comm']
 
     dim = gen_specs['user']['dim']
@@ -104,14 +106,14 @@ def persistent_pysot(H, persis_info, gen_specs, libE_info):
             proposals.append(new_action)
 
         add_to_local_H(local_H, proposals)
-        send_mgr_worker_msg(libE_comm, local_H[-len(proposals):][[i[0] for i in gen_specs['out']]])
+        persistent.send(local_H[-len(proposals):][[i[0] for i in gen_specs['out']]])
 
         # Start work loop
         stop_generator = False
 
         while True:
             # Get results back from libE workers
-            tag, Work, calc_in = get_mgr_worker_msg(libE_comm)
+            tag, Work, calc_in = persistent.recv()
             if tag in [STOP_TAG, PERSIS_STOP]:
                 break
             # Send all results to pySOT that we got from libE workers
@@ -149,7 +151,7 @@ def persistent_pysot(H, persis_info, gen_specs, libE_info):
             # Send new points to allocator - if any
             if new_proposals > 0:
                 add_to_local_H(local_H, proposals[-calc_in.size:])
-                send_mgr_worker_msg(libE_comm, local_H[-calc_in.size:][[i[0] for i in gen_specs['out']]])
+                persistent.send(local_H[-calc_in.size:][[i[0] for i in gen_specs['out']]])
 
         return local_H, persis_info, FINISHED_PERSISTENT_GEN_TAG
     finally:

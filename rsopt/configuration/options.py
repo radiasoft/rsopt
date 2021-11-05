@@ -228,6 +228,7 @@ class pySOT(Options):
     def __init__(self):
         super().__init__()
         self.nworkers = 2
+        self.method = 'pysot'
 
 
 class Dlib(Options):
