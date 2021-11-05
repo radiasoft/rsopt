@@ -238,6 +238,7 @@ class Dlib(Options):
     def __init__(self):
         super().__init__()
         self.nworkers = 2
+        self.method = 'dlib'
 
 
 class Mesh(Options):

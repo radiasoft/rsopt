@@ -49,20 +49,12 @@ def _set_app_names(config):
     return app_names
 
 
-def _set_persis_in(software, method):
-    # method name should be returned from get_local_optimizer_method
-    # only sets the unique (to the method) portion of the persis_in fiel
-    s = _OPT_SCHEMA[software]
-    m = s['methods'][method]
-
-    return m['persis_in']
-
-
 class libEnsembleOptimizer(Optimizer):
     # Configurationf or Local Optimization through uniform_or_localopt
     # Just sets up a local optimizer for now
     _NAME = 'libEnsemble'
     _SPECIFICATION_DICTS = ['gen_specs', 'libE_specs', 'sim_specs', 'alloc_specs']
+    _OPT_SCHEMA = _OPT_SCHEMA
 
     def __init__(self):
         super(libEnsembleOptimizer, self).__init__()
@@ -160,7 +152,7 @@ class libEnsembleOptimizer(Optimizer):
         for key, val in self._options.items():
             user_keys[key] = val
         self.gen_specs.update({'gen_f': persistent_local_opt,
-                               'persis_in': _set_persis_in(self._config.method, local_opt_method) +
+                               'persis_in': self._set_persis_in(self._config.software, local_opt_method) +
                                             [n[0] for n in gen_out],
                                'out': gen_out,
                                'user': user_keys})
@@ -245,6 +237,14 @@ class libEnsembleOptimizer(Optimizer):
 
         if self.clean_working_directory and os.path.isdir(self.working_directory):
             shutil.rmtree(self.working_directory)
+
+    def _set_persis_in(self, software, method):
+        # method name should be returned from get_local_optimizer_method
+        # only sets the unique (to the method) portion of the persis_in fiel
+        s = self._OPT_SCHEMA[software]
+        m = s['methods'][method]
+
+        return m['persis_in']
 
     def set_exit_criteria(self, exit_criteria):
         """

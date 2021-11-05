@@ -4,8 +4,8 @@ import dlib
 import logging
 logger = logging.getLogger()
 
-from libensemble.message_numbers import STOP_TAG, PERSIS_STOP, FINISHED_PERSISTENT_GEN_TAG
-from libensemble.tools.gen_support import send_mgr_worker_msg, get_mgr_worker_msg
+from libensemble.message_numbers import STOP_TAG, PERSIS_STOP, FINISHED_PERSISTENT_GEN_TAG, EVAL_GEN_TAG
+from libensemble.tools.persistent_support import PersistentSupport
 
 # Be careful: dlib seems to automatically truncate printout of values in many places,
 # but passes floats to full precision
@@ -14,6 +14,8 @@ from libensemble.tools.gen_support import send_mgr_worker_msg, get_mgr_worker_ms
 def persistent_dlib(H, persis_info, gen_specs, libE_info):
 
     # libEnsemble Setup
+    persistent = PersistentSupport(libE_info, EVAL_GEN_TAG)
+
     local_H = np.zeros(len(H), dtype=H.dtype)
     libE_comm = libE_info['comm']
 
@@ -37,12 +39,12 @@ def persistent_dlib(H, persis_info, gen_specs, libE_info):
         request = opt.get_next_x()
         work_requests.append(request)
     add_to_local_H(local_H, work_requests, work_log)
-    send_mgr_worker_msg(libE_comm, local_H[-len(work_requests):][[i[0] for i in gen_specs['out']]])
+    persistent.send(local_H[-len(work_requests):][[i[0] for i in gen_specs['out']]])
 
     # Start work loop
     while True:
         # Get results back from libE workers
-        tag, Work, calc_in = get_mgr_worker_msg(libE_comm)
+        tag, Work, calc_in = persistent.recv()
         if tag in [STOP_TAG, PERSIS_STOP]:
             break
 
@@ -56,7 +58,7 @@ def persistent_dlib(H, persis_info, gen_specs, libE_info):
 
         if work_requests:
             add_to_local_H(local_H, work_requests, work_log)
-            send_mgr_worker_msg(libE_comm, local_H[-len(work_requests):][[i[0] for i in gen_specs['out']]])
+            persistent.send(local_H[-len(work_requests):][[i[0] for i in gen_specs['out']]])
     # TODO: Result of Last point evaluated is not always being recorded in H before termination
     return local_H, persis_info, FINISHED_PERSISTENT_GEN_TAG
 

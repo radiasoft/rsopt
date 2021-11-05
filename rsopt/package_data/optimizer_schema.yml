@@ -1,5 +1,5 @@
 nlopt:
-  type: local
+  type: local  #  nlopt has global methods, but we don't support right now (chang to 'mixed' if we ever do)
   methods:
     LN_SBPLX:
       aposmm_support: True
@@ -42,7 +42,7 @@ dfols:
         - f
         - fvec
 scipy:
-  type: local
+  type: local  #  scipy has global methods, but we don't support right now (chang to 'mixed' if we ever do)
   methods:
     scipy_Nelder-Mead:
       aposmm_support: True
@@ -60,3 +60,12 @@ scipy:
       persis_in:
         - f
         - grad
+dlib:
+  type: global
+  methods:
+    dlib:
+      aposmm_support: False
+      local_support: False
+      persis_in:
+        - f
+        - sim_id

@@ -21,7 +21,8 @@ class DlibOptimizer(optimizer.libEnsembleOptimizer):
                      **self._config.options.software_options}
 
         self.gen_specs.update({'gen_f': persistent_dlib,
-                               'in': [],
+                               'persis_in': self._set_persis_in(self._config.software, self._config.method) +
+                                            [n[0] for n in gen_out],
                                'out': gen_out,
                                'user': user_keys})
 
