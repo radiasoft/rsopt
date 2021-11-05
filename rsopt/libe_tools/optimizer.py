@@ -30,7 +30,7 @@ _LIBENSEMBLE_DIRECTORY = './ensemble'
 
 
 def _configure_executor(job, name, executor):
-    executor.register_calc(full_path=job.full_path, app_name=name, calc_type='sim')
+    executor.register_app(full_path=job.full_path, app_name=name, calc_type='sim')
 
 
 def _set_app_names(config):

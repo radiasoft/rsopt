@@ -20,11 +20,11 @@ def create_executor_arguments(setup):
     args = {
         'num_procs': setup.get('cores', 1),
         'num_nodes': None,  # No user interface right now
-        'ranks_per_node': None, # No user interface right now
+        'procs_per_node': None, # No user interface right now
         'machinefile': None,  # Add in  setup.machinefile if user wants to control
         'app_args': setup.get('input_file', None),
         'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
-        'wait_on_run': True,
+        'wait_on_start': True,
         # 'app_name': None,  # Handled at optimizer setup
         # 'stdout': None,  # Handled at optimizer setup
         # 'stderr': None, # Handled at optimizer setup
