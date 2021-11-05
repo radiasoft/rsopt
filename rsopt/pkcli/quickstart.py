@@ -1,11 +1,7 @@
 import shutil
 import os
-from pykern import pkio
-from pykern import pkresource
 from pykern import pkyaml
-
-_EXAMPLE_SYMLINK = pkio.py_path(pkresource.filename('examples'))
-_EXAMPLE_REGISTRY = pkio.py_path(pkresource.filename('example_registry.yml'))
+from rsopt import _EXAMPLE_SYMLINK, _EXAMPLE_REGISTRY
 
 
 def _get_example_file_list(example_name):
