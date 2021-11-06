@@ -194,9 +194,10 @@ class libEnsembleOptimizer(Optimizer):
         self.libE_specs['disable_resource_manager'] = False  # This used to be called 'auto_resources and was set in Executor
 
         if self._config.rsmpi_executor:
-            self.libE_specs['resource_info'] = {'cores_on_node': (EXECUTOR_SCHEMA['cores_on_node']['physical_cores'],
-                                                                  EXECUTOR_SCHEMA['cores_on_node']['logical_cores']),
-                                                'node_file': EXECUTOR_SCHEMA['node_file']}
+            self.libE_specs['resource_info'] = {'cores_on_node':
+                                                    (EXECUTOR_SCHEMA['rsmpi']['cores_on_node']['physical_cores'],
+                                                     EXECUTOR_SCHEMA['rsmpi']['cores_on_node']['logical_cores']),
+                                                'node_file': EXECUTOR_SCHEMA['rsmpi']['node_file']}
 
     def _configure_sim(self):
         sim_function = SimulationFunction(self._config.jobs, self._config.options.get_objective_function())

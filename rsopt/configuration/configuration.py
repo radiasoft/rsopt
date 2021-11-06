@@ -11,13 +11,17 @@ class Configuration:
         self.comms = 'local'  # Will be either local or mpi
         self.mpi_comm = None
         self.is_manager = True
-        self.rsmpi_executor = False  # Is set to true if any executor uses rsmpi
+        # self.rsmpi_executor = False  # Is set to true if any executor uses rsmpi
 
     @property
     def options(self):
         return self._options
 
-    # TODO: rename to get_job_parameters same for settings and setup
+    @property
+    def rsmpi_executor(self):
+        rsmpi_used = any([j.setup.get('execution_type') == 'rsmpi' for j in self.jobs if j.setup.get('execution_type')])
+        return rsmpi_used
+
     def parameters(self, job=0):
         assert self.jobs[job], f"Requested job: {job} is not registered in the Configuration"
 
@@ -77,8 +81,6 @@ class Configuration:
         executors = [j.setup.get('execution_type') for j in self.jobs if j.setup.get('execution_type')]
         if executors.count('rsmpi') != len(executors) and executors.count('rsmpi') != 0:
             raise NotImplementedError("rsmpi is not supported in combination with other executors")
-        if executors.count('rsmpi') != 0:
-            self.rsmpi_executor = True
 
         # Right now we implicitly guarantee all executors will be same type
         executor = _EXECUTION_TYPES[executors[0]]

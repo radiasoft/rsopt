@@ -15,13 +15,12 @@ logger = logging.getLogger(__name__)
 _RSMPI_CONFIG_PATH = EXECUTOR_SCHEMA['rsmpi']['config_path']
 
 
-def register_rsmpi_executor(hosts='auto', cores_on_node=None, **kwargs):
+def register_rsmpi_executor(hosts='auto', **kwargs):
     """
     Create an MPIExecutor that can use rsmpi. The executor is returned and may be used to register calculations
     for workers like any other libEnsemble executor.
     :param hosts: (str or int) If 'auto' then all rsmpi resources are detected and used. Otherwise specify number
                                of hosts as an int.
-    :param cores_on_node: (tuple) Defaults to (16, 16). Number of physical cores and logical cores on the hosts.
     :param kwargs: Any other kwargs given will be passed to the MPIExecutor that is created.
 
     :return: libensemble.executors.mpi_executor.MPIExecutor object
@@ -30,7 +29,7 @@ def register_rsmpi_executor(hosts='auto', cores_on_node=None, **kwargs):
 
     if type(hosts) == int:
         hosts = int(hosts)
-    elif type(hosts) == str:
+    elif hosts == 'auto':
         hosts = _detect_rsmpi_resources()
     else:
         raise TypeError('hosts must be str or int')
