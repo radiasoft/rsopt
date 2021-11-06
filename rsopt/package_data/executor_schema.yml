@@ -6,6 +6,6 @@ rsmpi:
     physical_cores: 20
     logical_cores: 20
   node_file: 'libe_nodes'
-  subgroup_launch: True
+  subgroup_launch: False
   config_path: '/home/vagrant/jupyter/.rsmpi/ssh_config'
   fail_time: 8  # seconds
