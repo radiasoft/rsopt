@@ -33,14 +33,14 @@ class TestExecutorrsmpi(unittest.TestCase):
     def test_register_rsmpi_executor_manual(self):
         from libensemble.executors.mpi_executor import MPIExecutor
         hosts = 5
-        controller = execs.register_rsmpi_executor(hosts=hosts, cores_on_node=None)
+        controller = execs.register_rsmpi_executor(hosts=hosts)
         self.assertIsInstance(controller, MPIExecutor)
         self.assertTrue(os.path.isfile('libe_nodes'))
 
     def test_register_rsmpi_executor_auto(self):
         from libensemble.executors.mpi_executor import MPIExecutor
         hosts = 'auto'
-        controller = execs.register_rsmpi_executor(hosts=hosts, cores_on_node=None)
+        controller = execs.register_rsmpi_executor(hosts=hosts)
         self.assertIsInstance(controller, MPIExecutor)
         self.assertTrue(os.path.isfile('libe_nodes'))
 
