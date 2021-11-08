@@ -266,7 +266,7 @@ class Python(Setup):
         for k in dict_item_str.keys():
             kwarg_dict.pop(k)
 
-        output_template = template.render(dict_item=kwarg_dict, full_input_file_path=self.setup['input_file'],
+        output_template = template.render(dict_item=kwarg_dict, dict_item_str=dict_item_str, full_input_file_path=self.setup['input_file'],
                                           function=self.setup['function'])
 
         file_path = os.path.join(directory, _PARALLEL_PYTHON_RUN_FILE)
