@@ -4,10 +4,12 @@ import jinja2
 import pickle
 from rsopt import util
 from rsopt.codes import _TEMPLATED_CODES
+from rsopt import _SETUP_SCHEMA
 from copy import deepcopy
 from pykern import pkrunpy
 from pykern import pkio
 from pykern import pkresource
+from pykern import pkyaml
 from libensemble.executors.mpi_executor import MPIExecutor
 from rsopt.libe_tools.executors import register_rsmpi_executor
 
@@ -99,7 +101,10 @@ def _create_sym_links(*args, link_location='default'):
 
 
 class Setup:
-    __REQUIRED_KEYS = ('execution_type',)
+    _REQUIRED_KEYS = ('execution_type',)  # code specific keys that are required
+    _OPTIONAL_KEYS = ()  # code specific keys that are not required
+    # keys that can be used by any code
+    _KNOWN_KEYS = tuple(pkyaml.load_file(_SETUP_SCHEMA)) + _REQUIRED_KEYS + _OPTIONAL_KEYS
     RUN_COMMAND = None
     NAME = None
     SHIFTER_COMMAND = f'shifter --image={_SHIFTER_IMAGE} /bin/bash {_SHIFTER_BASH_FILE}'
@@ -130,8 +135,9 @@ class Setup:
 
     @classmethod
     def _check_setup(cls, setup):
-        for key in cls.__REQUIRED_KEYS:
-            assert setup.get(key), f"{key} must be defined in setup"
+        # Check globally required keys exist
+        for key in cls._REQUIRED_KEYS:
+            assert setup.get(key), f"{key} must be defined in each setup block"
 
     @classmethod
     def templated(cls):
@@ -162,7 +168,6 @@ class Setup:
         self.setup[name] = value
 
     def validate_input(self, key, value):
-        # Checks inputs with controlled inputs
         if self.validators.get(key):
             if self.validators[key](value):
                 return
@@ -230,6 +235,19 @@ class Python(Setup):
         # Python does not use text input files. Functions are dynamically imported by `function`.
         return None
 
+    @classmethod
+    def _check_setup(cls, setup):
+        # Check globally required keys exist
+        code = cls.NAME
+        for key in cls.__REQUIRED_KEYS:
+            assert setup.get(key), f"{key} must be defined in setup for {code}"
+        # Validate for all keys (field in config file) are known to setup
+        for key in setup.keys():
+            # Can be made private if non-required code-specific fields are ever added
+            if key not in (cls._KNOWN_KEYS + cls.__REQUIRED_KEYS):
+                raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
+        Setup._check_setup(setup)
+
     def generate_input_file(self, kwarg_dict, directory):
         is_parallel = self.setup.get('execution_type', False) == 'parallel' or self.setup.get('execution_type',
                                                                                               False) == 'rsmpi'
@@ -275,6 +293,19 @@ class Elegant(Setup):
     SERIAL_RUN_COMMAND = 'elegant'
     PARALLEL_RUN_COMMAND = 'Pelegant'
     NAME = 'elegant'
+
+    @classmethod
+    def _check_setup(cls, setup):
+        # Check globally required keys exist
+        code = cls.NAME
+        for key in cls.__REQUIRED_KEYS:
+            assert setup.get(key), f"{key} must be defined in setup for {code}"
+        # Validate for all keys (field in config file) are known to setup
+        for key in setup.keys():
+            # Can be made private if non-required code-specific fields are ever added
+            if key not in (cls._KNOWN_KEYS + cls.__REQUIRED_KEYS):
+                raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
+        Setup._check_setup(setup)
 
     def _edit_input_file_schema(self, kwarg_dict):
         # Name cases in the Sirepo model:
@@ -325,6 +356,19 @@ class Opal(Elegant):
     PARALLEL_RUN_COMMAND = 'opal'
     NAME = 'opal'
 
+    @classmethod
+    def _check_setup(cls, setup):
+        # Check globally required keys exist
+        code = cls.NAME
+        for key in cls.__REQUIRED_KEYS:
+            assert setup.get(key), f"{key} must be defined in setup for {code}"
+        # Validate for all keys (field in config file) are known to setup
+        for key in setup.keys():
+            # Can be made private if non-required code-specific fields are ever added
+            if key not in (cls._KNOWN_KEYS + cls.__REQUIRED_KEYS):
+                raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
+        Setup._check_setup(setup)
+
 
 class User(Python):
     __REQUIRED_KEYS = ('input_file', 'run_command', 'file_mapping', 'file_definitions')
@@ -353,6 +397,19 @@ class User(Python):
         module = pkrunpy.run_path_as_module(module_path)
         return module
 
+    @classmethod
+    def _check_setup(cls, setup):
+        # Check globally required keys exist
+        code = cls.NAME
+        for key in cls.__REQUIRED_KEYS:
+            assert setup.get(key), f"{key} must be defined in setup for {code}"
+        # Validate for all keys (field in config file) are known to setup
+        for key in setup.keys():
+            # Can be made private if non-required code-specific fields are ever added
+            if key not in (cls._KNOWN_KEYS + cls.__REQUIRED_KEYS):
+                raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
+        Setup._check_setup(setup)
+
     def generate_input_file(self, kwarg_dict, directory):
 
         # Get strings for each file and fill in arguments for this job
@@ -375,6 +432,19 @@ class Genesis(Elegant):
         d = genesis.Genesis(input_file, use_tempdir=False, expand_paths=False, check_executable=False)
 
         return d
+
+    @classmethod
+    def _check_setup(cls, setup):
+        # Check globally required keys exist
+        code = cls.NAME
+        for key in cls.__REQUIRED_KEYS:
+            assert setup.get(key), f"{key} must be defined in setup for {code}"
+        # Validate for all keys (field in config file) are known to setup
+        for key in setup.keys():
+            # Can be made private if non-required code-specific fields are ever added
+            if key not in (cls._KNOWN_KEYS + cls.__REQUIRED_KEYS):
+                raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
+        Setup._check_setup(setup)
 
     def _edit_input_file_schema(self, kwarg_dict):
         # Name cases:

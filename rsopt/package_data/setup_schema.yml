@@ -1,0 +1,9 @@
+# listing of fields known by all code's setup
+# setup classes currently maintain knowledge of strictly required fields and code specific fields
+- preprocess
+- postprocess
+- execution_type
+- input_file
+- input_distribution
+- output_distribution
+- cores
