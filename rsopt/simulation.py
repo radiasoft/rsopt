@@ -3,7 +3,7 @@ import time
 import numpy as np
 import os
 import rsopt.conversion
-from libensemble.message_numbers import WORKER_DONE, WORKER_KILL, TASK_FAILED
+from libensemble import message_numbers
 from libensemble.executors.executor import Executor
 from collections import Iterable
 
@@ -129,29 +129,32 @@ class SimulationFunction:
                     task.poll()
                     if task.finished:
                         if task.state == 'FINISHED':
-                            sim_status = WORKER_DONE
+                            sim_status = message_numbers.WORKER_DONE
                             self.J['status'] = sim_status
                             f = None
                             break
                         elif task.state == 'FAILED':
-                            sim_status = TASK_FAILED
+                            sim_status = message_numbers.TASK_FAILED
                             self.J['status'] = sim_status
+                            halt_job_sequence = True
                             break
                         else:
                             self.log.warning("Unknown task failure")
-                            sim_status = TASK_FAILED
+                            sim_status = message_numbers.TASK_FAILED
                             self.J['status'] = sim_status
+                            halt_job_sequence = True
                             break
                     elif task.runtime > job_timeout_sec:
                         self.log.warning('Task Timed out, aborting Job chain')
-                        sim_status = TASK_FAILED
+                        sim_status = message_numbers.WORKER_KILL_ON_TIMEOUT
+                        self.J['status'] = sim_status
                         task.kill()  # Timeout
                         halt_job_sequence = True
                         break
             else:
                 # Serial Python Job
                 f = job.execute(**kwargs)
-                sim_status = WORKER_DONE
+                sim_status = message_numbers.WORKER_DONE
                 # NOTE: Right now f is not passed to the objective function. Would need to go inside J. Or pass J into
                 #       function job.execute(**kwargs)
 
@@ -167,7 +170,7 @@ class SimulationFunction:
                     f_post(self.J)
 
         # TODO: Failures other than timeout do not interrupt the job chain right now
-        if sim_status == WORKER_DONE and not halt_job_sequence:
+        if sim_status == message_numbers.WORKER_DONE and not halt_job_sequence:
             # Use objective function is present
             if self.objective_function:
                 val = self.objective_function(self.J)
