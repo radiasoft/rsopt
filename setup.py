@@ -13,10 +13,11 @@ pksetup.setup(
     description='A Python library with tools for optimization problems',
     install_requires=[
         'pykern',
-        'libEnsemble',
+        'libEnsemble>=0.8.0',
         'numpy',
         'nlopt',
         'mpmath',
+        'jinja2>=3.0.1'
         'docutils==0.17'  # docutils>=0.18 may be breaking documentation build
     ],
     extras_require={
