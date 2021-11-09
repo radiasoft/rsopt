@@ -233,6 +233,7 @@ class Python(Setup):
     @classmethod
     def parse_input_file(cls, input_file, shifter):
         # Python does not use text input files. Functions are dynamically imported by `function`.
+        assert os.path.isfile(input_file), f'Could not find input_file: {input_file}'
         return None
 
     @classmethod
@@ -254,7 +255,6 @@ class Python(Setup):
         if not is_parallel:
             return None
 
-        assert self.setup.get('input_file'), "Input file must be provided to load Python function from"
         template_loader = jinja2.FileSystemLoader(searchpath=_TEMPLATE_PATH)
         template_env = jinja2.Environment(loader=template_loader)
         template = template_env.get_template(_PARALLEL_PYTHON_TEMPLATE)
