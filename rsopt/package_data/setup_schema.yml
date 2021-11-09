@@ -8,3 +8,4 @@
 - output_distribution
 - cores
 - timeout
+- force_executor
