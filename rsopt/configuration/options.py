@@ -20,6 +20,7 @@ class Options:
         self.sim_dirs_make = False
         self.run_dir = './ensemble'
         self.record_interval = 0
+        self.output_file = ''
 
     @classmethod
     def get_option(cls, options):

@@ -1,6 +1,5 @@
-import os
 from rsopt import run
-from libensemble.tools import save_libE_output
+from rsopt import util
 
 
 def configuration(config):
@@ -17,9 +16,7 @@ def configuration(config):
     H, persis_info, _ = runner.run()
 
     if _config.is_manager:
-        filename = os.path.splitext(config)[0]
-        history_file_name = "H_sample_" + filename + ".npy"
-        save_libE_output(H, persis_info, history_file_name, nworkers, mess='Sampler completed')
+        util.save_final_history(config, _config, H, persis_info, nworkers, message='Sampler completed')
 
 
 def start(config):
@@ -31,6 +28,4 @@ def start(config):
     runner = run.single_sampler(_config)
     H, persis_info, _ = runner.run()
     if _config.is_manager:
-        filename = os.path.splitext(config)[0]
-        history_file_name = "H_sample_" + filename + ".npy"
-        save_libE_output(H, persis_info, history_file_name, nworkers, mess='Ran start point')
+        util.save_final_history(config, _config, H, persis_info, nworkers, message='Ran start point')

@@ -1,5 +1,9 @@
 import re
 import os
+import logging
+import numpy as np
+import pickle
+from libensemble.tools import save_libE_output
 
 SLURM_PREFIX = 'nid'
 
@@ -99,3 +103,23 @@ def broadcast(data, root_rank=0):
 
     return MPI.COMM_WORLD.bcast(data, root=root_rank)
 
+
+def save_final_history(config_filename, config, H, persis_info, nworkers, message):
+    if config.options.output_file:
+        filename = config.options.output_file
+        _libe_save(H, persis_info, message, filename)
+    else:
+        filename = os.path.splitext(config_filename)[0]
+        history_file_name = "H_sample_" + filename + ".npy"
+        save_libE_output(H, persis_info, history_file_name, nworkers, mess=message)
+
+
+def _libe_save(H, persis_info, mess, filename):
+    # copy of the file save portion of libensemble.tools.save_libE_output, but with full control of save filename
+    logger = logging.getLogger('libensemble')
+    status_mess = ' '.join(['------------------', mess, '-------------------'])
+    logger.info('{}\nSaving results to file: {}'.format(status_mess, filename))
+    np.save(filename, H)
+
+    with open(filename + ".pickle", "wb") as f:
+        pickle.dump(persis_info, f)

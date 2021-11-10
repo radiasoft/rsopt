@@ -1,8 +1,6 @@
-import rsopt.parse as parse
 import numpy as np
-import os
 from rsopt import run
-from libensemble.tools import save_libE_output
+from rsopt import util
 
 
 def configuration(config):
@@ -19,9 +17,7 @@ def configuration(config):
     H, persis_info, _ = runner.run()
 
     if _config.is_manager:
-        filename = os.path.splitext(config)[0]
-        history_file_name = "H_" + filename + ".npy"
-        save_libE_output(H, persis_info, history_file_name, nworkers, mess='Run completed')
+        util.save_final_history(config, _config, H, persis_info, nworkers, message='Run completed')
         if software in _final_result:
             _final_result[software](H)
 
