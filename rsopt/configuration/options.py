@@ -1,11 +1,16 @@
 from pykern import pkrunpy
+from pykern import pkyaml
+from rsopt import _OPTIONS_SCHEMA
 import sys
 import os
+import itertools
 
 
 class Options:
+    NAME = 'options'
     __REQUIRED_KEYS = ('software',)
-    REQUIRED_KEYS = ()
+    _REGISTERED_OPTIONS = pkyaml.load_file(_OPTIONS_SCHEMA)
+    REQUIRED_OPTIONS = ()
 
     def __init__(self):
         self.objective_function = []
@@ -35,22 +40,23 @@ class Options:
 
     @classmethod
     def __check_options(cls, options):
+        # First check for options required by base class
+        # Inherited classes check for their requirements with _check_options
         for key in cls.__REQUIRED_KEYS:
             assert options.get(key), f"{key} must be defined in options"
 
     @classmethod
     def _check_options(cls, options):
         name = cls.NAME
-        for key in cls.REQUIRED_KEYS:
+        for key in cls.REQUIRED_OPTIONS:
             assert options.get(key), f"{key} must be defined in options for {name}"
 
     def _validate_input(self, name, value):
-        # If the name isn't registered then no point checking further
-        name_pass = hasattr(self, name)
-        if not name_pass:
-            print(f'{name} in options not recognized. It will be ignored.')
-            return False
-        # Check all other values defined in init
+        # _REGISTERED_OPTIONS covers base class values and
+        co = self._REGISTERED_OPTIONS[self.NAME]
+        _REGISTERED_OPTIONS = tuple(itertools.chain(*[ele if isinstance(ele, list) else [ele] for ele in co]))
+        if name not in _REGISTERED_OPTIONS and name not in self.REQUIRED_OPTIONS:
+            raise KeyError(f'options {name} was not recognized')
         else:
             expected_type = type(getattr(self, name))
             value_pass = isinstance(value, expected_type)
@@ -90,16 +96,16 @@ class Options:
 class Nlopt(Options):
     NAME = 'nlopt'
     # Ordering of required keys matters to validate method assignment is correct
-    REQUIRED_KEYS = ('method', 'exit_criteria')
+    REQUIRED_OPTIONS = ('method', 'exit_criteria')
     # Only can allow what aposmm_localopt_support handles right now
     ALLOWED_METHODS = ('LN_BOBYQA', 'LN_SBPLX', 'LN_COBYLA', 'LN_NEWUOA',
                          'LN_NELDERMEAD', 'LD_MMA')
 
     @classmethod
     def _check_options(cls, options):
-        for key in cls.REQUIRED_KEYS:
+        for key in cls.REQUIRED_OPTIONS:
             assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
-        proposed_method = options.get(cls.REQUIRED_KEYS[0])
+        proposed_method = options.get(cls.REQUIRED_OPTIONS[0])
         assert proposed_method in cls.ALLOWED_METHODS, \
             f"{proposed_method} not available for use in software {cls.NAME}"
 
@@ -107,7 +113,7 @@ class Nlopt(Options):
 class Scipy(Options):
     NAME = 'scipy'
     # Ordering of required keys matters to validate method assignment is correct
-    REQUIRED_KEYS = ('method', 'exit_criteria')
+    REQUIRED_OPTIONS = ('method', 'exit_criteria')
     # Only can allow what aposmm_localopt_support handles right now
     # SciPy routines are internally named ['scipy_Nelder-Mead', 'scipy_COBYLA', 'scipy_BFGS']
     # Will use same aliases as scipy uses in keeping with nlopt, and prefix here
@@ -119,9 +125,9 @@ class Scipy(Options):
 
     @classmethod
     def _check_options(cls, options):
-        for key in cls.REQUIRED_KEYS:
+        for key in cls.REQUIRED_OPTIONS:
             assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
-        proposed_method = options.get(cls.REQUIRED_KEYS[0])
+        proposed_method = options.get(cls.REQUIRED_OPTIONS[0])
         assert proposed_method in cls.ALLOWED_METHODS, \
             f"{proposed_method} not available for use in software {cls.NAME}"
 
@@ -133,7 +139,7 @@ class Scipy(Options):
 
 class Dfols(Options):
     NAME = 'dfols'
-    REQUIRED_KEYS = ('exit_criteria', 'components')
+    REQUIRED_OPTIONS = ('exit_criteria', 'components')
 
     def __init__(self):
         super().__init__()
@@ -141,7 +147,7 @@ class Dfols(Options):
 
     @classmethod
     def _check_options(cls, options):
-        for key in cls.REQUIRED_KEYS:
+        for key in cls.REQUIRED_OPTIONS:
             assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
 
         if 'software_options' in options.keys():
@@ -160,7 +166,7 @@ class Dfols(Options):
 
 class Aposmm(Options):
     NAME = 'aposmm'
-    REQUIRED_KEYS = ('method', 'exit_criteria')
+    REQUIRED_OPTIONS = ('method', 'exit_criteria', 'initial_sample_size')
     # Only can allow what aposmm_localopt_support handles right now
     ALLOWED_METHODS = ('LN_BOBYQA', 'LN_SBPLX', 'LN_COBYLA', 'LN_NEWUOA',
                          'LN_NELDERMEAD', 'LD_MMA')
@@ -178,17 +184,10 @@ class Aposmm(Options):
         for key, val in self.SOFTWARE_OPTIONS.items():
             self.__setattr__(key, val)
 
-    # def get_software_options(self):
-    #     options_dict = {}
-    #     for key in self.SOFTWARE_OPTIONS.keys():
-    #         options_dict[key] = self.__getattribute__(key)
-    #
-    #     return options_dict
-
 
 class Nsga2(Options):
     NAME = 'nsga2'
-    REQUIRED_KEYS = ('n_objectives', 'exit_criteria', )
+    REQUIRED_OPTIONS = ('n_objectives', 'exit_criteria',)
     SOFTWARE_OPTIONS = {}
 
     def __init__(self):
@@ -208,22 +207,9 @@ class Nsga2(Options):
         return sim_specs
 
 
-    # @classmethod
-    # def _check_options(cls, options):
-    #     for key in cls.REQUIRED_KEYS:
-    #         assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
-    #     try:
-    #         int(options['software_options'].get('n_objectives'))
-    #         if options['software_options'].get('n_objectives') == 0:
-    #             raise ValueError('The option `n_objectives` must be set to a non-zero value for NSGA2')
-    #     except ValueError:
-    #         nobj = repr(options['software_options'].get('n_objectives'))
-    #         raise ValueError('{} is not a valid number of objectives for `n_objectives'.format(nobj))
-
-
 class pySOT(Options):
     NAME = 'pysot'
-    REQUIRED_KEYS = ('exit_criteria',)
+    REQUIRED_OPTIONS = ('exit_criteria',)
     SOFTWARE_OPTIONS = {}
 
     def __init__(self):
@@ -234,7 +220,7 @@ class pySOT(Options):
 
 class Dlib(Options):
     NAME = 'dlib'
-    REQUIRED_KEYS = ('exit_criteria',)
+    REQUIRED_OPTIONS = ('exit_criteria',)
     SOFTWARE_OPTIONS = {}
 
     def __init__(self):
@@ -245,7 +231,7 @@ class Dlib(Options):
 
 class Mesh(Options):
     NAME = 'mesh_scan'
-    REQUIRED_KEYS = ()
+    REQUIRED_OPTIONS = ()
 
     def __init__(self):
         super().__init__()
@@ -255,7 +241,7 @@ class Mesh(Options):
 
 class LH(Options):
     NAME = 'lh_scan'
-    REQUIRED_KEYS = ('batch_size',)
+    REQUIRED_OPTIONS = ('batch_size',)
 
     def __init__(self):
         super().__init__()

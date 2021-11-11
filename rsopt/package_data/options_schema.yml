@@ -1,0 +1,42 @@
+# listing of fields known (but not necessarily required) by base options
+# type specification and validation are left to the class implementation
+options: &options
+  - objective_function
+  - exit_criteria
+  - software_options
+  - executor_options
+  - software
+  - method
+  - sym_links
+  - nworkers
+  - use_worker_dirs
+  - sim_dirs_make
+  - run_dir
+  - record_interval
+  - output_file
+nlopt:
+  - *options
+scipy:
+  - *options
+dfols:
+  - *options
+  - components
+aposmm:
+  - *options
+  - max_active_runs
+  - high_priority_to_best_localopt_runs
+  - initial_sample_size
+nsga2:
+  - *options
+  - n_objectives
+pysot:
+  - *options
+dlib:
+  - *options
+mesh_scan:
+  - *options
+  - mesh_file
+lh_scan:
+  - *options
+  - batch_size
+  - seed
