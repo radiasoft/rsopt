@@ -10,7 +10,7 @@ codes:
           max: 2.
           start: -0.7
       setup:
-        input_file: six_hump_camel.py
+        input_file: support/six_hump_camel.py
         function: six_hump_camel_func
         execution_type: serial
 options:

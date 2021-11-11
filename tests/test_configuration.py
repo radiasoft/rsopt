@@ -81,7 +81,8 @@ class TestOptionsReaders(unittest.TestCase):
     required_keys = {'nlopt': {'method': 'LN_SBPLX',
                                'exit_criteria': 'fill'},
                      'aposmm': {'method': 'LN_COBYLA',
-                                'exit_criteria': 'fill'},
+                                'exit_criteria': 'fill',
+                                 'initial_sample_size': 42},
                      'pysot': {'exit_criteria': 'fill'},
                      'dlib': {'exit_criteria': 'fill'},
                      'mesh_scan': {},
@@ -103,7 +104,7 @@ class TestOptionsReaders(unittest.TestCase):
     def test_missing_req_options(self):
 
         for option_name, option_class in config.options.option_classes.items():
-            if option_class.REQUIRED_KEYS:
+            if option_class.REQUIRED_OPTIONS:
                 opt_dict = {}
                 opt_dict[self.software_key] = option_name
                 with self.assertRaises(AssertionError):  # could use assertRaisesRegex and loop from pulling keys
@@ -134,8 +135,7 @@ class TestYAMLtoConfiguration(unittest.TestCase):
         python_job = config.jobs[0]
         setup = python_job._setup
 
-        # Path for six_hump_camel defined relative to support for cmd test
-        setup.setup['input_file'] = 'support/' + setup.setup['input_file']
+        setup.setup['input_file'] = setup.setup['input_file']
 
         assert callable(setup.function)
 
