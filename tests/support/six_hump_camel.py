@@ -1,3 +1,4 @@
+import time
 
 
 def six_hump_camel_func(x, y):
@@ -11,3 +12,11 @@ def six_hump_camel_func(x, y):
     term3 = (-4+4*x2**2) * x2**2
 
     return term1 + term2 + term3
+
+
+def sleepy_six_hump_camel_func(x, y, t=0.):
+    """
+    Sleep for t seconds then run six hump camel
+    """
+    time.sleep(t)
+    return six_hump_camel_func(x, y)

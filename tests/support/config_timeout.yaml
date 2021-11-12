@@ -1,0 +1,25 @@
+codes:
+  - python:
+      settings:
+        t: 0
+      parameters:
+        x:
+          min: -3.
+          max: 3.
+          start: 0.08
+        y:
+          min: -2.
+          max: 2.
+          start: -0.7
+      setup:
+        input_file: six_hump_camel.py
+        function: sleepy_six_hump_camel_func
+        execution_type: parallel
+        force_executor: True
+        timeout: 10.0
+options:
+  software: nlopt
+  method: LN_BOBYQA
+  exit_criteria:
+    sim_max: 2
+#  sym_links: [support_utils.py, six_hump_camel.py]
