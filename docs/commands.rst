@@ -97,22 +97,22 @@ Valid entries for optimizers in ``software`` are given below. Some libraries may
 The algorithm used may be specified with the  ``method`` option. See below for a listing of supported algorithms in
 each library.
 
-``nlopt``: NLopt [1]_ is an open-source library of non-linear optimization algorithms.
+:doc:`nlopt<optimizers/nlopt>`: NLopt [1]_ is an open-source library of non-linear optimization algorithms.
 
-``scipy``: Several methods from the optimization module of the popular SciPy [2]_ library are available. For details
+:doc:`scipy<optimizers/scipy>`: Several methods from the optimization module of the popular SciPy [2]_ library are available. For details
 of the algorithms see the 'SciPy manual'_.
 .. _SciPy manual: https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
 
-``dfols``: The Derivative-Free Optimizer for Least-Squares (DFO-LS) [3]_ is an algorithm especially constructed to handle
+:doc:`dfols<optimizers/dfols>`: The Derivative-Free Optimizer for Least-Squares (DFO-LS) [3]_ is an algorithm especially constructed to handle
 objective functions formuated as least-squares problems.
 
-``aposmm``: The Asynchronously Parallel Optimization Solver for finding Multiple Minima (APOSMM) [4]_ is a global optimization
+:doc:`aposmm<optimizers/aposmm>`: The Asynchronously Parallel Optimization Solver for finding Multiple Minima (APOSMM) [4]_ is a global optimization
 algorithm that coordinates concurrent local optimization runs in order to identify many local minima.
 
-``pysot``: Python Surrogate Optimization Toolbox (pySOT) [5]_ implements a collection of surrogate optimization algorithms
+:doc:`pysot<optimizers/pysot>`: Python Surrogate Optimization Toolbox (pySOT) [5]_ implements a collection of surrogate optimization algorithms
 with several variations in surrogate model, optimization strategy, and experimental plan provided.
 
-``dlib``: Implements the global_function_search method from dlib [6]_.
+:doc:`dlib<optimizers/dlib>`: Implements the global_function_search method from dlib [6]_.
 
 Parameter Scans
 ---------------
