@@ -169,7 +169,6 @@ class SimulationFunction:
                 for f_post in job._setup._postprocess:
                     f_post(self.J)
 
-        # TODO: Failures other than timeout do not interrupt the job chain right now
         if sim_status == message_numbers.WORKER_DONE and not halt_job_sequence:
             # Use objective function is present
             if self.objective_function:
@@ -187,6 +186,5 @@ class SimulationFunction:
             # TODO: Temporary penalty. Need to add a way to adjust this.
             self.log.warning('Penalty was used because result could not be evaluated')
             output = format_evaluation(self.sim_specs, _PENALTY)
-
 
         return output, persis_info, sim_status

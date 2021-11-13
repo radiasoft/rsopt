@@ -14,7 +14,7 @@ codes:
       setup:
         input_file: six_hump_camel.py
         function: sleepy_six_hump_camel_func
-        execution_type: parallel
+        execution_type: serial
         force_executor: True
         timeout: 10.0
 options:

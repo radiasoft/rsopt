@@ -31,6 +31,7 @@ class TestSetupFeatures(unittest.TestCase):
         H, persis_info, _ = runner.run()
 
         frame = tools.parse_stat_file('libE_stats.txt')
+        frame.to_csv('resr.csv')
         for row in frame.status[:2]:
             self.assertEqual(row, TIMEOUT_STATUS_MESSAGE)
 
@@ -48,7 +49,16 @@ class TestSetupFeatures(unittest.TestCase):
         for row in frame.status[:2]:
             self.assertEqual(row, COMPLETED_STATUS_MESSAGE)
 
+    def test_force_executor(self):
+        from libensemble.executors.mpi_executor import MPIExecutor
+        os.chdir(self.run_dir.name)
+        config_yaml = parse.read_configuration_file(self.timeout_config)
+        _config = parse.parse_yaml_configuration(config_yaml)
+        software = _config.options.NAME
+        runner = run.run_modes[software](_config)
+        runner._configure_executors()
+        self.assertTrue(isinstance(runner.executor, MPIExecutor))
+        self.assertTrue(runner._config.jobs[0].executor)
+
     def tearDown(self):
         self.run_dir.cleanup()
-
-
