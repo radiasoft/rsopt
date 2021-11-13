@@ -60,6 +60,25 @@ Example snippets (Using NumPy to form the residual vectors):
         return r_sum, r
 
 
+
+Example Options Block
+^^^^^^^^^^^^^^^^^^^^^
+
+
+.. code-block:: yaml
+
+ options:
+  software: dfols
+  method: dfols
+  components: 214
+  # Run until tolerance is reached or exit_criteria is hit
+  software_options: {'user_params': {'model.rel_tol': 1e-4}}
+  exit_criteria:
+    # If model.rel_tol isn't reached after 400 simulations then rsopt will terminate
+    sim_max: 400
+  objective_function: [objective.py, obj_f]
+
+
 See rsopt/examples/python_chwirut_example for an example using DFO-LS
 
 .. [1] https://github.com/numericalalgorithmsgroup/dfols

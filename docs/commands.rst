@@ -88,31 +88,31 @@ and no value can be directly returned. Therefore you must make sure to write any
 define an ``objective_function`` that can read them.
 
 
+.. _opt_software:
 
 Optimizer Software
 ~~~~~~~~~~~~~~~~~~
-.. _opt_software:
 
 Valid entries for optimizers in ``software`` are given below. Some libraries may have different algorithms to choose from.
 The algorithm used may be specified with the  ``method`` option. See below for a listing of supported algorithms in
 each library.
 
-:doc:`nlopt<optimizers/nlopt>`: NLopt [1]_ is an open-source library of non-linear optimization algorithms.
+* :doc:`nlopt<optimizers/nlopt>`: NLopt [1]_ is an open-source library of non-linear optimization algorithms.
 
-:doc:`scipy<optimizers/scipy>`: Several methods from the optimization module of the popular SciPy [2]_ library are available. For details
-of the algorithms see the 'SciPy manual'_.
-.. _SciPy manual: https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
+* :doc:`scipy<optimizers/scipy>`: Several methods from the optimization module of the popular SciPy [2]_ library are available. For details
+  of the algorithms see the 'SciPy manual'_.
+  .. _SciPy manual: https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
 
-:doc:`dfols<optimizers/dfols>`: The Derivative-Free Optimizer for Least-Squares (DFO-LS) [3]_ is an algorithm especially constructed to handle
+* :doc:`dfols<optimizers/dfols>`: The Derivative-Free Optimizer for Least-Squares (DFO-LS) [3]_ is an algorithm especially constructed to handle
 objective functions formuated as least-squares problems.
 
-:doc:`aposmm<optimizers/aposmm>`: The Asynchronously Parallel Optimization Solver for finding Multiple Minima (APOSMM) [4]_ is a global optimization
-algorithm that coordinates concurrent local optimization runs in order to identify many local minima.
+* :doc:`aposmm<optimizers/aposmm>`: The Asynchronously Parallel Optimization Solver for finding Multiple Minima (APOSMM) [4]_ is a global optimization
+  algorithm that coordinates concurrent local optimization runs in order to identify many local minima.
 
-:doc:`pysot<optimizers/pysot>`: Python Surrogate Optimization Toolbox (pySOT) [5]_ implements a collection of surrogate optimization algorithms
-with several variations in surrogate model, optimization strategy, and experimental plan provided.
+* :doc:`pysot<optimizers/pysot>`: Python Surrogate Optimization Toolbox (pySOT) [5]_ implements a collection of surrogate optimization algorithms
+  with several variations in surrogate model, optimization strategy, and experimental plan provided.
 
-:doc:`dlib<optimizers/dlib>`: Implements the global_function_search method from dlib [6]_.
+* :doc:`dlib<optimizers/dlib>`: Implements the global_function_search method from dlib [6]_.
 
 Parameter Scans
 ---------------
