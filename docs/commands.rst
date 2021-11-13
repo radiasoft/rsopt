@@ -97,92 +97,22 @@ Valid entries for optimizers in ``software`` are given below. Some libraries may
 The algorithm used may be specified with the  ``method`` option. See below for a listing of supported algorithms in
 each library.
 
-``nlopt``: NLopt [1]_ is an open-source library of non-linear optimization algorithms. Currently, only a subset of algorithms
-from NLopt are available in rsopt. For more detailed description of each algorithm please see the 'NLopt manual'_.
-.. _NLopt manual: https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/
-Method names are based upon NLopt's Python API naming scheme.
-
-**Gradient-free methods** - these algorithms do not make use of the objective function gradient. The objective function
-or setup.function, in the case of Python evaluation, should just return a single float that will be interpreted as
-objective function value at the observation point.
-
-    - ``LN_NELDERMEAD``: The well known Nelder-Mead method, sometimes just referred to as "simplex method".
-    - ``LN_BOBYQA``: Bound Optimization BY Quadratic Approximation. A trust-region based method that uses a quadratic model of the objective.
-    - ``LN_SBPLX``: A variant of Nelder-Mead that uses Nelder-Mead on a sequence of subspaces.
-    - ``LN_COBYLA``: Constrained Optimization BY Linear Approximations. This is another trust-region method. COBYLA generally supports
-      inequality and equality constraints, however, rsopt does not have an interface to pass constrains at this time.
-    - ``LN_NEWUOA``: NEW Unconstrained Optimization Algorithm. NEWUOA performs unconstrained optimization using
-      an iteratively constructed quadratic approximation for the objective function. Despite the name the NLopt manual
-      notes that is generally better to use the even newer BOBYQA algorithm.
-
-**Gradient-based methods** - these require passing gradient information for the objective function at the observation point.
-For these methods the objective function or setup.function, in the case of Python evaluation, should return a tuple of
-(f, fgrad) where f is the value of the objective function at the observation point x as a float and fgrad is the
-gradient of f at x, fgrad should be an array of floats with the same dimension as x.
-
-    - ``LD_MMA``: Method of Moving Asymptotes.
+``nlopt``: NLopt [1]_ is an open-source library of non-linear optimization algorithms.
 
 ``scipy``: Several methods from the optimization module of the popular SciPy [2]_ library are available. For details
 of the algorithms see the 'SciPy manual'_.
 .. _SciPy manual: https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
-Method names are based on SciPy's API naming scheme.
-
-**Gradient-free methods** - these algorithms do not make use of the objective function gradient. The objective function
-or setup.function, in the case of Python evaluation, should just return a single float that will be interpreted as
-objective function value at the observation point.
-
-    - ``Nelder-Mead``: The well known Nelder-Mead method, sometimes just referred to as "simplex method".
-    - ``COBYLA``: Constrained Optimization BY Linear Approximations. This is another trust-region method. COBYLA generally supports
-      inequality and equality constraints, however, rsopt does not have an interface to pass constrains at this time.
-
-**Gradient-based methods** - these require passing gradient information for the objective function at the observation point.
-For these methods the objective function or setup.function, in the case of Python evaluation, should return a tuple of
-(f, fgrad) where f is the value of the objective function at the observation point x as a float and fgrad is the
-gradient of f at x, fgrad should be an array of floats with the same dimension as x.
-
-    - ``BFGS``: The Broyden-Fletcher-Goldfarb-Shanno algorithm. Can also be used like a gradient free method.
-      If no gradient information is passed then BFGS will use a first-difference estimate.
 
 ``dfols``: The Derivative-Free Optimizer for Least-Squares (DFO-LS) [3]_ is an algorithm especially constructed to handle
-objective functions formuated as least-squares problems.  Note that it is a single algorithm, and the ``method`` field
-should also be set to ``dfols``. Note: you must supply the number of terms in the least-squares objective using
-the field ``components`` under ``options``.
+objective functions formuated as least-squares problems.
 
 ``aposmm``: The Asynchronously Parallel Optimization Solver for finding Multiple Minima (APOSMM) [4]_ is a global optimization
-algorithm that coordinates concurrent local optimization runs in order to identify many local minima. APOSMM is included
-in the libEnsemble library, for a description of its setup and options there see: https://libensemble.readthedocs.io/en/master/examples/aposmm.html.
-However, rsopt automates much of the routine setup for APOSMM so a brief listing of relevant options is given below:
-
-    - ``initial_sample_size``: Number of uniformly sampled points must be returned (non-nan value) before a local opt run is started.
-    - ``max_active_runs``: Bound on number of runs APOSMM is advancing.
-    - The optional values for ``gen_specs['user']`` may be passed to APOSMM through the ``software_options`` dictionary
-      with the exception of ``sample_points`` which is not currently supported in the rsopt interface.
-
-You must also supply a local optimization method that APOSMM will use with the ``method`` field.
-The command must distinguish the local optimizer software and method in the form: ``software.method``
-Currently just the NLopt
-algorithms are available for use with APOSMM in rsopt. That is: ``LN_NELDERMEAD``, ``LN_BOBYQA``, ``LN_SBPLX``, ``LN_COBYLA``,
-``LN_NEWUOA``, and ``LD_MMA``. To use LN_NELDERMEAD for example one should have ``method: nlopt.LN_NELDERMEAD``.
-
+algorithm that coordinates concurrent local optimization runs in order to identify many local minima.
 
 ``pysot``: Python Surrogate Optimization Toolbox (pySOT) [5]_ implements a collection of surrogate optimization algorithms
 with several variations in surrogate model, optimization strategy, and experimental plan provided.
-pySOT includes support for asynchronous use of all optimization algorithms which is utilized by rsopt.
 
-
-Currently rsopt
-implements a fixed choice for the three components and  uses:
-``RBFInterpolant`` for the surrogate model, ``SRBFStrategy`` for the strategy, and ``SymmetricLatinHypercube`` for the
-experimental plan. The user can pass the following through ``software_options`` to configure pySOT:
-
-    - ``num_pts``: Sets the number of points that will be evaluated as part of the experimental planning phase before
-      before optimization begins. Defaults to 2 * (PARAMETER_DIMENSION + 1) if not set.
-Also supports use of arbitrary numbers of workers ``nworkers`` in ``options``.
-
-``dlib``: Implements the global_function_search method from dlib [6]_. This method is based on using the approximated
- Lipschitz constant to define an upper bound on the search space that guides the optimization. This method is particularly
-attractive because it requires no hyper parameter choices. For a very nice description of the method's operation see
-here_. Supports use of arbitrary numbers of workers ``nworkers`` in ``options``.
+``dlib``: Implements the global_function_search method from dlib [6]_.
 
 Parameter Scans
 ---------------
@@ -245,4 +175,3 @@ Other useful helper commands.
 .. [4] https://doi.org/10.1007/s12532-017-0131-4
 .. [5] https://github.com/dme65/pySOT
 .. [6] https://github.com/davisking/dlib
-.. _here http://blog.dlib.net/2017/12/a-global-optimization-algorithm-worth.html
