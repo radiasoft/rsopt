@@ -10,7 +10,10 @@ import shutil
 SUPPORT_PATH = './support/'
 TIMEOUT_STATUS_MESSAGE = 'Worker killed task on Timeout'
 COMPLETED_STATUS_MESSAGE = 'Completed'
+HOME = os.getcwd()
 
+# I am doing something wrong with the tempdir run
+# Tests all pass when run individually but if the whole test is executed then test_executor_timeout fails
 
 class TestSetupFeatures(unittest.TestCase):
     # For these tests the process moves to SUPPORT_PATH before starting the test
@@ -61,4 +64,5 @@ class TestSetupFeatures(unittest.TestCase):
         self.assertTrue(runner._config.jobs[0].executor)
 
     def tearDown(self):
+        os.chdir(HOME)
         self.run_dir.cleanup()
