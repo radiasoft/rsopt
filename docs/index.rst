@@ -14,8 +14,9 @@ rsopt is a Python library for modularizing and running optimization problems.
    Introduction<introduction>
    Installation<installation>
    Run Modes<commands>
-   Configuration Files<configuration>
    Supported Codes<codes>
+   Configuration Files<configuration>
+   Simulation Execution<simulation_execution>
 
 Indices and tables
 ==================

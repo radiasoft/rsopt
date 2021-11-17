@@ -104,7 +104,7 @@ each library.
   .. _SciPy manual: https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
 
 * :doc:`dfols<optimizers/dfols>`: The Derivative-Free Optimizer for Least-Squares (DFO-LS) [3]_ is an algorithm especially constructed to handle
-objective functions formuated as least-squares problems.
+  objective functions formuated as least-squares problems.
 
 * :doc:`aposmm<optimizers/aposmm>`: The Asynchronously Parallel Optimization Solver for finding Multiple Minima (APOSMM) [4]_ is a global optimization
   algorithm that coordinates concurrent local optimization runs in order to identify many local minima.

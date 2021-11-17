@@ -76,6 +76,7 @@ Example Options Block
   exit_criteria:
     # If model.rel_tol isn't reached after 400 simulations then rsopt will terminate
     sim_max: 400
+  # objective_function can be optional if using python in codes
   objective_function: [objective.py, obj_f]
 
 
