@@ -341,7 +341,8 @@ class Elegant(Setup):
                     ele_name = model.models.elements[id]["name"]
                     raise NameError(f"Parameter: {name} is not found for element {ele_name} with type {ele_type}")
             else:
-                raise ValueError("{} was not found in loaded .ele or .lte files".format(n))
+                raise ValueError("{} was not found in the {} lattice loaded from {}".format(n, self.NAME,
+                                                                                            self.setup['input_file']))
 
         return model
 
