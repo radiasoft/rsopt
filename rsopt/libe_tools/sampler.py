@@ -57,8 +57,11 @@ class GridSampler(libEnsembleOptimizer):
     def _define_mesh_parameters(self):
         mesh_parameters = []
         size = 1
-        for lb, ub, s in zip(self.lb, self.ub, self._config.get_parameters_list('get_samples')):
-            mp = [lb, ub, s]
+        for lb, ub, st, s in zip(self.lb, self.ub, self.start, self._config.get_parameters_list('get_samples')):
+            if s == 1:
+                mp = [st, st, s]
+            else:
+                mp = [lb, ub, s]
             mesh_parameters.append(mp)
             size *= s
 
