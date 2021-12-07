@@ -33,7 +33,7 @@ class Aposmm(Options):
         sim_specs = self._OPT_SCHEMA[software]['methods'][method]['sim_specs']
         opt_method = option_classes[software]()
         for key in opt_method.REQUIRED_OPTIONS:
-            if key == 'exit_criteria':
+            if key == 'exit_criteria' or key == 'method':
                 continue
             assert self.software_options.get(key), f'Use of {software}.{method} with APOSMM requires that {key} be ' \
                                                    f'set in software_options '
