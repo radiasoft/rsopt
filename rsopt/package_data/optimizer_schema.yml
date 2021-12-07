@@ -6,26 +6,46 @@ nlopt:
       local_support: True
       persis_in:
         - f
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float]
     LN_BOBYQA:
       aposmm_support: True
       local_support: True
       persis_in:
         - f
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float]
     LN_COBYLA:
       aposmm_support: True
       local_support: True
       persis_in:
         - f
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float]
     LN_NEWUOA:
       aposmm_support: True
       local_support: True
       persis_in:
         - f
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float]
     LN_NELDERMEAD:
       aposmm_support: True
       local_support: True
       persis_in:
         - f
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float]
     LD_MMA:
       aposmm_support: True
       local_support: True
@@ -41,6 +61,11 @@ dfols:
       persis_in:
         - f
         - fvec
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float]
+          - ['fvec', float, components]
 scipy:
   type: local  #  scipy has global methods, but we don't support right now (chang to 'mixed' if we ever do)
   methods:
@@ -49,11 +74,19 @@ scipy:
       local_support: True
       persis_in:
         - f
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float]
     scipy_COBYLA:
       aposmm_support: True
       local_support: True
       persis_in:
         - f
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float]
     scipy_BFGS:
       aposmm_support: True
       local_support: True
@@ -69,6 +102,10 @@ dlib:
       persis_in:
         - f
         - sim_id
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float]
 pysot:
   type: global
   methods:
@@ -78,6 +115,10 @@ pysot:
       persis_in:
         - f
         - sim_id
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float]
 aposmm:
   type: global
   methods:  # aposmm uses other software and methods. AposmmOptimizer checks for aposmm_support and handles config.

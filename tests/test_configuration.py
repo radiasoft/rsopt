@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import rsopt.configuration as config
+from rsopt.configuration.options import options
 from rsopt.parse import read_configuration_file, parse_yaml_configuration
 SUPPORT_PATH = './support/'
 
@@ -47,7 +48,7 @@ options_dict = {'software': 'nlopt',
                  'record_interval': 2},
                  'method': 'LN_SBPLX',
                  'exit_criteria': {'sim_max': 10000, 'wall_clock': '1e4'},
-                 'objective_function': None
+                 'objective_function': []
                 }
 
 
@@ -95,7 +96,7 @@ class TestOptionsReaders(unittest.TestCase):
                      'lh_scan': {'batch_size': 512}}
 
     def test_options_set(self):
-        for option_name, option_class in config.options.option_classes.items():
+        for option_name, option_class in options.option_classes.items():
             opt_dict = self.required_keys[option_name]
             opt_dict[self.software_key] = option_name
             option_obj = config.options.Options.get_option(opt_dict)()
@@ -103,7 +104,7 @@ class TestOptionsReaders(unittest.TestCase):
 
     def test_missing_req_options(self):
 
-        for option_name, option_class in config.options.option_classes.items():
+        for option_name, option_class in options.option_classes.items():
             if option_class.REQUIRED_OPTIONS:
                 opt_dict = {}
                 opt_dict[self.software_key] = option_name

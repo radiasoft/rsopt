@@ -24,4 +24,3 @@ options:
                      'dist_to_bound_multiple': 0.5}
   exit_criteria:
     sim_max: 400
-  objective_function: None

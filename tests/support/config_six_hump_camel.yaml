@@ -21,4 +21,4 @@ options:
                      'record_interval': 2}
   exit_criteria:
     sim_max: 30
-  objective_function: None
+  objective_function: []

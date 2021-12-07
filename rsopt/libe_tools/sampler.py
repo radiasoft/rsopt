@@ -133,4 +133,4 @@ class LHSampler(libEnsembleOptimizer):
 
     def _configure_persistant_info(self):
         # _configure_specs must have been already called
-        self.persis_info = add_unique_random_streams({}, self.nworkers + 1)
+        self.persis_info = add_unique_random_streams({}, self.nworkers + 1, seed=self._config.options.seed)
