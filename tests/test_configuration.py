@@ -48,7 +48,7 @@ options_dict = {'software': 'nlopt',
                  'record_interval': 2},
                  'method': 'LN_SBPLX',
                  'exit_criteria': {'sim_max': 10000, 'wall_clock': '1e4'},
-                 'objective_function': None
+                 'objective_function': []
                 }
 
 

@@ -3,7 +3,18 @@ from pykern import pkyaml
 from rsopt import _OPTIONS_SCHEMA, _OPTIMIZER_SCHEMA
 import sys
 import os
-import itertools
+
+
+_TYPE_MAPPING = {
+    # Map typing from schema to Python types
+    'None': type(None),
+    'bool': bool,
+    'str': str,
+    'int': int,
+    'float': float,
+    'list': list,
+    'dict': dict
+}
 
 
 class Options:
@@ -56,18 +67,15 @@ class Options:
             assert options.get(key), f"{key} must be defined in options for {name}"
 
     def _validate_input(self, name, value):
-        # _REGISTERED_OPTIONS covers base class values and
         co = self._REGISTERED_OPTIONS[self.NAME]
-        _REGISTERED_OPTIONS = tuple(itertools.chain(*[ele if isinstance(ele, list) else [ele] for ele in co]))
-        if name not in _REGISTERED_OPTIONS and name not in self.REQUIRED_OPTIONS:
+        if name not in co.keys() and name not in self.REQUIRED_OPTIONS:
             raise KeyError(f'options {name} was not recognized')
         else:
-            expected_type = type(getattr(self, name))
-            value_pass = isinstance(value, expected_type)
+            allowed_types = co[name]['typing']
+            value_pass = isinstance(value, tuple(_TYPE_MAPPING[t] for t in allowed_types))
             if not value_pass:
                 received_type = type(value)
-                print(f'{name} must be type {expected_type}, but received {received_type}')
-                return False
+                raise TypeError(f'{name} must be one of types {allowed_types}, but received {received_type}')
 
         return True
 

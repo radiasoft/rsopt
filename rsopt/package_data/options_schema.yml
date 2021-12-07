@@ -1,42 +1,84 @@
 # listing of fields known (but not necessarily required) by base options
 # type specification and validation are left to the class implementation
 options: &options
-  - objective_function
-  - exit_criteria
-  - software_options
-  - executor_options
-  - software
-  - method
-  - sym_links
-  - nworkers
-  - use_worker_dirs
-  - sim_dirs_make
-  - run_dir
-  - record_interval
-  - output_file
-nlopt:
-  - *options
+  objective_function:
+    typing:
+      - list
+  exit_criteria:
+    typing:
+      - dict
+  software_options:
+    typing:
+      - dict
+  executor_options:
+    typing:
+      - dict
+  software:
+    typing:
+      - str
+  method:
+    typing:
+      - str
+  sym_links:
+    typing:
+      - list
+  nworkers:
+    typing:
+      - int
+  use_worker_dirs:
+    typing:
+      - bool
+  sim_dirs_make:
+    typing:
+      - bool
+  run_dir:
+    typing:
+      - str
+  record_interval:
+    typing:
+      - int
+  output_file:
+    typing:
+      - str
+nlopt:                
+  <<: *options
 scipy:
-  - *options
+  <<: *options
 dfols:
-  - *options
-  - components
+  <<: *options
+  components: {typing: [int]}
 aposmm:
-  - *options
-  - max_active_runs
-  - high_priority_to_best_localopt_runs
-  - initial_sample_size
+  <<: *options
+  max_active_runs:
+    typing:
+      - int
+  high_priority_to_best_localopt_runs:
+    typing:
+      - bool
+  initial_sample_size:
+    typing:
+      - int
 nsga2:
-  - *options
-  - n_objectives
+  <<: *options
+  n_objectives:
+    typing:
+      - int
 pysot:
-  - *options
+  <<: *options
 dlib:
-  - *options
+  <<: *options
 mesh_scan:
-  - *options
-  - mesh_file
+  <<: *options
+  mesh_file:
+    typing:
+      - str
 lh_scan:
-  - *options
-  - batch_size
-  - seed
+  <<: *options
+  batch_size:
+    typing:
+      - int
+  seed:
+    typing:
+      - None
+      - str
+      - int

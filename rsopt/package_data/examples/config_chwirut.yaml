@@ -30,4 +30,3 @@ options:
                      }
   exit_criteria:
     sim_max: 400
-  objective_function: None
