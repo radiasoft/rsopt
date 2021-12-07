@@ -145,9 +145,9 @@ Sampler Software
 Valid entries for samplers in ``software`` are given below. Please see the links for a description of the sampler and
 any additional setup required.
 
-- :doc:`dfols<samplers/mesh_scan>`: Samples a points on a uniform mesh. The mesh is either constructed from (min, max, samples), taking equally
+- :doc:`mesh_scan<samplers/mesh_scan>`: Samples a points on a uniform mesh. The mesh is either constructed from (min, max, samples), taking equally
   spaced `samples` between `min` and `max` or can be from a user defined mesh stored in NumPy's default `.npy` format.
-- :doc:`dfols<samplers/lh_scan>`: Samples points using a Latin Hypercube.
+- :doc:`lh_scan<samplers/lh_scan>`: Samples points using a Latin Hypercube.
 - ``start``: Can be used with `rsopt sample start` to run the configuration file on just the start point for each parameter.
   This is also useful as a method to help with debugging errors during simulation chains. It will ignore most other
   run configuration such as `nworkers` and `software`.

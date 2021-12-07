@@ -25,7 +25,7 @@ Options
 The following required and optional keys can be used within the :code:`options:` block:
 
 * :code:`software` *[str (required)]*: :code:`mesh_scan`
-* :code:`mesh_ile` *[str (optional)]*: The name of a file giving the points to evaluate for the scan. The array should
+* :code:`mesh_file` *[str (optional)]*: The name of a file giving the points to evaluate for the scan. The array should
   be formatted to have a shape of (N, M) where N is the length of the parameter vector and M is the number of samples.
 
 
