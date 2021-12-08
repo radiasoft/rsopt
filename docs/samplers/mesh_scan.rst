@@ -16,7 +16,7 @@ Configuration
 Requirements and optional keys for setting up the configuration file to use Mesh Scan are given below.
 
 Codes Blocks
-^^^^^^^^^^^
+^^^^^^^^^^^^
 * :code:`samples` *[int (required)]*: Each parameter must have a specified number of samples given.
   If :code:`samples: 1` then the parameter is set to its :code:`start` value.
 

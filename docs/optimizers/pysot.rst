@@ -11,8 +11,8 @@ Currently rsopt implements a fixed choice for the three components and  uses:
 ``RBFInterpolant`` for the surrogate model, ``SRBFStrategy`` for the strategy, and ``SymmetricLatinHypercube`` for the
 experimental plan.
 The user can pass the following through ``software_options`` to configure pySOT:
-    - ``num_pts``: Sets the number of points that will be evaluated as part of the experimental planning phase before
-      before optimization begins. Defaults to 2 * (PARAMETER_DIMENSION + 1) if not set.
+
+- ``num_pts``: Sets the number of points that will be evaluated as part of the experimental planning phase before optimization begins. Defaults to 2 * (PARAMETER_DIMENSION + 1) if not set.
 
 *The ``objective_function``or ``function`` in ``setup``, in the case of Python evaluation,
 should just return a single float that will be interpreted as

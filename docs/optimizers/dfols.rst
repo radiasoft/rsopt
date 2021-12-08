@@ -11,7 +11,7 @@ Configuration
 Requirements and optional keys for setting up the configuration file to use DFO-LS are given below.
 
 Codes Blocks
-^^^^^^^^^^^
+^^^^^^^^^^^^
 No special configuration is needed in any portion of the :code:`codes` blocks to use DFO-LS.
 
 Options
