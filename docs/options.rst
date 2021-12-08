@@ -14,7 +14,7 @@ Global Options
     Number of workers used for running simulations, and in some cases a worker may be used run the governing `software`.
     In cases where the `software` option supports parallel evaluations then workers will each, independently
     run through a Job chain. For some software options the supported number of worker is fixed (e.g. local optimizers
-    can only use two workes. One to manage the optimizer and one to manage simulation execution.)
+    can only use two workers. One to manage the optimizer and one to manage simulation execution.)
     See :ref:`Software</opt_software>` for information on support for parallel evaluation
     in a particular `software` option.
 - `exit_criteria` [dict]:

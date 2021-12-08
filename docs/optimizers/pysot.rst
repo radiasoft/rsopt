@@ -7,7 +7,7 @@ Python Surrogate Optimization Toolbox (pySOT) [1]_ implements a collection of su
 with several variations in surrogate model, optimization strategy, and experimental plan provided.
 pySOT includes support for asynchronous use of all optimization algorithms which is utilized by rsopt.
 
-Currently rsoptimplements a fixed choice for the three components and  uses:
+Currently rsopt implements a fixed choice for the three components and  uses:
 ``RBFInterpolant`` for the surrogate model, ``SRBFStrategy`` for the strategy, and ``SymmetricLatinHypercube`` for the
 experimental plan.
 The user can pass the following through ``software_options`` to configure pySOT:

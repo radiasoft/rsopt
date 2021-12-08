@@ -26,7 +26,7 @@ The following required and optional keys can be used within the :code:`options:`
 * :code:`batch_size` *[int (required)]*: The number of sample points to evaluate.
 * :code:`seed` *[int or None or str (optional)]*: Sets the seed to initialize the pseudo-random number generator used by the sampler.
   Behavior depends on the setting:
-   * :code:`''`: **default** If an empty string is given, or seed is not explicity included then a fixed seed is set.
+   * :code:`''`: **default** If an empty string is given, or seed is not explicitly included then a fixed seed is set.
      Repeated runs with this setting will always evaluate the same point.
    * :code:`None`: If seed is set to :code: `None` then a random seed will be used. **IMPORTANT**: To set a field to be
      :code:`None`-type in YAML the field must be empty. So the options block should look like:
