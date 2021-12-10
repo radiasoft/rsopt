@@ -15,20 +15,19 @@ logger = logging.getLogger(__name__)
 _RSMPI_CONFIG_PATH = EXECUTOR_SCHEMA['rsmpi']['config_path']
 
 
-def register_rsmpi_executor(hosts='auto', **kwargs):
+def register_rsmpi_executor(hosts: str or list = 'auto') -> MPIExecutor:
     """
     Create an MPIExecutor that can use rsmpi. The executor is returned and may be used to register calculations
     for workers like any other libEnsemble executor.
-    :param hosts: (str or int) If 'auto' then all rsmpi resources are detected and used. Otherwise specify number
-                               of hosts as an int.
-    :param kwargs: Any other kwargs given will be passed to the MPIExecutor that is created.
+    :param hosts: (str or list) If 'auto' then all rsmpi resources are detected and used. If a list is given
+                                the list entries are written to the libe_nodes file.
 
     :return: libensemble.executors.mpi_executor.MPIExecutor object
     """
     schema = EXECUTOR_SCHEMA['rsmpi']
 
-    if type(hosts) == int:
-        hosts = int(hosts)
+    if type(hosts) == list:
+        pass
     elif hosts == 'auto':
         hosts = _detect_rsmpi_resources()
     else:
@@ -37,14 +36,14 @@ def register_rsmpi_executor(hosts='auto', **kwargs):
     _generate_rsmpi_node_file(hosts)
 
     customizer = {k:  schema[k] for k in ('mpi_runner', 'runner_name', 'subgroup_launch')}
-    jobctrl = MPIExecutor(**kwargs, custom_info=customizer)
+    jobctrl = MPIExecutor(custom_info=customizer)
     # Set longer fail time - rsmpi is relatively slow to start
     jobctrl.fail_time = schema['fail_time']
     
     return jobctrl
 
 
-def _detect_rsmpi_resources():
+def _detect_rsmpi_resources() -> int:
     hosts = 0
     assert os.path.isfile(_RSMPI_CONFIG_PATH), "rsmpi configuration does not exist"
     with open(_RSMPI_CONFIG_PATH, 'r') as ff:
@@ -57,10 +56,16 @@ def _detect_rsmpi_resources():
     return hosts
 
 
-def _generate_rsmpi_node_file(nodes):
+def _generate_rsmpi_node_file(nodes: int or list) -> None:
     with open('libe_nodes', 'w') as ff:
-        for node in range(1, nodes+1):
-            ff.write(str(node)+'\n')
+        if type(nodes) == int:
+            for node in range(1, nodes+1):
+                ff.write(str(node)+'\n')
+        elif type(nodes) == list:
+            for node in nodes:
+                ff.write(str(node)+'\n')
+        else:
+            raise TypeError(f'nodes must be int or list. Received instead: {nodes}')
 
 
 # Not strictly needed (MPIExecutor with n=1 is currently used by rsopt to simplify setup)
