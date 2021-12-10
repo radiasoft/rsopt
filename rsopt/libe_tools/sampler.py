@@ -21,8 +21,9 @@ class GridSampler(libEnsembleOptimizer):
         self.exact_mesh = self._config.options.mesh_file
 
         if self.exact_mesh:
+            # Mesh should have shape (number of parameters, number of samples)
             mesh = np.load(self.exact_mesh)
-            sim_max = mesh.size
+            sim_max = mesh.shape[1]
         else:
             mesh, sim_max = self._define_mesh_parameters()
 
