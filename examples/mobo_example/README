@@ -1,0 +1,5 @@
+Testing libEnsemble generator for the Multi-Objective Bayesian approach implemented by https://github.com/ChristopherMayes/Xopt
+To run: rsopt optimize configuration config_mobo.yml
+
+Plotting script: python plot_result.py
+(may need to change the name of `history_file` in plot_result.py)

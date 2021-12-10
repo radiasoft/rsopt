@@ -47,6 +47,11 @@ scipy:
 dfols:
   <<: *options
   components: {typing: [int]}
+mobo:
+  <<: *options
+  objectives: {typing: [int]}
+  constraints: {typing: [int]}
+  reference: {typing: [list]}
 aposmm:
   <<: *options
   max_active_runs:

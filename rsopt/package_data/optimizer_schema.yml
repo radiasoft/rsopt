@@ -122,3 +122,17 @@ pysot:
 aposmm:
   type: global
   methods:  # aposmm uses other software and methods. AposmmOptimizer checks for aposmm_support and handles config.
+mobo:
+  type: global
+  methods:
+    mobo:
+      aposmm_support: False
+      local_support: False
+      persis_in:
+        - f
+        - c
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float, objectives]
+          - ['c', float, constraints]

@@ -7,6 +7,7 @@ from rsopt.configuration.options import nsga2
 from rsopt.configuration.options import aposmm
 from rsopt.configuration.options import pysot
 from rsopt.configuration.options import scipy
+from rsopt.configuration.options import mobo
 
 option_classes = {
     'nlopt': nlopt.Nlopt,
@@ -16,6 +17,7 @@ option_classes = {
     'scipy': scipy.Scipy,
     'pysot': pysot.pySOT,
     'dlib': dlib.Dlib,
+    'mobo': mobo.Mobo,
     'mesh_scan': mesh.Mesh,
     'lh_scan': lh.LH
 }

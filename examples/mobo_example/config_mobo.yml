@@ -1,0 +1,28 @@
+codes:
+  - python:
+      parameters:
+        x1:
+          min: 0.
+          max: 3.14
+          start: 1.0
+        x2:
+          min: 0.
+          max: 3.14
+          start: 1.0
+      setup:
+        input_file: tnk_function.py
+        function: tnk
+        execution_type: serial
+options:
+  nworkers: 4
+  software: mobo
+  objectives: 2
+  constraints: 2
+  reference: [1.4, 1.4]
+  software_options:
+    fixed_cost: True
+    constraints:
+      c1: ['GREATER_THAN', 0]
+      c2: ['LESS_THAN', 0.5]
+  exit_criteria:
+    sim_max: 80
