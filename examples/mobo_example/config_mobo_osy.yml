@@ -1,0 +1,53 @@
+codes:
+  - python:
+      parameters:
+        x1:
+          min: 0.
+          max: 10.
+          start: 1.0
+        x2:
+          min: 0.
+          max: 10.
+          start: 1.0
+        x3:
+          min: 1.
+          max: 5.
+          start: 2.5
+        x4:
+          min: 0.
+          max: 6.
+          start: 1.0
+        x5:
+          min: 1.
+          max: 5.
+          start: 2.5
+        x6:
+          min: 0.
+          max: 10.
+          start: 1.0          
+      setup:
+        input_file: osy_function.py
+        function: osy
+        execution_type: serial
+options:
+  nworkers: 9
+  software: mobo
+  objectives: 2
+  constraints: 6
+  reference: [-75., 70.]
+  software_options:
+    fixed_cost: True
+    min_calc_to_remodel: 3
+    generator_options:
+        use_gpu: True
+    constraints:
+      c1: ['GREATER_THAN', 0] 
+      c2: ['GREATER_THAN', 0]
+      c3: ['GREATER_THAN', 0]
+      c4: ['GREATER_THAN', 0]
+      c5: ['GREATER_THAN', 0]
+      c6: ['GREATER_THAN', 0]
+  exit_criteria:
+    sim_max: 100
+  record_interval: 3
+  output_file: mobo_example_osy_results

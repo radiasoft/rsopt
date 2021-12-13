@@ -86,6 +86,11 @@ def budgeting(x: torch.Tensor, base_cost: float, total_cost: float,
 
 
 def persistent_mobo(H, persis_info, gen_specs, libE_info):
+    """
+    libEnsemble persistent generator implementation of the asynchronous update Multi-Objective Bayseian Optimization
+    routine from Xopt. See also: https://link.aps.org/doi/10.1103/PhysRevAccelBeams.24.062801
+
+    """
     # libEnsemble Setup
     persistent = PersistentSupport(libE_info, EVAL_GEN_TAG)
     local_H = np.zeros(len(H), dtype=H.dtype)

@@ -21,7 +21,7 @@ options:
   reference: [1.4, 1.4]
   software_options:
     fixed_cost: True
-    min_calc_to_remodel: 3
+    min_calc_to_remodel: 3  # if min_calc_to_remodel == nworkers - 1 then model update is synchronous
     use_gpu: False
     constraints:
       c1: ['GREATER_THAN', 0]
