@@ -3,8 +3,8 @@ from botorch.utils.multi_objective.pareto import is_non_dominated
 import numpy as np
 import torch
 
-# History file name will change depending on some run settings
-history_file = 'H_sample_config_mobo_history_length=81_evals=80_workers=4.npy'
+
+history_file = 'mobo_example_results.npy'
 H = np.load(history_file)
 
 

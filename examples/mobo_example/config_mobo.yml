@@ -21,8 +21,11 @@ options:
   reference: [1.4, 1.4]
   software_options:
     fixed_cost: True
+    min_calc_to_remodel: 3
+    use_gpu: False
     constraints:
       c1: ['GREATER_THAN', 0]
       c2: ['LESS_THAN', 0.5]
   exit_criteria:
     sim_max: 80
+  output_file: mobo_example_results
