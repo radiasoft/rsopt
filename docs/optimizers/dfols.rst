@@ -4,14 +4,14 @@ DFO-LS Optimization Methods
 ===========================
 
 The Derivative-Free Optimizer for Least-Squares (DFO-LS) [1]_ is an algorithm especially constructed to handle
-objective functions formuated as least-squares problems.
+objective functions formulated as least-squares problems.
 
 Configuration
 -------------
 Requirements and optional keys for setting up the configuration file to use DFO-LS are given below.
 
 Codes Blocks
-^^^^^^^^^^^
+^^^^^^^^^^^^
 No special configuration is needed in any portion of the :code:`codes` blocks to use DFO-LS.
 
 Options

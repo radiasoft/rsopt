@@ -93,6 +93,12 @@ define an ``objective_function`` that can read them.
 Optimizer Software
 ~~~~~~~~~~~~~~~~~~
 
+.. toctree::
+  :maxdepth: 1
+  :glob:
+
+  optimizers/*
+
 Valid entries for optimizers in ``software`` are given below. Some libraries may have different algorithms to choose from.
 The algorithm used may be specified with the  ``method`` option. See below for a listing of supported algorithms in
 each library.
@@ -142,6 +148,12 @@ Sampler Software
 ~~~~~~~~~~~~~~~~~~
 .. _sampler_software:
 
+.. toctree::
+  :maxdepth: 1
+  :glob:
+
+  samplers/*
+
 Valid entries for samplers in ``software`` are given below. Please see the links for a description of the sampler and
 any additional setup required.
 
@@ -163,8 +175,6 @@ Other useful helper commands.
   have imports locally defined the import module files will also be included. Imports defined or installed elsewhere will
   not be included in the tarball.
   Full command is ``rsopt pack configuration config_name``.
-
-
 
 
 .. [1] https://github.com/stevengj/nlopt

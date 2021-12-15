@@ -4,10 +4,6 @@ from rsopt.libe_tools.interface import get_local_optimizer_method
 from libensemble.gen_funcs.persistent_aposmm import aposmm
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
 
-# TODO: make set_optimizer a member of Optimizer and have a Setup like class selection scheme
-#  based on arguments of set_optimizer
-
-# set_optimizer method: software is aposmm and method is local_opt method, options go to aposmm
 
 # dimension for x and x_on_cube set at run time
 aposmm_gen_out = [('x', float, None), ('x_on_cube', float, None), ('sim_id', int),

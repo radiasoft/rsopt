@@ -3,6 +3,8 @@ from rsopt.configuration.settings import _SETTING_READERS, Settings
 from rsopt.configuration.setup import _SETUP_READERS, Setup, _PARALLEL_PYTHON_RUN_FILE
 
 
+_USE_SIM_DIRS_DEFAULT = ['elegant', 'opal', 'genesis']
+
 def get_reader(obj, category):
     config_categories = {'parameters': _PARAMETER_READERS,
                          'settings': _SETTING_READERS,
@@ -99,6 +101,12 @@ class Job:
     def timeout(self):
         timeout =  self._setup.setup.get('timeout') or 1e10
         return timeout
+
+    @property
+    def sim_dirs_required(self) -> bool:
+        if self.code in _USE_SIM_DIRS_DEFAULT or (self.code == 'python' and self.setup['cores'] > 1):
+            return True
+        return False
 
     @parameters.setter
     def parameters(self, parameters):
