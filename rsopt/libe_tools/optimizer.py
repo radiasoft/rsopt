@@ -135,6 +135,10 @@ class libEnsembleOptimizer(Optimizer):
                                                      EXECUTOR_SCHEMA['rsmpi']['cores_on_node']['logical_cores']),
                                                 'node_file': EXECUTOR_SCHEMA['rsmpi']['node_file']}
 
+        if self._config.options.use_zero_resource:
+            # Do not assign resources to the generator
+            self.libE_specs['zero_resource_workers'] = [1]
+
     def _configure_sim(self):
         sim_function = SimulationFunction(self._config.jobs, self._config.options.get_objective_function())
         self.sim_specs.update({'sim_f': sim_function,
