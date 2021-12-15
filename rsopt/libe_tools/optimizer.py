@@ -62,66 +62,6 @@ class libEnsembleOptimizer(Optimizer):
         for spec in self._SPECIFICATION_DICTS:
             self.__setattr__(spec, {})
 
-    def set_optimizer(self, software, method, objective_function=None, options=None):
-        """
-        Choose an optimizer and set supporting options.
-        Optimizer package options are:
-            nlopt
-        Refer to individual package pages for a list of algorithms available.
-        Options always available:
-            record_interval (int): The history array from libEnsemble will be saved to file ever
-                `record_interval` optimization steps.
-            working_directory (str): Path to a directory where simulations will be run. Optimizer logs
-                and records will still be created in the directory where the optimizer is run.
-        :param software: (str) name of optimization package to use.
-        :param method: (str) name of optimization algorithm.
-        :param options: (dict) dictionary of options and settings.
-        :return: None
-        """
-
-        # TODO: NEXT: This should just set method and options in the correct place in the Configuration
-        #   there should be separate functions that load from the Configuration file when needed
-        #   so it will not matter if setters are initiated from a python file or console loads a configuration file
-
-        # move options to their appropriate dict for libE
-        for key, mapping in OPTIONS_ALLOWED.items():
-            if key in options:
-                dict_name, dict_value = mapping[self._NAME]
-                self.__getattribute__(dict_name)[dict_value] = options.pop(key)
-
-        config_options = {'software': software, 'method': method,
-                          'objective_function': objective_function, 'software_options': options}
-        if not options.get('exit_criteria'):
-            config_options['exit_criteria'] = {'sim_max': int(1000)}
-        self._config.options = config_options
-
-    def add_simulation(self, simulation, code):
-        # TODO: documentation will need to be fleshed out when code types are set
-        """
-        Add a simulation of type `code` to the Jobs list. If code is 'python` then `simulation` should be a callable
-        object that will run the simulation. Otherwise `simulation` should be the path to the
-        run file for the simulation.
-
-        Only serial simulations can be configured through the Python API. For parallel setup please use a YAML
-        configuration file.
-
-        Args:
-            simulation: (callable or str) If code=='python` then simulation should be callable else should be string
-            containing path (rel or abs) to run file.
-            code: (str) Type of job to be run. See documentation for full set of options.
-
-        Returns:
-            None
-        """
-        self._manual_job_setup()
-        if code == 'python':
-            self._config.jobs[-1].setup = {'function': simulation,
-                                          'execution_type': 'serial',
-                                          'code': code}
-        else:
-            self._config.jobs[-1].setup = {'input_file': simulation,
-                                           'execution_type': 'serial',
-                                           'code': code}
 
     def run(self, clean_work_dir=False):
         self.clean_working_directory = clean_work_dir
