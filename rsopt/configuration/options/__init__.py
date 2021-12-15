@@ -33,8 +33,8 @@ class Options:
         self.method = ''
         self.sym_links = []
         self.nworkers = 2
-        self.use_worker_dirs = False
-        self.sim_dirs_make = False
+        self.use_worker_dirs = True
+        self.sim_dirs_make = True
         self.run_dir = './ensemble'
         self.record_interval = 0
         self.output_file = ''

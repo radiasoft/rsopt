@@ -8,26 +8,22 @@ from rsopt.libe_tools.interface import get_local_optimizer_method
 from rsopt.simulation import SimulationFunction
 from pykern import pkyaml
 from rsopt import _EXECUTOR_SCHEMA, _OPTIMIZER_SCHEMA
+import logging
 
+logger = logging.getLogger('libensemble')
 OPT_SCHEMA = pkyaml.load_file(_OPTIMIZER_SCHEMA)
 EXECUTOR_SCHEMA = pkyaml.load_file(_EXECUTOR_SCHEMA)
 
-# dimension for x needs to be set
+# dtype dimensions > 1 are set at run time
 persistent_local_opt_gen_out = [('x', float, None),
                                 ('x_on_cube', float, None),
                                 ('sim_id', int),
                                 ('local_pt', bool)]
 
-# Options like record interval are useful for a variety of optimizers and should not be mapped
-#   to libE specific terms. Other libE specific options can retain their original terminology.
-# FUTURE: Allowed option keys should be stored with parent once built out
+# Some libE_spec keys are re-mapped to rsopt terminology
 LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims',
                       'use_worker_dirs': 'use_worker_dirs',
                       'working_directory': 'ensemble_dir_path'}
-# These codes normally need separate working directories or input files will overwrite
-_USE_WORKER_DIRS_DEFAULT = ['elegant', 'opal', 'genesis']
-_LIBENSEMBLE_DIRECTORY = './ensemble'
-
 
 def _configure_executor(job, name, executor):
     executor.register_app(full_path=job.full_path, app_name=name, calc_type='sim')
@@ -62,7 +58,7 @@ class libEnsembleOptimizer(Optimizer):
         self.H0 = None
         self.executor = None  # Set by method
         self.nworkers = 2  # Always 2 for local optimizer (1 for sim worker and 1 for persis generator)
-        self.working_directory = _LIBENSEMBLE_DIRECTORY
+        self.working_directory = self._config.options.run_dir
         for spec in self._SPECIFICATION_DICTS:
             self.__setattr__(spec, {})
 
@@ -169,17 +165,17 @@ class libEnsembleOptimizer(Optimizer):
         self.comms = 'local'
 
         # Directory structure setup
-        for job in self._config.jobs:
-            if job.code in _USE_WORKER_DIRS_DEFAULT or (job.code == 'python' and job.setup['cores'] > 1):
-                # TODO: Move these checks into configuration
-                self.libE_specs.setdefault('use_worker_dirs', True)
-                self.libE_specs.setdefault('sim_dirs_make', True)
-                break
+        if self._config.sim_dirs_required():
+                self.libE_specs['sim_dirs_make'] = True
+                if self.libE_specs['sim_dirs_make'] != self._config.options.sim_dirs_make:
+                    logger.warning('Requested option '
+                                   '`sim_dirs_make: {}` cannot be used\n'.format(self._config.options.sim_dirs_make) +
+                                   'Setting `sim_dirs_make: True`\n')
         else:
-            self.libE_specs['use_worker_dirs'] = self._config.options.use_worker_dirs
             self.libE_specs['sim_dirs_make'] = self._config.options.sim_dirs_make
+        self.libE_specs['use_worker_dirs'] = self._config.options.use_worker_dirs
 
-        self.libE_specs['ensemble_dir_path'] = self._config.options.run_dir
+        self.libE_specs['ensemble_dir_path'] =self.working_directory
 
         # Files needed for each simulation
         self.libE_specs['sim_dir_symlink_files'] = self._config.get_sym_link_list()

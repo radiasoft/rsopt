@@ -72,6 +72,16 @@ class Configuration:
 
         return formatter(attribute_list)
 
+    def sim_dirs_required(self) -> bool:
+        # If a job requires individual sim directories to make input files then set sim_dirs_make = True
+        # we choose to always set use_worker_dirs = True in this case, but this is not strictly required
+        # If no job requires sim_dirs_make then we check options for the settings
+
+        for job in self.jobs:
+            if job.sim_dirs_required:
+                return True
+        return False
+
     # TODO: Shifter needs special handling, it is still MPIExecutor but needs to change app setup
     def create_exector(self):
         # Executor is created even for serial jobs

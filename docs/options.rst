@@ -53,7 +53,7 @@ Global Options
 - `sym_links` [list]:
   A list of file names that will be symlinked into every simulation run directory.
 - `sim_dirs_make` [bool]:
-  If true then ever simulation will be run in a separate directory under `run_dir`. This is always set to `True` if
+  If true then every simulation will be run in a separate directory under `run_dir`. This is always set to `True` if
   any code is using `parallel` or `rsmpi` execution regardless of setting in the configuration file. Otherwise input files
   might clash.
 - `use_worker_dirs` [bool]:
