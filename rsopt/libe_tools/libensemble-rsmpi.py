@@ -9,15 +9,15 @@ parser = argparse.ArgumentParser(description="Wrap rsmpi for use by libensemble.
                                              "to rsmpi flags.")
 
 parser.add_argument("-np", dest="n", required=True,
-                     help="Pass number of processors to rsmpi")
+                    help="Pass number of processors to rsmpi")
 parser.add_argument("--ppn", dest="ppn", required=False,
                     help="Not required by rsmpi, but supplied by libEnsemble. Input is not used if given.")
 parser.add_argument('args', nargs=argparse.REMAINDER, help="All other arguments are appended after rsmpi")
 server_spec = parser.add_mutually_exclusive_group(required=True)
 server_spec.add_argument("-machinefile", dest="machinefile",
-                    help="Location of machinefile that gives rsmpi server number on the first line")
+                         help="Location of machinefile that gives rsmpi server number on the first line")
 server_spec.add_argument("-hosts", dest="hosts",
-                    help="Host number of rsmpi server")
+                         help="Host number of rsmpi server")
 
 
 def get_host_from_machinefile(machinefile):
@@ -37,14 +37,23 @@ args = ' '.join(parsed_args.args)
 formatted_run_string = run_string.format(n=parsed_args.n, h=h, args=args).split()
 
 # Execute
-run_status = subprocess.Popen(formatted_run_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+try:
+    run_status = subprocess.Popen(formatted_run_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-out, err = run_status.communicate()
+    out, err = run_status.communicate()
 
-if out:
+    if out:
+        sys.stdout.write(out.decode())
+        sys.stdout.flush()
+    if err:
+        sys.stderr.write(err.decode())
+        sys.stderr.flush()
+    sys.exit(run_status.returncode)
+
+except KeyboardInterrupt:
+    run_status.kill()
+    out, err = run_status.communicate()
     sys.stdout.write(out.decode())
-    sys.stdout.flush()
-if err:
     sys.stderr.write(err.decode())
     sys.stderr.flush()
-sys.exit(run_status.returncode)
+    sys.exit(run_status.returncode)
