@@ -36,7 +36,8 @@ pksetup.setup(
             'sirepo@git+https://github.com/radiasoft/sirepo',
             'lume-genesis@git+https://github.com/cchall/lume-genesis',
             'pandas',  # Needed for some post-processing utilities
-            'xopt'  # If using MOBO algorithm for optimization
+            'xopt',  # If using MOBO algorithm for optimization
+            'pymoo'  # Used by some MOBO examples
         ]
     },
     license='http://www.apache.org/licenses/LICENSE-2.0.html',

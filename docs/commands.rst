@@ -119,6 +119,8 @@ each library.
 
 * :doc:`dlib<optimizers/dlib>`: Implements the global_function_search method from dlib [6]_.
 
+* :doc:`mobo<optimizers/mobo>`: A Multi-Objective Bayesian Optimization algorithm from Xopt [7]_. Supports constraints.
+
 Parameter Scans
 ---------------
 
@@ -182,3 +184,4 @@ Other useful helper commands.
 .. [4] https://doi.org/10.1007/s12532-017-0131-4
 .. [5] https://github.com/dme65/pySOT
 .. [6] https://github.com/davisking/dlib
+.. [7] https://github.com/ChristopherMayes/xopt
