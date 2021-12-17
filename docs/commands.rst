@@ -93,6 +93,12 @@ define an ``objective_function`` that can read them.
 Optimizer Software
 ~~~~~~~~~~~~~~~~~~
 
+.. toctree::
+  :maxdepth: 1
+  :glob:
+
+  optimizers/*
+
 Valid entries for optimizers in ``software`` are given below. Some libraries may have different algorithms to choose from.
 The algorithm used may be specified with the  ``method`` option. See below for a listing of supported algorithms in
 each library.
@@ -100,8 +106,7 @@ each library.
 * :doc:`nlopt<optimizers/nlopt>`: NLopt [1]_ is an open-source library of non-linear optimization algorithms.
 
 * :doc:`scipy<optimizers/scipy>`: Several methods from the optimization module of the popular SciPy [2]_ library are available. For details
-  of the algorithms see the 'SciPy manual'_.
-  .. _SciPy manual: https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
+  of the algorithms see the `SciPy manual`_.
 
 * :doc:`dfols<optimizers/dfols>`: The Derivative-Free Optimizer for Least-Squares (DFO-LS) [3]_ is an algorithm especially constructed to handle
   objective functions formuated as least-squares problems.
@@ -142,6 +147,12 @@ Sampler Software
 ~~~~~~~~~~~~~~~~~~
 .. _sampler_software:
 
+.. toctree::
+  :maxdepth: 1
+  :glob:
+
+  samplers/*
+
 Valid entries for samplers in ``software`` are given below. Please see the links for a description of the sampler and
 any additional setup required.
 
@@ -164,9 +175,7 @@ Other useful helper commands.
   not be included in the tarball.
   Full command is ``rsopt pack configuration config_name``.
 
-
-
-
+.. _SciPy manual: https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
 .. [1] https://github.com/stevengj/nlopt
 .. [2] https://www.scipy.org/
 .. [3] https://github.com/numericalalgorithmsgroup/dfols

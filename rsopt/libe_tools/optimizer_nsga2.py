@@ -1,12 +1,7 @@
 from rsopt.libe_tools import optimizer
-from rsopt.libe_tools.interface import get_local_optimizer_method
 from libensemble.gen_funcs.persistent_deap_nsga2 import deap_nsga2
 from libensemble.alloc_funcs.start_only_persistent import only_persistent_gens
 
-# TODO: make set_optimizer a member of Optimizer and have a Setup like class selection scheme
-#  based on arguments of set_optimizer
-
-# set_optimizer method: software is nsga2 and method does not need to be set currently
 
 # dimension for individual set at run time
 nsga2_gen_out = [('individual', float, None), ('generation', int)]

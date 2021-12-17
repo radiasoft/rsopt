@@ -4,7 +4,7 @@ SciPy Optimization Methods
 ==========================
 
 Several methods from the optimization module of the popular SciPy [1]_ library are available. For details
-of the algorithms see the 'SciPy manual'_.
+of the algorithms see the `SciPy manual`_.
 .. _SciPy manual: https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
 Method names are based on SciPy API's naming scheme.
 

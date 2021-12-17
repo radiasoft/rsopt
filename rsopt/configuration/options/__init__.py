@@ -33,11 +33,13 @@ class Options:
         self.method = ''
         self.sym_links = []
         self.nworkers = 2
-        self.use_worker_dirs = False
-        self.sim_dirs_make = False
+        self.use_worker_dirs = True
+        self.sim_dirs_make = True
         self.run_dir = './ensemble'
         self.record_interval = 0
         self.output_file = ''
+        # use_zero_resource is not set in options_schema and thus cannot be set by the user
+        self.use_zero_resource = True
 
     @classmethod
     def get_option(cls, options_instance):

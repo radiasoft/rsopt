@@ -1,21 +1,22 @@
 .. _options_ref:
+
 Global Options
 ==============
 
 - `software` [str]:
-    Specify what software package to use when rsopt runs. See :ref:`Software</opt_software>` for a list of supported software.
+    Specify what software package to use when rsopt runs. See :ref:`Software<opt_software>` for a list of supported software.
 - `method` [str]:
     When `software` package chosen contains multiple algorithms the choice is specified by `method`.
-    See :ref:`Software</opt_software>` for particulars on methods supported by the chosen `software`.
+    See :ref:`Software<opt_software>` for particulars on methods supported by the chosen `software`.
 - `software_options` [dict]:
     Can be used to pass configuration options directly to the chosen `software`.
-    See :ref:`Software</opt_software>` for available options that can be set depending on chosen `software`.
+    See :ref:`Software<opt_software>` for available options that can be set depending on chosen `software`.
 - `nworkers` [int] (default: 2):
     Number of workers used for running simulations, and in some cases a worker may be used run the governing `software`.
     In cases where the `software` option supports parallel evaluations then workers will each, independently
     run through a Job chain. For some software options the supported number of worker is fixed (e.g. local optimizers
-    can only use two workes. One to manage the optimizer and one to manage simulation execution.)
-    See :ref:`Software</opt_software>` for information on support for parallel evaluation
+    can only use two workers. One to manage the optimizer and one to manage simulation execution.)
+    See :ref:`Software<opt_software>` for information on support for parallel evaluation
     in a particular `software` option.
 - `exit_criteria` [dict]:
   Required when there is not a deterministic stopping point (sampler software). For all optimizers this must be set
@@ -52,9 +53,14 @@ Global Options
 - `sym_links` [list]:
   A list of file names that will be symlinked into every simulation run directory.
 - `sim_dirs_make` [bool]:
-  If true then ever simulation will be run in a separate directory under `run_dir`. This is always set to `True` if
+  If true then every simulation will be run in a separate directory under `run_dir`. This is always set to `True` if
   any code is using `parallel` or `rsmpi` execution regardless of setting in the configuration file. Otherwise input files
   might clash.
 - `use_worker_dirs` [bool]:
   If true then sim directories are organized under a common worker directory. This is used by default
   if parallel execution is being used.
+
+- `executor_options` [dict]:
+  Options given here are passed directly to the libEnsemble Executor.
+    - `hosts` [list] (rsmpi only): A list of rsmpi host indices that workers can use. To see your available host indices run
+      :code:`rsmpi` on the command line. If not set rsmpi will be allowed to assign work to all rsmpi nodes available to you.

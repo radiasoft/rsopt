@@ -9,7 +9,7 @@ Can be used to run any command line executable through rsopt.
 
 user setup commands
 -------------------
-These are special commands that must be included in the ``setup`` portion of the confirugation file for ``user``.
+These are special commands that must be included in the ``setup`` portion of the configuration file for ``user``.
 
 * ``input_file``: Name of the input file that should be used when program is executed. Can be an existing file,
     in which case it will be copied into the run directory - or the name of a file included in ``file_mapping``,
