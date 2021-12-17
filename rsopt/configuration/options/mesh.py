@@ -7,5 +7,6 @@ class Mesh(Options):
 
     def __init__(self):
         super().__init__()
+        self.use_zero_resource = False
         self.nworkers = 1
         self.mesh_file = ''
