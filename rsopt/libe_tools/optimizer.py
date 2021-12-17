@@ -58,7 +58,6 @@ class libEnsembleOptimizer(Optimizer):
         self.H0 = None
         self.executor = None  # Set by method
         self.nworkers = 2  # Always 2 for local optimizer (1 for sim worker and 1 for persis generator)
-        self.working_directory = self._config.options.run_dir
         for spec in self._SPECIFICATION_DICTS:
             self.__setattr__(spec, {})
 
@@ -115,7 +114,7 @@ class libEnsembleOptimizer(Optimizer):
             self.libE_specs['sim_dirs_make'] = self._config.options.sim_dirs_make
         self.libE_specs['use_worker_dirs'] = self._config.options.use_worker_dirs
 
-        self.libE_specs['ensemble_dir_path'] =self.working_directory
+        self.libE_specs['ensemble_dir_path'] = self._config.options.run_dir
 
         # Files needed for each simulation
         self.libE_specs['sim_dir_symlink_files'] = self._config.get_sym_link_list()
@@ -184,8 +183,8 @@ class libEnsembleOptimizer(Optimizer):
     def _cleanup(self):
         import shutil, os
 
-        if self.clean_working_directory and os.path.isdir(self.working_directory):
-            shutil.rmtree(self.working_directory)
+        if self.clean_working_directory and os.path.isdir(self._config.options.run_dir):
+            shutil.rmtree(self._config.options.run_dir)
 
     def _set_persis_in(self, software, method):
         # method name should be returned from get_local_optimizer_method
