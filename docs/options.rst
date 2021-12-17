@@ -59,3 +59,8 @@ Global Options
 - `use_worker_dirs` [bool]:
   If true then sim directories are organized under a common worker directory. This is used by default
   if parallel execution is being used.
+
+- `executor_options` [dict]:
+  Options given here are passed directly to the libEnsemble Executor.
+    - `hosts` [list] (rsmpi only): A list of rsmpi host indices that workers can use. To see your available host indices run
+      :code:`rsmpi` on the command line. If not set rsmpi will be allowed to assign work to all rsmpi nodes available to you.

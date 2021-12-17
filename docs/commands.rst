@@ -106,8 +106,7 @@ each library.
 * :doc:`nlopt<optimizers/nlopt>`: NLopt [1]_ is an open-source library of non-linear optimization algorithms.
 
 * :doc:`scipy<optimizers/scipy>`: Several methods from the optimization module of the popular SciPy [2]_ library are available. For details
-  of the algorithms see the 'SciPy manual'_.
-  .. _SciPy manual: https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
+  of the algorithms see the `SciPy manual`_.
 
 * :doc:`dfols<optimizers/dfols>`: The Derivative-Free Optimizer for Least-Squares (DFO-LS) [3]_ is an algorithm especially constructed to handle
   objective functions formuated as least-squares problems.
@@ -176,7 +175,7 @@ Other useful helper commands.
   not be included in the tarball.
   Full command is ``rsopt pack configuration config_name``.
 
-
+.. _SciPy manual: https://docs.scipy.org/doc/scipy/reference/tutorial/optimize.html
 .. [1] https://github.com/stevengj/nlopt
 .. [2] https://www.scipy.org/
 .. [3] https://github.com/numericalalgorithmsgroup/dfols

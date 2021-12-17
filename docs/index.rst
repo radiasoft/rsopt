@@ -9,6 +9,7 @@ Welcome to rsopt's documentation!
 rsopt is a Python library for modularizing and running optimization problems.
 
 .. toctree::
+   :maxdepth: 2
 
    Introduction<introduction>
    Installation<installation>
