@@ -104,6 +104,10 @@ class SingleSample(GridSampler):
         # Overwrite any use specified exit criteria and set based on scan
         self._config.options.exit_criteria = None
         self.exit_criteria = {'sim_max': sim_max}
+    def _configure_specs(self):
+        super(SingleSample, self)._configure_specs()
+        # single sample overrides the software in the config file to use sampler so we need to force no zero rec workers
+        self.libE_specs['zero_resource_workers'] = []
 
 class LHSampler(libEnsembleOptimizer):
 
