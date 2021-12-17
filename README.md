@@ -17,7 +17,7 @@ For more information see the: http://rsopt.readthedocs.org/en/latest/
 
 rsopt uses the Python package Pykern to handle installation. You can install Pykern with pip using:
 ```bash
-pip install pykern
+pip install git+https://github.com/radiasoft/pykern
 ```
 Then to install rsopt:
 ```bash
