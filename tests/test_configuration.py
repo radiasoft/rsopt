@@ -93,7 +93,8 @@ class TestOptionsReaders(unittest.TestCase):
                                'exit_criteria': 'fill'},
                      'scipy': {'method': 'Nelder-Mead',
                                'exit_criteria': 'fill'},
-                     'lh_scan': {'batch_size': 512}}
+                     'lh_scan': {'batch_size': 512},
+                     'mobo': {'constraints': 80, 'objectives': 42, 'reference': [2000, 2000], 'exit_criteria': 'fill'}}
 
     def test_options_set(self):
         for option_name, option_class in options.option_classes.items():

@@ -32,7 +32,7 @@ class TestExecutorrsmpi(unittest.TestCase):
 
     def test_register_rsmpi_executor_manual(self):
         from libensemble.executors.mpi_executor import MPIExecutor
-        hosts = 5
+        hosts = [6, 5]
         controller = execs.register_rsmpi_executor(hosts=hosts)
         self.assertIsInstance(controller, MPIExecutor)
         self.assertTrue(os.path.isfile('libe_nodes'))
