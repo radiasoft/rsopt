@@ -13,7 +13,7 @@ Some examples for MOBO also require the library pymoo which is not installed wit
 
 Configuration
 -------------
-Requirements and optional keys for setting up the configuration file to use DFO-LS are given below.
+Requirements and optional keys for setting up the configuration file to use MOBO are given below.
 
 Codes Blocks
 ^^^^^^^^^^^^
