@@ -116,9 +116,8 @@ def save_final_history(config_filename, config, H, persis_info, nworkers, messag
 
 def _libe_save(H, persis_info, mess, filename):
     # copy of the file save portion of libensemble.tools.save_libE_output, but with full control of save filename
-    logger = logging.getLogger('libensemble')
     status_mess = ' '.join(['------------------', mess, '-------------------'])
-    logger.info('{}\nSaving results to file: {}'.format(status_mess, filename))
+    print('{}\nSaving results to file: {}'.format(status_mess, filename))
     np.save(filename, H)
 
     with open(filename + ".pickle", "wb") as f:
