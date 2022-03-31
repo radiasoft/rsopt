@@ -4,13 +4,14 @@ from botorch.utils.sampling import draw_sobol_samples
 from xopt.bayesian.data import get_data_json
 from xopt.bayesian import generators
 from xopt.bayesian.utils import get_candidates
+from xopt.vocs import VOCS
 
 from libensemble.message_numbers import STOP_TAG, PERSIS_STOP, FINISHED_PERSISTENT_GEN_TAG, EVAL_GEN_TAG
 from libensemble.tools.persistent_support import PersistentSupport
 
 import logging
 
-# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('libensemble')
 gen_log = logging.getLogger('gen-log')
 
@@ -111,9 +112,10 @@ def persistent_mobo(H, persis_info, gen_specs, libE_info):
     use_cuda = generator_options.get('use_gpu', False)
 
     # assemble necessary VOCS components
-    vocs = {'variables': {str(i): [l, u] for i, (l, u) in enumerate(zip(lb, ub))},
-            'objectives': {str(i): 'MINIMIZE' for i in range(H.dtype['f'].shape[0])},
-            'constraints': constraints}
+    vocs = VOCS()
+    vocs.variables = {str(i): [l, u] for i, (l, u) in enumerate(zip(lb, ub))}
+    vocs.objectives = {str(i): 'MINIMIZE' for i in range(H.dtype['f'].shape[0])}
+    vocs.constraints = constraints
 
     # create generator
     candidate_generator = configure_generator(vocs, ref, **generator_options)
@@ -135,9 +137,9 @@ def persistent_mobo(H, persis_info, gen_specs, libE_info):
         # for ele in initial_x:
         #     q.put(ele)
 
-        train_x, train_y, train_c, inputs, outputs = torch.empty(0, len(vocs['variables'])), \
-                                                     torch.empty(0, len(vocs['objectives'])), \
-                                                     torch.empty(0, len(vocs['constraints'])), None, None
+        train_x, train_y, train_c, inputs, outputs = torch.empty(0, len(vocs.variables)), \
+                                                     torch.empty(0, len(vocs.objectives)), \
+                                                     torch.empty(0, len(vocs.constraints)), None, None
 
     else:
         data = get_data_json(restart_file, vocs, **candidate_generator.tkwargs)
@@ -184,7 +186,7 @@ def persistent_mobo(H, persis_info, gen_specs, libE_info):
 
             # If budget remains and enough calcs received back: Train new model and get new candidates
             if not total_cost > budget and calc_recv_since_remodel >= min_calc_to_remodel:
-                logger.info(f"generating {len(calc_in)} new candidate(s)")
+                logger.info(f"generating {calc_recv_since_remodel} new candidate(s)")
 
                 # Check for pending evaluations
                 if np.any(~local_H['returned']):
@@ -211,7 +213,7 @@ def persistent_mobo(H, persis_info, gen_specs, libE_info):
             if new_candidates is not None:
                 total_cost, submissions = budgeting(new_candidates, base_cost,
                                                     total_cost, budget, fixed_cost)
-
+                logger.debug("Sending out {} new candidates for eval".format(len(submissions)))
                 add_to_local_H(local_H, submissions, use_cuda)
                 persistent.send(local_H[-len(submissions):][[g[0] for g in gen_specs['out']]])
 
