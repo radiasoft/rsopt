@@ -129,32 +129,28 @@ class SimulationFunction:
                     task.poll()
                     if task.finished:
                         if task.state == 'FINISHED':
-                            sim_status = message_numbers.WORKER_DONE
-                            self.J['status'] = sim_status
+                            self.J['sim_status'] = message_numbers.WORKER_DONE
                             f = None
                             break
                         elif task.state == 'FAILED':
-                            sim_status = message_numbers.TASK_FAILED
-                            self.J['status'] = sim_status
+                            self.J['sim_status'] = message_numbers.TASK_FAILED
                             halt_job_sequence = True
                             break
                         else:
                             self.log.warning("Unknown task failure")
-                            sim_status = message_numbers.TASK_FAILED
-                            self.J['status'] = sim_status
+                            self.J['sim_status'] = message_numbers.TASK_FAILED
                             halt_job_sequence = True
                             break
                     elif task.runtime > job_timeout_sec:
                         self.log.warning('Task Timed out, aborting Job chain')
-                        sim_status = message_numbers.WORKER_KILL_ON_TIMEOUT
-                        self.J['status'] = sim_status
+                        self.J['sim_status'] = message_numbers.WORKER_KILL_ON_TIMEOUT
                         task.kill()  # Timeout
                         halt_job_sequence = True
                         break
             else:
                 # Serial Python Job
                 f = job.execute(**kwargs)
-                sim_status = message_numbers.WORKER_DONE
+                self.J['sim_status'] = message_numbers.WORKER_DONE
                 # NOTE: Right now f is not passed to the objective function. Would need to go inside J. Or pass J into
                 #       function job.execute(**kwargs)
 
@@ -169,7 +165,7 @@ class SimulationFunction:
                 for f_post in job._setup._postprocess:
                     f_post(self.J)
 
-        if sim_status == message_numbers.WORKER_DONE and not halt_job_sequence:
+        if self.J['sim_status'] == message_numbers.WORKER_DONE and not halt_job_sequence:
             # Use objective function is present
             if self.objective_function:
                 val = self.objective_function(self.J)
@@ -187,4 +183,4 @@ class SimulationFunction:
             self.log.warning('Penalty was used because result could not be evaluated')
             output = format_evaluation(self.sim_specs, _PENALTY)
 
-        return output, persis_info, sim_status
+        return output, persis_info, self.J['sim_status']
