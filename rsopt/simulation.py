@@ -108,9 +108,8 @@ class SimulationFunction:
             _, kwargs = compose_args(x, job.parameters, job.settings)
             self.J['inputs'] = kwargs
             # Call preprocessors
-            if job.pre_process:
-                for f_pre in job._setup._preprocess:
-                    f_pre(self.J)
+            for f_pre in job.pre_process:
+                f_pre(self.J)
             # Generate input files for simulation
             job._setup.generate_input_file(kwargs, '.')
             if self.switchyard and job.input_distribution:
@@ -161,9 +160,8 @@ class SimulationFunction:
                 self.switchyard = rsopt.conversion.create_switchyard(job.output_distribution, job.code)
                 self.J['switchyard'] = self.switchyard
 
-            if job.post_process:
-                for f_post in job._setup._postprocess:
-                    f_post(self.J)
+            for f_post in job.post_process:
+                f_post(self.J)
 
         if self.J['sim_status'] == message_numbers.WORKER_DONE and not halt_job_sequence:
             # Use objective function is present
