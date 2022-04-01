@@ -116,9 +116,9 @@ class Setup:
         self.input_file_model = None
         self.validators = {'execution_type': _validate_execution_type}
         self.handlers = {'preprocess': self._handle_preprocess,
-                         'postprocess': self._handle_preprocess}
-        self._preprocess = []
-        self._postprocess = []
+                         'postprocess': self._handle_postprocess}
+        self.preprocess = []
+        self.postprocess = []
 
     @classmethod
     def get_setup(cls, setup, code):
@@ -200,7 +200,7 @@ class Setup:
         module_path, function_name = value
         module = pkrunpy.run_path_as_module(module_path)
         function = getattr(module, function_name)
-        self._preprocess.append(function)
+        self.preprocess.append(function)
         return True
 
     def _handle_postprocess(self, value):
@@ -208,7 +208,7 @@ class Setup:
         module_path, function_name = value
         module = pkrunpy.run_path_as_module(module_path)
         function = getattr(module, function_name)
-        self._postprocess.append(function)
+        self.postprocess.append(function)
         return True
 
 
