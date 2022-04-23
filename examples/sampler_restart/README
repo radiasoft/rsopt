@@ -1,0 +1,22 @@
+In this example we show how to restart a partially completed scan. This can be useful if you were running a job
+at a cluster with timed allocation and reached the time limit or if an error caused rsopt to previously crash.
+
+To start we will run the configuration file config_scan.yml which is performing a uniform gridded scan over
+the 2D Rosenbrock function. A known point in the scan is set to trigger an error which will cause rsopt to abort
+(see rosenbrock_raise in func.py).
+
+To start run in a terminal:
+    rsopt sample configuration config_scan.yml
+
+An error will occur around evaluation 500: 'AssertionError: An expected error occurred!'
+and the history up to the error will automatically be written out. All planned evaluations are already in the history
+they just don't have results yet so we can pass that history to rsopt and tell it to restart and run any unevaluated points.
+
+First we need to make sure the run won't fail again. Make 2 changes in config_scan.yml:
+    - On line 18 change 'rosenbrock_raise' to 'rosenbrock'
+    - On line 24 change 'scan_rosenbrock' to 'restart_scan'
+
+To restart the scan in a terminal run (fill in the appropriate history name, it may differ a little each time):
+    rsopt sample restart config_scan.yml libE_history_at_abort...
+
+Now the remaining ~2000 points show be evaluated and saved in a new history file!
