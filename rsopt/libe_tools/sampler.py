@@ -1,15 +1,15 @@
 import numpy as np
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
-from rsopt.libe_tools.optimizer import set_dtype_dimension
+from rsopt.libe_tools.tools import set_dtype_dimension
 from rsopt.libe_tools import tools
 from rsopt.libe_tools.generator_functions import utility_generators
 from libensemble.tools import add_unique_random_streams
 from libensemble.gen_funcs.sampling import latin_hypercube_sample
+from libensemble.alloc_funcs.give_pregenerated_work import give_pregenerated_sim_work
+
 mesh_sampler_gen_out = [('x', float, None)]
 lh_sampler_gen_out = [('x', float, None)]
 
-# TODO: could expand the parameter spec to have an optional sample field to read from
-# TODO: Haven't checked if multijob run will work correctly
 
 class GridSampler(libEnsembleOptimizer):
 
@@ -46,7 +46,6 @@ class GridSampler(libEnsembleOptimizer):
         self._config.options.exit_criteria = None
         self.exit_criteria = {'sim_max': sim_max}
 
-
     def _configure_allocation(self):
         # If not setting alloc_specs it must be None and not empty dict
         self.alloc_specs = None
@@ -67,6 +66,7 @@ class GridSampler(libEnsembleOptimizer):
             size *= s
 
         return mesh_parameters, size
+
 
 class SingleSample(GridSampler):
     # Run a single point using start values of parameters - or no parameters at all
@@ -104,10 +104,12 @@ class SingleSample(GridSampler):
         # Overwrite any use specified exit criteria and set based on scan
         self._config.options.exit_criteria = None
         self.exit_criteria = {'sim_max': sim_max}
+
     def _configure_specs(self):
         super(SingleSample, self)._configure_specs()
         # single sample overrides the software in the config file to use sampler so we need to force no zero rec workers
         self.libE_specs['zero_resource_workers'] = []
+
 
 class LHSampler(libEnsembleOptimizer):
 
@@ -142,3 +144,35 @@ class LHSampler(libEnsembleOptimizer):
     def _configure_persistant_info(self):
         # _configure_specs must have been already called
         self.persis_info = add_unique_random_streams({}, self.nworkers + 1, seed=self._config.options.seed)
+
+
+restart_alloc_out = [('x', float, None), ]
+
+
+class RestartSampler(libEnsembleOptimizer):
+
+    def __init__(self, restart_from):
+        self.restart_from = restart_from
+        super().__init__()
+
+        self._set_evaluation_points()
+
+    def _configure_optimizer(self):
+        self.nworkers = self._config.options.nworkers
+
+        # Overwrite any use specified exit criteria and set based on scan
+        self._config.options.exit_criteria = None
+        self.exit_criteria = {'sim_max': self.H0.size}
+
+    def _configure_allocation(self):
+        self.alloc_specs = {'alloc_f': give_pregenerated_sim_work,
+                            'out': [tools.set_dtype_dimension(dtype, self.dimension) for dtype in restart_alloc_out]}
+
+    def _configure_persistant_info(self):
+        # No persis info needs to be maintained
+        self.persis_info = {}
+
+    def _set_evaluation_points(self):
+        H_candidates = np.load(self.restart_from)
+        H_new = tools.filter_completed_history(H_candidates)
+        self.H0 = H_new

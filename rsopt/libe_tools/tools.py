@@ -1,4 +1,5 @@
 import re
+import numpy
 import pandas
 
 LIBE_STATS_FIELDS = ["Worker", ": sim_id", ": sim Time:", "Start:", "End:", "Status:", "\n"]
@@ -48,6 +49,14 @@ def parse_stat_file(filename):
     df = pandas.DataFrame(parsed_lines, columns=DATAFRAME_COLUMNS)
 
     return df
+
+
+def filter_completed_history(H: numpy.ndarray) -> numpy.ndarray:
+    completed = H['returned']
+    # If any points were given but not returned mark them not given
+    H['given'] = H['given'] * H['returned']
+
+    return H[~completed]
 
 
 def set_dtype_dimension(dtype, dimension):

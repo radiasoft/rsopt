@@ -50,7 +50,14 @@ def single_sampler(config):
 
 
 def lh_sampler(config):
-    sample = LHSampler()
+    sample = sampler.LHSampler()
+    sample.load_configuration(config)
+
+    return sample
+
+
+def restart_sampler(config, history):
+    sample = sampler.RestartSampler(restart_from=history)
     sample.load_configuration(config)
 
     return sample
