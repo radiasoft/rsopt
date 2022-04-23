@@ -48,3 +48,13 @@ def parse_stat_file(filename):
     df = pandas.DataFrame(parsed_lines, columns=DATAFRAME_COLUMNS)
 
     return df
+
+
+def set_dtype_dimension(dtype, dimension):
+    if len(dtype) == 2:
+        return dtype
+    elif len(dtype) == 3:
+        new_dtype = dtype[0], dtype[1], (dimension,)
+        return new_dtype
+    else:
+        raise IndexError('size of dtype cannot be set')

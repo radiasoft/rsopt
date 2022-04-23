@@ -1,4 +1,5 @@
 import numpy as np
+from rsopt.libe_tools import tools
 from rsopt.libe_tools import optimizer
 from rsopt.libe_tools.interface import get_local_optimizer_method
 from libensemble.gen_funcs.persistent_aposmm import aposmm
@@ -44,7 +45,7 @@ class AposmmOptimizer(optimizer.libEnsembleOptimizer):
         # #   default left to APOSMM setting:
 
     def _configure_optimizer(self):
-        gen_out = [optimizer.set_dtype_dimension(dtype, self.dimension) for dtype in aposmm_gen_out]
+        gen_out = [tools.set_dtype_dimension(dtype, self.dimension) for dtype in aposmm_gen_out]
         if self._config.options.load_start_sample:
             self.H0 = process_start_sample(self._config.options.load_start_sample)
         software, method = split_method(self._config.method)

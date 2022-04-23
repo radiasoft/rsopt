@@ -1,3 +1,4 @@
+from rsopt.libe_tools import tools
 from rsopt.libe_tools import optimizer
 from libensemble.gen_funcs.persistent_deap_nsga2 import deap_nsga2
 from libensemble.alloc_funcs.start_only_persistent import only_persistent_gens
@@ -15,7 +16,7 @@ class EvolutionaryOptimizer(optimizer.libEnsembleOptimizer):
 
     def _configure_optimizer(self):
 
-        gen_out = [optimizer.set_dtype_dimension(dtype, self.dimension) for dtype in nsga2_gen_out]
+        gen_out = [tools.set_dtype_dimension(dtype, self.dimension) for dtype in nsga2_gen_out]
 
         user_keys = {'lb': list(self.lb),  # DEAP requires lists
                      'ub': list(self.ub),

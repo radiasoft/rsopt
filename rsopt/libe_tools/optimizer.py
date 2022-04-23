@@ -3,7 +3,8 @@ from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
 from libensemble.tools import check_inputs
 from libensemble.tools import add_unique_random_streams
-from rsopt.optimizer import Optimizer, OPTIONS_ALLOWED
+from rsopt.libe_tools import tools
+from rsopt.optimizer import Optimizer
 from rsopt.libe_tools.interface import get_local_optimizer_method
 from rsopt.simulation import SimulationFunction
 from pykern import pkyaml
@@ -76,7 +77,7 @@ class libEnsembleOptimizer(Optimizer):
 
     def _configure_optimizer(self):
         local_opt_method = get_local_optimizer_method(self._config.method, self._config.software)
-        gen_out = [set_dtype_dimension(dtype, self.dimension) for dtype in persistent_local_opt_gen_out]
+        gen_out = [tools.set_dtype_dimension(dtype, self.dimension) for dtype in persistent_local_opt_gen_out]
         user_keys = {'lb': self.lb,
                      'ub': self.ub,
                      'initial_sample_size': 1,
@@ -208,14 +209,3 @@ class libEnsembleOptimizer(Optimizer):
                 self.exit_criteria[key] = val
             else:
                 raise KeyError(f'{key} is not a valid exit criteria option for libEnsemble')
-
-
-def set_dtype_dimension(dtype, dimension):
-    if len(dtype) == 2:
-        return dtype
-    elif len(dtype) == 3:
-        new_dtype = dtype[0], dtype[1], (dimension,)
-        return new_dtype
-    else:
-        raise IndexError('size of dtype cannot be set')
-
