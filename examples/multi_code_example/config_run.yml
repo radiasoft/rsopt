@@ -1,0 +1,83 @@
+codes:
+    # OPAL Block for adjusting capture cavity settings
+    - opal:
+        settings:
+            # Shorten tracking to just after X106 monitor
+            track.zstop: "{0.28,8.25}"
+            beam.bcurrent: 1.3  # Sets bunch to be 1 nC of charge
+        parameters:
+            DISTRIBUTION.1.TPULSEFWHM:
+                min: 2.5e-11
+                max: 6.0e-11
+                start: 4.42409587e-11
+            DISTRIBUTION.1.SIGMAR: #check w/ FNAL for actual range
+                min: 0.0002
+                max: 0.004
+                start: 1.18951526e-03
+            MS.KS:
+                min: 0.1
+                max: 0.25
+                start:  1.61656081e-01
+            GUN.VOLT:
+                min: 20.
+                max: 42.  # Changed down from 100. to spec from fermilab
+                start: 3.88363078e+01
+            GUN.LAG:
+                min: -0.4
+                max:  0.01 
+                start: -2.19750730e-04
+            # correct chirp for compression is around: lag=-0.295, volt=29.57
+            CC1.LAG:
+                min: -0.34   # -19.48 deg
+                max:  0.0   
+                start: -0.295
+            CC1.VOLT:
+                min: 20.
+                max: 31.
+                start: 29.97359742658
+            CC2.LAG:
+                min: -0.34   # -19.48 deg
+                max:  0.0   
+                start: -0.3042105263157895
+            CC2.VOLT:
+                min: 20.
+                max: 31.
+                start: 29.9735974265826
+        setup:
+            input_file: run_files/sim698_fast_injector_toX107.in
+            execution_type: parallel
+            cores: 4
+            output_distribution: sim698_fast_injector_toX107.h5
+            timeout: 6000.
+    # Python block picks out the correct quadrupole settings in the chicane for the requested R56
+    # This can't be just a preprocess step because the optimizer needs to choose `target_r56`
+    # But we need to store the quadrupole calculations in J so the preprocess does the work in the block and function
+    # Is a dummy value
+    - python:
+        parameters: 
+            target_r56:
+                # Fit range for chicane R56
+                min: -0.235
+                max: -0.14
+                start: -0.151
+        setup:
+            input_file: set_chicane_r56.py
+            function: passes
+            execution_type: serial
+            preprocess: [set_chicane_r56.py, get_quads_k1]
+    # Run elegant with the chicane configured
+    - elegant:
+        parameters:
+        setup:
+            input_distribution: from_opal.sdds
+            preprocess: [set_chicane_r56.py, set_quads_k1] # take quad settings from J and set them in beamline
+            input_file: run_files/fast_compressor.ele
+            execution_type: parallel
+            cores: 4
+            timeout: 500.
+options:
+    software: mesh_scan
+    sym_links:
+        - run_files/Q114_r56_to_k1.pickle
+        - run_files/Q115_r56_to_k1.pickle
+        - run_files/Q116_r56_to_k1.pickle
