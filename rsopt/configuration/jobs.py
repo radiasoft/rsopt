@@ -1,7 +1,7 @@
 from rsopt.configuration.parameters import _PARAMETER_READERS, Parameters
 from rsopt.configuration.settings import _SETTING_READERS, Settings
 from rsopt.configuration.setup import _SETUP_READERS, Setup, _PARALLEL_PYTHON_RUN_FILE
-
+import pathlib
 
 _USE_SIM_DIRS_DEFAULT = ['elegant', 'opal', 'genesis']
 
@@ -18,6 +18,14 @@ def get_reader(obj, category):
     raise TypeError(f'{category} input type is not recognized')
 
 
+def get_input_file(file_path: str or None):
+    if not file_path:
+        return
+
+    path = pathlib.Path(file_path)
+    return path.name
+
+
 def create_executor_arguments(setup):
     # Really creates Executor.submit() arguments
     args = {
@@ -25,7 +33,7 @@ def create_executor_arguments(setup):
         'num_nodes': None,  # No user interface right now
         'procs_per_node': None, # No user interface right now
         'machinefile': None,  # Add in  setup.machinefile if user wants to control
-        'app_args': setup.get('input_file', None),
+        'app_args': get_input_file(setup.get('input_file', None)),
         'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
         'wait_on_start': True,
         # 'app_name': None,  # Handled at optimizer setup
