@@ -20,6 +20,7 @@ class TestSetupFeatures(unittest.TestCase):
     def setUp(self):
         self.run_dir = tempfile.TemporaryDirectory()
         self.timeout_config = os.path.join('config_timeout.yaml')
+        self.ignored_files_config = os.path.join('config_ignored_files.yaml')
         shutil.copy(os.path.join(SUPPORT_PATH, self.timeout_config), self.run_dir.name)
         shutil.copy(os.path.join(SUPPORT_PATH, 'six_hump_camel.py'), self.run_dir.name)
 
@@ -62,6 +63,24 @@ class TestSetupFeatures(unittest.TestCase):
         runner._configure_executors()
         self.assertTrue(isinstance(runner.executor, MPIExecutor))
         self.assertTrue(runner._config.jobs[0].executor)
+
+    def test_ignored_files(self):
+        # parsing assumes you are same directory as config file
+        os.chdir(SUPPORT_PATH)
+
+        config_yaml = parse.read_configuration_file(self.ignored_files_config)
+        _config = parse.parse_yaml_configuration(config_yaml)
+
+    def test_ignored_files_exception(self):
+        # parsing assumes you are same directory as config file
+        os.chdir(SUPPORT_PATH)
+
+        config_yaml = parse.read_configuration_file(self.ignored_files_config)
+        # Take out first ignored_files declaration
+        config_yaml.codes[0].elegant.setup.ignored_files = []
+
+        self.assertRaisesRegex(AssertionError, 'file=transverse_w_type1.sdds missing',
+                               parse.parse_yaml_configuration, config_yaml)
 
     def tearDown(self):
         os.chdir(HOME)

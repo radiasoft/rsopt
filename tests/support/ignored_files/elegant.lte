@@ -1,0 +1,2 @@
+"T1": TRWAKE,inputfile="transverse_w_type1.sdds"
+"BL1": LINE=("T1")

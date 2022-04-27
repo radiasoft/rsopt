@@ -1,0 +1,16 @@
+
+Title, string="tmp";
+"OP1": option,psdumpfreq=1000.0,version=10900.0;
+
+"Q1": QUADRUPOLE,k1=0.1,l=0.1;
+
+"Q1#0": "Q1",elemedge=0;
+BL1: LINE=("Q1#0");
+
+
+"FI1": fieldsolver,fstype="NONE",mt=32.0,mx=16.0,my=16.0;
+"BE1": beam,bcurrent=2.4303744e-07,bfreq=50.6328,npart=30000.0,particle="PROTON";
+"DI1": distribution,fname="opal.dist",inputmounits="NONE",sigmapx=0.0193824942,sigmapy=0.01945341389,sigmapz=0.0098599,sigmax=0.00465705,sigmay=0.00439896,sigmaz=0.000180777,type="FROMFILE";
+"TR1": track,beam=BE1,maxsteps=10000.0,zstop=1.0;
+ run, beam=BE1,distribution=DI1,fieldsolver=FI1,method="PARALLEL-T";
+endtrack;

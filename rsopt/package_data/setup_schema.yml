@@ -9,3 +9,4 @@
 - cores
 - timeout
 - force_executor
+- ignored_files
