@@ -2,7 +2,7 @@ import pickle
 import pathlib
 
 # Set path accordingly
-PATH = pathlib.Path('/home/vagrant/jupyter/research/fastfelo/FAST/bc1_quad_opt/')
+PATH = pathlib.Path('.')
 Q114 = 'Q114_r56_to_k1.pickle'
 Q115 = 'Q115_r56_to_k1.pickle'
 Q116 = 'Q116_r56_to_k1.pickle'
