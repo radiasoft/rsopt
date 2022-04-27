@@ -93,8 +93,8 @@ LINAC: LINE=("MS#0","GUN#0","CC1#0","CC2#0","Q_106#0","Q_106#1","X_107#1");
 
 "GEN_DIST": distribution,cutoffr=1.0,ekin=0.55,emissionsteps=100.0,emitted=true,nbin=9.0,sigmar=0.0016311995860689569,tpulsefwhm=1.1899831482510942e-11,type="FLATTOP",writetofile=true;
 //"VC_DIST": distribution,ekin=0.4,emissionsteps=100.0,emitted=true,fname="fast_laser.dist",nbin=9.0,type="FROMFILE";
-"FS_SC": fieldsolver,bboxincr=1.0,fstype="FFT",mt=32.0,mx=32.0,my=32.0, PARFFTX=true,PARFFTY=true,PARFFTT=true;
-"BEAM1": beam,bcurrent=0.52,bfreq=1300.0,charge=-1.0,npart=60000,particle="ELECTRON",pc=1e-06;
-"TR1": track,beam=BEAM1,dt={1.0e-13,2.0e-13},line=LINAC,maxsteps=2500000.0,zstop={0.28,8.25};
+"FS_SC": fieldsolver,bboxincr=1.0,fstype="FFT",mt=8.0,mx=8.0,my=8.0, PARFFTX=false,PARFFTY=false,PARFFTT=true;
+"BEAM1": beam,bcurrent=0.52,bfreq=1300.0,charge=-1.0,npart=1000,particle="ELECTRON",pc=1e-06;
+"TR1": track,beam=BEAM1,dt={5.0e-13,10.0e-13},line=LINAC,maxsteps=2500000.0,zstop={0.28,8.25};
  run, beam=BEAM1,distribution=GEN_DIST,fieldsolver=FS_SC,method="PARALLEL-T";
 endtrack;

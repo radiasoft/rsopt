@@ -10,7 +10,7 @@ codes:
                 min: 2.5e-11
                 max: 6.0e-11
                 start: 4.42409587e-11
-            DISTRIBUTION.1.SIGMAR: #check w/ FNAL for actual range
+            DISTRIBUTION.1.SIGMAR:
                 min: 0.0002
                 max: 0.004
                 start: 1.18951526e-03
@@ -44,10 +44,10 @@ codes:
                 max: 31.
                 start: 29.9735974265826
         setup:
-            input_file: run_files/sim698_fast_injector_toX107.in
+            input_file: run_files/fast_injector_toX107.in
             execution_type: parallel
             cores: 4
-            output_distribution: sim698_fast_injector_toX107.h5
+            output_distribution: fast_injector_toX107.h5
             timeout: 6000.
     # Python block picks out the correct quadrupole settings in the chicane for the requested R56
     # This can't be just a preprocess step because the optimizer needs to choose `target_r56`
