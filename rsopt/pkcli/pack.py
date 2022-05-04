@@ -70,7 +70,8 @@ def _get_files_from_job(job):
     files = _get_processing(job)
     file_list.extend(files)
 
-    return file_list
+    # return file paths as string to match against anything passed to ignore list
+    return [str(f) for f in file_list]
 
 
 def _get_files_from_options(config):
@@ -82,7 +83,8 @@ def _get_files_from_options(config):
         files = _get_local_modules(config.options.objective_function[0])
         file_list.extend(files)
 
-    return file_list
+    # return file paths as string to match against anything passed to ignore list
+    return [str(f) for f in file_list]
 
 
 def _create_tar(name, file_list):
@@ -99,19 +101,24 @@ def _create_tar(name, file_list):
 
 def configuration(config, ignore=None, add=None):
     file_list = [config, ]
+    if not ignore:
+        ignore = []
     config_yaml = parse.read_configuration_file(config)
     _config = parse.parse_yaml_configuration(config_yaml)
 
     for job in _config.jobs:
         files = _get_files_from_job(job)
+        ignore.extend(job.ignored_files(with_path=True))
         file_list.extend(files)
 
     files = _get_files_from_options(_config)
     file_list.extend(files)
+    # remove any duplicate items
+    file_list = set(file_list)
 
     if ignore:
         for file in ignore:
-            if ignore in file_list:
+            if file in file_list:
                 file_list.remove(file)
             else:
                 print(f'File: {file} is not being used by rsopt configuration')

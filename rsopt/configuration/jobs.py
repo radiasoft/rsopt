@@ -123,11 +123,16 @@ class Job:
             return True
         return False
 
-    @property
-    def ignored_files(self) -> list:
+    def ignored_files(self, with_path: bool = False) -> list:
         # Get files that should be ignore by sirepo.lib parse
+        # If with_path then prepend the path from input_file, if any
+
         ignored_files = self._setup.get_ignored_files
-        ignored_files.append(self.input_distribution)
+        if self.input_distribution:
+            ignored_files.append(self.input_distribution)
+
+        if with_path and ignored_files:
+            ignored_files = [str(self._setup.input_file_path.joinpath(f)) for f in ignored_files]
 
         return ignored_files
 
@@ -178,4 +183,4 @@ class Job:
         if self._setup.setup.get('input_file'):
             self._setup.input_file_model = self._setup.parse_input_file(self._setup.setup.get('input_file'),
                                                                         self.setup.get('execution_type', False) == 'shifter',
-                                                                        self.ignored_files)
+                                                                        self.ignored_files())
