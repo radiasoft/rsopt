@@ -1,7 +1,7 @@
 from rsopt.configuration.parameters import _PARAMETER_READERS, Parameters
 from rsopt.configuration.settings import _SETTING_READERS, Settings
 from rsopt.configuration.setup import _SETUP_READERS, Setup, _PARALLEL_PYTHON_RUN_FILE
-
+import pathlib
 
 _USE_SIM_DIRS_DEFAULT = ['elegant', 'opal', 'genesis']
 
@@ -18,6 +18,14 @@ def get_reader(obj, category):
     raise TypeError(f'{category} input type is not recognized')
 
 
+def get_input_file(file_path: str or None):
+    if not file_path:
+        return
+
+    path = pathlib.Path(file_path)
+    return path.name
+
+
 def create_executor_arguments(setup):
     # Really creates Executor.submit() arguments
     args = {
@@ -25,7 +33,7 @@ def create_executor_arguments(setup):
         'num_nodes': None,  # No user interface right now
         'procs_per_node': None, # No user interface right now
         'machinefile': None,  # Add in  setup.machinefile if user wants to control
-        'app_args': setup.get('input_file', None),
+        'app_args': get_input_file(setup.get('input_file', None)),
         'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
         'wait_on_start': True,
         # 'app_name': None,  # Handled at optimizer setup
@@ -115,6 +123,14 @@ class Job:
             return True
         return False
 
+    @property
+    def ignored_files(self) -> list:
+        # Get files that should be ignore by sirepo.lib parse
+        ignored_files = self._setup.get_ignored_files
+        ignored_files.append(self.input_distribution)
+
+        return ignored_files
+
     @parameters.setter
     def parameters(self, parameters):
         reader = get_reader(parameters, 'parameters')
@@ -161,4 +177,5 @@ class Job:
         # Import input_file
         if self._setup.setup.get('input_file'):
             self._setup.input_file_model = self._setup.parse_input_file(self._setup.setup.get('input_file'),
-                                                                        self.setup.get('execution_type', False) == 'shifter')
+                                                                        self.setup.get('execution_type', False) == 'shifter',
+                                                                        self.ignored_files)

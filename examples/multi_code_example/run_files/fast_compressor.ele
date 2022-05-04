@@ -1,0 +1,63 @@
+
+&global_settings
+  mpi_io_write_buffer_size = 1048576,
+&end
+
+&run_setup
+  expand_for = "from_opal.sdds",
+  lattice = "injectortodump.lte",
+  sigma = "%s.sig",
+  output = "%s.out",
+  use_beamline = "THRU_BC1",
+&end
+
+
+&alter_elements
+  item = "LSC_BINS",
+  name = "*",
+  type = "CSRDRIFT",
+  value = 0
+&end
+
+&alter_elements
+    type = "CSRCSBEND",
+    name = "*"
+    item = CSR,
+    value = 1
+&end
+
+&alter_elements
+  item = "CSR",
+  name = "*",
+  type = "CSRDRIFT",
+  value = 1
+&end
+
+&run_control
+&end
+
+&twiss_output
+  alpha_x = -0.3165065997845755,
+  alpha_y = -0.3409077393850276,
+  beta_x = 7.689218982798661,
+  beta_y = 7.487138692741433,
+  filename = "%s.twi",
+  matched = 0,
+&end
+
+&matrix_output
+  SDDS_output = "%s.mat",
+  SDDS_output_order = 2,
+  output_at_each_step = 1,
+&end
+
+
+&sdds_beam
+  center_arrival_time = 1,
+  center_transversely = 1,
+  input = "from_opal.sdds",
+  reverse_t_sign = 1,
+&end
+
+&track
+&end

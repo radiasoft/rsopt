@@ -1,0 +1,16 @@
+Example chaining different codes together.
+Runs an OPAL injector simulation and then passes the distribution to elegant for simulation through a bunch
+compression chicane.
+
+An intermediate step runs a Python script to set the chicane R56. The setup of this script is slightly obtuse.
+The function get_quads_k1 in set_chicane_r56.py is run as a preprocess function that takes in the desired R56 value
+from the job dictionary and finds the required settings for 3 quadupoles in the chicane that will set it to the target
+R56 while maintaining achromatic transport. These quadrupole settings are written to the Job dictionary and used by the
+preprocess function in the elegant block `set_quads_k1` to set the quadrupole strengths at execution.
+Because this process needs the Job dictionary for communication the Python block function `passes` is just a dummy
+since it will not have access to the Job dictionary, and all actual work is handled in preprocess functions.
+
+To execute the simulation chain through rsopt run:
+    rsopt sample start config_run.yml
+
+This will run a single chain of simulations using the start value of each parameter in the configuration file.
