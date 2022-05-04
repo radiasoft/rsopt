@@ -23,8 +23,7 @@ def _get_processing(job):
     # return pre/post processing scripts and local dependencies (if any)
     file_list = []
     for attr in ['pre_process', 'post_process']:
-        # TODO: might want to just make a getter for setup.setup - also used in _get_files_from_job
-        if job._setup.setup.get(attr):
+        if job.setup.get(attr):
             file_name = job._setup.setup.get(attr)[0]
             files = _get_local_modules(file_name)
             file_list.extend(files)
@@ -63,8 +62,7 @@ def _get_files_from_job(job):
         file_list.extend(files)
     else:
         m = job._setup.input_file_model
-        # TODO: might want to just make a getter for setup.setup
-        files = _get_file_list_from_model(m, job.code, job._setup.setup['input_file'])
+        files = _get_file_list_from_model(m, job.code, job.setup['input_file'])
         file_list.extend(files)
 
     files = _get_processing(job)
