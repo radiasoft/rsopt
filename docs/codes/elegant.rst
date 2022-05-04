@@ -3,9 +3,14 @@
 ``elegant``
 ===========
 
+Basic Setup
+-----------
+
 The particle accelerator tracking code ``elegant`` [1]_ [2]_ has special support in rsopt provided by the Sirepo library.
 Using Sirepo, rsopt can parse ``elegant`` command and lattice files, automatically replacing and updating values given
-for parameters and settings with no additional work required by the user. An example setup is shown below::
+for parameters and settings with no additional work required by the user. An example setup is shown below
+
+.. code-block:: yaml
 
     codes:
         - elegant:
@@ -39,6 +44,52 @@ In setup you only need to provide the command file name, though the correspondin
 should be located in the same directory. rsopt will handle reading and parsing both files during optimization or
 parameter sweeps. If multiple workers can be used for the rsopt run then they will always work in separate directories for
 each new job to prevent overwriting files.
+
+Syntax for repeated commands
+----------------------------
+
+Some commands may appear repeatedly in an input file. In this case the command name should be followed by the position
+of the command to be used (indexed to 1). For instance if the command file contained two :code:`alter_element` commands
+controlling the voltage and phase of all cavities in an rf cell:
+
+.. code-block::
+
+    !1
+    &alter_elements
+      item = "VOLT",
+      name = "L2CELL*",
+      type = "RF*",
+      value = 0.9,
+      multiplicative = 1
+    &end
+
+    !2
+    &alter_elements
+      item = "PHASE",
+      name = "L2CELL*",
+      type = "RF*",
+      value = 66.0,
+    &end
+
+The corresponding block in the rsopt configuration file could look like:
+
+.. code-block:: yaml
+
+    codes:
+        - elegant:
+            parameters:
+            alter_elements.1.value: # Voltage L2
+                min: 8.0
+                max: 1.1
+                start: 1.0
+            alter_elements.2.value: # Phase L2
+                min: 60.0
+                max: 77.0
+                start: 6.42e+01
+            setup:
+                input_file: elegant_command_file.ele
+                execution_type: serial
+
 
 .. _elegant_name_mangling:
 

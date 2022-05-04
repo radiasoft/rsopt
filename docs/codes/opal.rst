@@ -3,9 +3,14 @@
 ``OPAL``
 ========
 
+Basic Setup
+-----------
+
 The particle accelerator tracking code ``OPAL`` [1]_ [2]_ has special support in rsopt provided by the Sirepo library.
 Using Sirepo, rsopt can parse ``OPAL`` input files, automatically replacing and updating values given
-for parameters and settings with no additional work required by the user. An example setup is shown below::
+for parameters and settings with no additional work required by the user. An example setup is shown below:
+
+.. code-block:: yaml
 
     codes:
         - opal:
@@ -35,6 +40,51 @@ within the given input file (the CALL command is not currently supported by the 
 rsopt will handle reading and parsing both files during optimization or
 parameter sweeps. If multiple workers can be used for the rsopt run then they will always work in separate directories for
 each new job to prevent overwriting files.
+
+Syntax for repeated commands
+----------------------------
+
+Some commands may appear repeatedly in an input file. In this case the command name should be followed by the position
+of the command to be used (indexed to 1). For instance if the input file contained two :code:`DISTRIBUTION` commands:
+
+.. code-block::
+
+    // 1
+    gen_dist: DISTRIBUTION, TYPE = FLATTOP,
+            SIGMAR = 0.001*2,
+            TPULSEFWHM = fwhm*2,
+            NBIN = 9,
+            EMISSIONSTEPS = 100,
+            EMISSIONMODEL = NONE,
+            EKIN = 0.55,
+            EMITTED = True,
+            WRITETOFILE = True;
+    // 2
+    vc_dist: DISTRIBUTION, TYPE = FROMFILE,
+            FNAME = "laser.dist",
+            EMITTED = TRUE,
+            EMISSIONMODEL = None,
+            NBIN = 9,
+            EMISSIONSTEPS = 100,
+            EKIN = 0.4;
+
+If the :code:`gen_dist` :code:`DISTRIBUTION` were being used by OPAL
+The corresponding block in the rsopt configuration file to use :code:`TPULSEFWHM` as an optimization parameter
+would look like:
+
+.. code-block:: yaml
+
+    codes:
+        - opal:
+            parameters:
+              DISTRIBUTION.1.TPULSEFWHM:
+                min: 0.8e-11
+                max: 2.6e-11
+                start: 1.33e-11
+            setup:
+                input_file: opal_input.in
+                execution_type: serial
+
 
 Providing an objective value
 ----------------------------

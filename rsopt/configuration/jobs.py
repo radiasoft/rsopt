@@ -5,6 +5,7 @@ from rsopt.configuration.setup import _SETUP_READERS, Setup, _PARALLEL_PYTHON_RU
 
 _USE_SIM_DIRS_DEFAULT = ['elegant', 'opal', 'genesis']
 
+
 def get_reader(obj, category):
     config_categories = {'parameters': _PARAMETER_READERS,
                          'settings': _SETTING_READERS,
@@ -44,6 +45,7 @@ def create_executor_arguments(setup):
 
     return args
 
+
 class Job:
     # Job should never assume any particular code so that all parts may be set independently
     # When actually executed, or setting up to execute, then setup is queried to decide execution
@@ -75,6 +77,7 @@ class Job:
             return self._setup.setup
         else:
             return None
+
     @property
     def execute(self):
         return self._setup.function
@@ -90,16 +93,20 @@ class Job:
         return self._setup.setup.get('output_distribution')
 
     @property
-    def pre_process(self):
-        return self._setup.setup.get('preprocess')
+    def pre_process(self) -> callable:
+        # Iterator that returns any preprocess functions defined in setup
+        for pre in self._setup.preprocess:
+            yield pre
 
     @property
-    def post_process(self):
-        return self._setup.setup.get('postprocess')
+    def post_process(self) -> callable:
+        # Iterator that returns any postprocess functions defined in setup
+        for post in self._setup.postprocess:
+            yield post
 
     @property
     def timeout(self):
-        timeout =  self._setup.setup.get('timeout') or 1e10
+        timeout = self._setup.setup.get('timeout') or 1e10
         return timeout
 
     @property
