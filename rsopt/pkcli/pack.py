@@ -22,9 +22,9 @@ def _get_local_modules(script_name):
 def _get_processing(job):
     # return pre/post processing scripts and local dependencies (if any)
     file_list = []
-    for attr in ['pre_process', 'post_process']:
+    for attr in ['preprocess', 'postprocess']:
         if job.setup.get(attr):
-            file_name = job._setup.setup.get(attr)[0]
+            file_name = job.setup.get(attr)[0]
             files = _get_local_modules(file_name)
             file_list.extend(files)
 
