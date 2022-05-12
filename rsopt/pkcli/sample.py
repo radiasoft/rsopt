@@ -29,8 +29,7 @@ def configuration(config):
 
 
 def start(config):
-    """
-    Run a single pass through the run chain in the configuration file.
+    """Run a single pass through the run chain in the configuration file.
 
     All settings are applied. Any parameters in the configuration are set to the value in `start`.
     The setting for `software` is ignored in this mode.
