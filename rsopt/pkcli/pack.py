@@ -75,6 +75,7 @@ def _get_files_from_options(config):
 
     return file_list
 
+
 def _create_tar(name, file_list):
     tarname = f'{name}.tar.gz'
     tar = tarfile.open(tarname, 'w:gz')
@@ -86,7 +87,17 @@ def _create_tar(name, file_list):
 
     return tarname
 
+
 def configuration(config, ignore=None, add=None):
+    """
+    Packs all run files used by the configuration file into a tarball.
+    Locally defined Python modules will be included.
+
+    :param config: (str) Name of configuration file to use
+    :param ignore: Optional. Files that should not be included in tarball.
+    :param add: Optional. Files to include that are not automatically detected from the configuration file.
+    :return: None
+    """
     file_list = [config,]
     config_yaml = parse.read_configuration_file(config)
     _config = parse.parse_yaml_configuration(config_yaml)
@@ -103,13 +114,13 @@ def configuration(config, ignore=None, add=None):
             if ignore in file_list:
                 file_list.remove(file)
             else:
-                print(f'File: {file} is not being used by rsopt configuration')
+                print(f'File: {file} is not being used by rsopt configuration. Nothing to ignore.')
     if add:
         for file in add:
             if file not in file_list:
                 file_list.append(file)
             else:
-                print(f'File: {file} already found in rsopt configuration')
+                print(f'File: {file} already found in rsopt configuration. Skipping add.')
 
     tar_name = os.path.splitext(config)[0]
     create_filename = _create_tar(tar_name, file_list)

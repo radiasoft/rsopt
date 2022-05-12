@@ -25,7 +25,17 @@ def _matches(name, patterns):
 
 
 def libensemble(directory=None):
-    "Clean a directory of libEnsemble output files"
+    """
+    Clean a directory of libEnsemble output files. Defaults to the current working directory.
+    This will delete all files that match:
+      'ensemble.log'
+      'libE_stats.txt'
+      .npy files starting with 'libE_history'
+      .pickle files starting with 'libE_persis_info'
+
+    :param directory: (str) Optional. Path to directory that will be cleaned.
+    :return:
+    """
     directory = '.' if not directory else directory
     for file in os.listdir(directory):
         if file in _LIBE_CLEANUP_FILES:

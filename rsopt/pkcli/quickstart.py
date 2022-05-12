@@ -10,6 +10,12 @@ def _get_example_file_list(example_name):
 
 
 def start():
+    """
+    Generates files for the quickstart example (https://rsopt.readthedocs.io/en/latest/quick_start)
+    in the current directory.
+
+    :return: None
+    """
     my_name = 'start'
     example_file_list = _get_example_file_list(my_name)
     start_message = """
