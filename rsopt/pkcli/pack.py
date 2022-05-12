@@ -90,8 +90,9 @@ def _create_tar(name, file_list):
 
 def configuration(config, ignore=None, add=None):
     """
-    Packs all run files used by the configuration file into a tarball.
-    Locally defined Python modules will be included.
+    Create a tarball of all configuration file dependencies
+
+    Locally defined Python modules will be included but not library files.
 
     :param config: (str) Name of configuration file to use
     :param ignore: Optional. Files that should not be included in tarball.

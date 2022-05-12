@@ -4,7 +4,9 @@ from rsopt import util
 
 def configuration(config):
     """
-    Runs a sampling job based on the content of the configuration file.
+    Runs a sampling job.
+
+    A sampling job will be started based on the content of the configuration file.
     The configuration file should have the software field in options set to one of:
       mesh_scan, lh_scan
 
@@ -30,6 +32,7 @@ def configuration(config):
 def start(config):
     """
     Run a single pass through the run chain in the configuration file.
+
     All settings are applied. Any parameters in the configuration are set to the value in `start`.
     The setting for `software` is ignored in this mode.
 
