@@ -25,8 +25,7 @@ def _matches(name, patterns):
 
 
 def libensemble(directory=None):
-    """
-    Clean a directory of libEnsemble output files.
+    """Clean a directory of libEnsemble output files.
 
     Deletes files matching those typically produced during libEnsemble runs. Defaults to the current working directory.
     This will delete all files that match:

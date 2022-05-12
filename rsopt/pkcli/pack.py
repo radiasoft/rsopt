@@ -89,8 +89,7 @@ def _create_tar(name, file_list):
 
 
 def configuration(config, ignore=None, add=None):
-    """
-    Create a tarball of all configuration file dependencies
+    """Create a tarball of all configuration file dependencies.
 
     Locally defined Python modules will be included but not library files.
 

@@ -10,8 +10,7 @@ def _get_example_file_list(example_name):
 
 
 def start():
-    """
-    Generates files for the quickstart example in the current directory.
+    """Generates files for the quickstart example in the current directory.
 
     See https://rsopt.readthedocs.io/en/latest/quick_start  for a detailed description  of the example.
 

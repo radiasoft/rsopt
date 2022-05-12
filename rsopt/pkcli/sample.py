@@ -3,8 +3,7 @@ from rsopt import util
 
 
 def configuration(config):
-    """
-    Runs a sampling job.
+    """Runs a sampling job.
 
     A sampling job will be started based on the content of the configuration file.
     The configuration file should have the software field in options set to one of:
