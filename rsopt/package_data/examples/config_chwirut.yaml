@@ -22,11 +22,12 @@ options:
   software: dfols
   method: dfols
   components: 214
-  software_options: {'do_logging': False,
-                     'rhoend': 1e-5,
-                     'user_params': {'model.abs_tol': 1e-10,
-                                     'model.rel_tol': 1e-4
-                                    }
-                     }
+  software_options:
+      dfols_kwargs:
+          do_logging: False
+          rhoend: 1e-5
+          user_params:
+              'model.abs_tol': 1e-10
+              'model.rel_tol': 1e-4
   exit_criteria:
     sim_max: 400
