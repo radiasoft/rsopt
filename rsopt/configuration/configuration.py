@@ -97,24 +97,31 @@ class Configuration:
 
         return executor(**self.options.executor_options)
 
-    def get_sym_link_list(self):
-        sym_link_files = []
+    def get_sym_link_list(self) -> list:
+        # TODO: Genesis currently handles its own symlinking which is inconsistent with the usage here
+        #       Should be changed to use the configuration symlink method and let libEnsemble handle
+
+        sym_link_files = set()
         for job in self.jobs:
-            if job.code == 'python' and job.setup.get('input_file'):
-                # If an input file is registered then copy to run dir, otherwise expect Python function defined or
-                # imported into input script
-                sym_link_files.append(job.setup['input_file'])
+            sym_link_files.update(job.sym_link_targets)
+        sym_link_files.update(self._options.sym_links)
 
-            if job.code == 'user':
-                if job.setup['input_file'] not in job.setup['file_mapping'].values():
-                    # If file name in file_mapping then input_file being created dynamically, otherwise copy here
-                    sym_link_files.append(job.setup['input_file'])
 
-            # TODO: Genesis currently handles its own symlinking which is inconsistent with the usage here
-            #       Should be changed to use the configuration symlink method and let libEnsemble handle
+        # sym_link_files = []
+        # for job in self.jobs:
+        #     if job.code == 'python' and job.setup.get('input_file'):
+        #         # If an input file is registered then copy to run dir, otherwise expect Python function defined or
+        #         # imported into input script
+        #         sym_link_files.append(job.setup['input_file'])
+        #
+        #     if job.code == 'user':
+        #         if job.setup['input_file'] not in job.setup['file_mapping'].values():
+        #             # If file name in file_mapping then input_file being created dynamically, otherwise copy here
+        #             sym_link_files.append(job.setup['input_file'])
+        #
+        #
+        # # Add user specified file names
+        # sym_link_files.extend(self._options.sym_links)
 
-        # Add user specified file names
-        sym_link_files.extend(self._options.sym_links)
-
-        return sym_link_files
+        return list(sym_link_files)
 
