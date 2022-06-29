@@ -2,6 +2,8 @@ import os
 import sys
 import jinja2
 import pickle
+import typing
+import sirepo.lib
 from rsopt import util
 from rsopt.codes import _TEMPLATED_CODES
 from rsopt import _SETUP_SCHEMA
@@ -65,7 +67,8 @@ def _validate_execution_type(key):
         return False
 
 
-def _shifter_parse_model(name, input_file):
+def _shifter_parse_model(name: str, input_file: str, ignored_files: list) -> sirepo.lib.SimData or None:
+    # Sidesteps the difficulty of Sirepo install on NERSC by running a script that parses to the Sirepo model
     import shlex
     from subprocess import Popen, PIPE
 
@@ -73,7 +76,7 @@ def _shifter_parse_model(name, input_file):
     if node_to_use:
         run_string = f"srun -w {node_to_use} --ntasks 1 --nodes 1 shifter --image={_SHIFTER_IMAGE} " \
                      f"/bin/bash {_SHIFTER_BASH_FILE} python {_SHIFTER_SIREPO_SCRIPT}"
-        run_string = ' '.join([run_string, name, input_file])
+        run_string = ' '.join([run_string, name, input_file, *ignored_files])
         cmd = Popen(shlex.split(run_string), stderr=PIPE, stdout=PIPE)
         out, err = cmd.communicate()
         if err:
@@ -144,15 +147,25 @@ class Setup:
         return cls.NAME in _TEMPLATED_CODES
 
     @classmethod
-    def parse_input_file(cls, input_file, shifter):
+    def parse_input_file(cls, input_file: str, shifter: str,
+                         ignored_files: typing.Optional[typing.List[str]] = None) -> sirepo.lib.SimData or None:
 
         if shifter:
-            d = _shifter_parse_model(cls.NAME, input_file)
+            # Must pass a list to ignored_files here since it is sent to subprocess
+            d = _shifter_parse_model(cls.NAME, input_file, ignored_files or [])
         else:
             import sirepo.lib
-            d = sirepo.lib.Importer(cls.NAME).parse_file(input_file)
+            d = sirepo.lib.Importer(cls.NAME, ignored_files).parse_file(input_file)
 
         return d
+
+    @property
+    def get_ignored_files(self) -> list:
+        ignored_file_list = self.setup.get('ignored_files')
+        if ignored_file_list:
+            assert type(ignored_file_list) == list, f"ignored files for code {self.NAME} as not a list"
+            return ignored_file_list
+        return []
 
     def generate_input_file(self, kwarg_dict, directory):
         # stub
@@ -231,7 +244,8 @@ class Python(Setup):
         return self.setup['function']
 
     @classmethod
-    def parse_input_file(cls, input_file, shifter):
+    def parse_input_file(cls, input_file: str, shifter: str,
+                         ignored_files: typing.Optional[typing.List[str]] = None) -> None:
         # Python does not use text input files. Functions are dynamically imported by `function`.
         assert os.path.isfile(input_file), f'Could not find input_file: {input_file}'
         return None
@@ -428,9 +442,11 @@ class Genesis(Elegant):
     PARALLEL_RUN_COMMAND = 'genesis_mpi'
 
     @classmethod
-    def parse_input_file(cls, input_file, shifter):
-        # assumes lume-genesis can best installed locally - shifter execution not needed
-        # expand_paths is not used to ensure that generated input files are used if desired - otherwise rsopt symlinks them to run dir
+    def parse_input_file(cls, input_file: str, shifter: str,
+                         ignored_files: typing.Optional[typing.List[str]] = None):
+        # assumes lume-genesis can be installed locally - shifter execution not needed
+        # expand_paths is not used to ensure that generated input files are used if desired -
+        # otherwise rsopt symlinks them to run dir
         import genesis
         d = genesis.Genesis(input_file, use_tempdir=False, expand_paths=False, check_executable=False)
 

@@ -1,0 +1,22 @@
+codes:
+  - elegant:
+      settings:
+      parameters:
+      setup:
+        input_file: ignored_files/elegant.ele
+        execution_type: serial
+        ignored_files:
+          - transverse_w_type1.sdds
+  - opal:
+      settings:
+      parameters:
+      setup:
+        input_file: ignored_files/opal.in
+        execution_type: serial
+        ignored_files:
+          - opal.dist
+options:
+  software: nlopt
+  method: LN_BOBYQA
+  exit_criteria:
+    sim_max: 2
