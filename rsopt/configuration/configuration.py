@@ -1,9 +1,18 @@
 from rsopt.configuration import Options
+from rsopt.configuration import parameters
+from rsopt.configuration import settings
+from rsopt.configuration import setup
 from rsopt.configuration.setup import _EXECUTION_TYPES
 _EXECUTORS = {'parallel'}
 
 
 class Configuration:
+    """
+    Stores Job and Option data for a run and provides interfaces to data that requires knowledge of the state
+    of all Jobs together or the combined state of Jobs and Options.
+
+    For information on individual Jobs and Options states, the respective objects are queried directly.
+    """
 
     def __init__(self):
         self.jobs = []
@@ -14,41 +23,73 @@ class Configuration:
         # self.rsmpi_executor = False  # Is set to true if any executor uses rsmpi
 
     @property
-    def options(self):
+    def options(self) -> Options:
+        """
+        Getter
+        :return: Options object for the configuration
+        """
         return self._options
 
     @property
-    def rsmpi_executor(self):
+    def rsmpi_executor(self) -> bool:
+        """
+        Is rsmpi used for any Job in the Job list
+        """
         rsmpi_used = any([j.setup.get('execution_type') == 'rsmpi' for j in self.jobs if j.setup.get('execution_type')])
         return rsmpi_used
 
-    def parameters(self, job=0):
+    def parameters(self, job: int = 0) -> parameters.Parameters:
+        """
+        Getter
+        :param job: Index of Job in job list
+        :return: Parameters object
+        """
         assert self.jobs[job], f"Requested job: {job} is not registered in the Configuration"
 
         return self.jobs[job].parameters
 
-    def settings(self, job=0):
+    def settings(self,  job: int = 0) -> settings.Settings:
+        """
+        Getter
+        :param job: Index of Job in job list
+        :return: Settings object
+        """
         assert self.jobs[job], f"Requested job: {job} is not registered in the Configuration"
 
         return self.jobs[job].settings
 
-    def setup(self, job=0):
+    def setup(self,  job: int = 0) -> setup.Setup:
+        """
+        Getter
+        :param job:  Index of Job in job list
+        :return: Setup object
+        """
         assert self.jobs[job], f"Requested job: {job} is not registered in the Configuration"
 
         return self.jobs[job].setup
 
     @options.setter
-    def options(self, options):
+    def options(self, options: dict) -> None:
+        # Iterates through a dictionary to set up an Options object from that dictionary
         new_options = self._options.get_option(options)()
         for name, value in options.items():
             new_options.parse(name, value)
         self._options = new_options
 
     @property
-    def method(self):
+    def method(self) -> str:
+        """
+        Get name of the method (if any) to be used with software
+        :return:
+        """
         return self._options.method
+
     @property
-    def software(self):
+    def software(self) -> str:
+        """
+        Get name of Options class (software from configuration file)
+        :return:
+        """
         return self._options.NAME
 
     def set_jobs(self, jobs):
@@ -57,14 +98,24 @@ class Configuration:
         else:
             self.jobs.append(jobs)
 
-    def get_dimension(self):
+    def get_dimension(self) -> int:
+        """
+        Calculate the parameter space dimension
+        :return:
+        """
         dim = 0
         for job in self.jobs:
             dim += len(job.parameters)
 
         return dim
 
-    def get_parameters_list(self, attribute, formatter=list):
+    def get_parameters_list(self, attribute: str, formatter=list):
+        """
+        Iterate through jobs and assemble shared attributes into a single iterable object.
+        :param attribute: attribute to query
+        :param formatter: (list) iterable container to put attributes in. Must have method `extend`.
+        :return: iterable with type from `formatter`
+        """
         # get list attribute from all job parameters and return based on formatter
         attribute_list = []
         for job in self.jobs:

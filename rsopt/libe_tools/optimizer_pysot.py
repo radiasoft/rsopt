@@ -1,4 +1,5 @@
 import numpy as np
+from rsopt.libe_tools import tools
 from rsopt.libe_tools import optimizer
 from rsopt.libe_tools.generator_functions.persistent_pysot import persistent_pysot
 from libensemble.alloc_funcs.start_only_persistent import only_persistent_gens
@@ -13,7 +14,7 @@ class PysotOptimizer(optimizer.libEnsembleOptimizer):
         super().__init__()
 
     def _configure_optimizer(self):
-        gen_out = [optimizer.set_dtype_dimension(dtype, self.dimension) for dtype in pysot_gen_out]
+        gen_out = [tools.set_dtype_dimension(dtype, self.dimension) for dtype in pysot_gen_out]
         user_keys = {'lb': self.lb,
                      'ub': self.ub,
                      'dim': self._config.get_dimension(),

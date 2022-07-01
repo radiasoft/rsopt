@@ -28,6 +28,7 @@ class Optimizer:
 
         self.working_directory = '.'
         self.clean_working_directory = False
+
     @property
     def lb(self):
         return self._config.get_parameters_list('get_lower_bound', formatter=np.array)
@@ -52,7 +53,7 @@ class Optimizer:
     def start(self, value=None):
         pass
 
-    def load_configuration(self, config):
+    def load_configuration(self, config: dict or PKDict or Configuration or str):
         """
         Load a configuration file to setup an optimization run.
         May be given as a dictionary or path to configuration stored in YAML format

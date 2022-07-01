@@ -46,3 +46,18 @@ def start(config):
     H, persis_info, _ = runner.run()
     if _config.is_manager:
         util.save_final_history(config, _config, H, persis_info, nworkers, message='Ran start point')
+
+
+def restart(config, history, rerun_failed=''):
+    _config = run.startup_sequence(config)
+
+    try:
+        nworkers = _config.options.nworkers
+    except AttributeError:
+        # Sampler defaults to 1 worker if not set
+        nworkers = 1
+
+    runner = run.restart_sampler(_config, history)
+    H, persis_info, _ = runner.run()
+    if _config.is_manager:
+        util.save_final_history(config, _config, H, persis_info, nworkers, message='Finished rest of sampler')
