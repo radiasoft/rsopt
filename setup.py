@@ -23,18 +23,19 @@ pksetup.setup(
     extras_require={
         'nersc': ['rsbeams@git+https://github.com/radiasoft/rsbeams',
                   'lume-genesis@git+https://github.com/cchall/lume-genesis',
-                    # Inherited from sirepo
-                    # sirepo binary build fails so it needs to be installed with --no-deps
-                    'numconv',
-                    'flask',
-                    'user-agents',
-                    'aenum',
-                    'SQLAlchemy'
-                    ],
+                  # Inherited from sirepo
+                  # sirepo binary build fails so it needs to be installed with --no-deps
+                  'numconv',
+                  'flask',
+                  'user-agents',
+                  'aenum',
+                  'SQLAlchemy'
+                  ],
         'full': [
             'rsbeams@git+https://github.com/radiasoft/rsbeams',
             'sirepo@git+https://github.com/radiasoft/sirepo',
             'lume-genesis@git+https://github.com/cchall/lume-genesis',
+            'DFO-LS',  # If using dfols optimizer
             'pandas',  # Needed for some post-processing utilities
             'xopt',  # If using MOBO algorithm for optimization
             'pymoo'  # Used by some MOBO examples

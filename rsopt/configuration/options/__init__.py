@@ -64,11 +64,13 @@ class Options:
 
     @classmethod
     def _check_options(cls, options):
+        # Ensure all required keys/values for an options class are in the parsed input
         name = cls.NAME
         for key in cls.REQUIRED_OPTIONS:
             assert options.get(key), f"{key} must be defined in options for {name}"
 
     def _validate_input(self, name, value):
+        # Ensure each option key is recognized. Check typing for each option value.
         co = self._REGISTERED_OPTIONS[self.NAME]
         if name not in co.keys() and name not in self.REQUIRED_OPTIONS:
             raise KeyError(f'options {name} was not recognized')
@@ -88,6 +90,7 @@ class Options:
             self.__setattr__(name, value)
 
     def get_objective_function(self):
+        # import the objective function if given
         if len(self.objective_function) == 2:
             module_path, function = self.objective_function
             sys.path.append(os.getcwd())
@@ -99,6 +102,10 @@ class Options:
         return function
 
     def get_sim_specs(self):
+        # This is the most common sim_spec setting. It is updated by libEnsembleOptimizer if a different value needed.
+        # TODO: It's not clear why this is defined here.
+        #  It is something that will vary by Option class but is otherwise static.
+        #  Maybe it should be put into the options schema?
         sim_specs = {
             'in': ['x'],
             'out': [('f', float), ]
