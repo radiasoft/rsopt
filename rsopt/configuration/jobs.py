@@ -2,6 +2,7 @@ from rsopt.configuration.parameters import _PARAMETER_READERS, Parameters
 from rsopt.configuration.settings import _SETTING_READERS, Settings
 from rsopt.configuration.setup import _SETUP_READERS, Setup, _PARALLEL_PYTHON_RUN_FILE
 import pathlib
+import typing
 
 _USE_SIM_DIRS_DEFAULT = ['elegant', 'opal', 'genesis']
 
@@ -123,9 +124,15 @@ class Job:
             return True
         return False
 
-    def ignored_files(self, with_path: bool = False) -> list:
-        # Get files that should be ignore by sirepo.lib parse
-        # If with_path then prepend the path from input_file, if any
+    def get_ignored_files(self, with_path: bool = False) -> typing.List[str]:
+        """Get files that should be ignored by sirepo.lib parse.
+
+        Args:
+            with_path: If with_path then prepend the path from input_file, if any.
+
+        Returns: list
+
+        """
 
         ignored_files = self._setup.get_ignored_files
         if self.input_distribution:
@@ -183,4 +190,4 @@ class Job:
         if self._setup.setup.get('input_file'):
             self._setup.input_file_model = self._setup.parse_input_file(self._setup.setup.get('input_file'),
                                                                         self.setup.get('execution_type', False) == 'shifter',
-                                                                        self.ignored_files())
+                                                                        self.get_ignored_files())
