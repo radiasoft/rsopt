@@ -97,9 +97,6 @@ def _create_tar(name, file_list):
 
 
 def configuration(config, ignore=None, add=None):
-    file_list = [config, ]
-    if not ignore:
-        ignore = []
     """Create a tarball of all configuration file dependencies.
 
     Locally defined Python modules will be included but not library files.
@@ -109,6 +106,11 @@ def configuration(config, ignore=None, add=None):
     :param add: Optional. Files to include that are not automatically detected from the configuration file.
     :return: None
     """
+
+    file_list = [config, ]
+    if not ignore:
+        ignore = []
+
     file_list = [config,]
     config_yaml = parse.read_configuration_file(config)
     _config = parse.parse_yaml_configuration(config_yaml)
