@@ -36,11 +36,10 @@ def _get_file_list_from_model(model, code_name, input_file_path):
     model_path = pathlib.Path(input_file_path).parents[0]
     # Get input and lattice if exists
     file_list = [model_path.joinpath(model['_SimData__source'].basename), ]
-    try:
-        lattice_file = model._SimData__adapter._lattice_path('', model).basename
+
+    if hasattr(model._SimData__adapter, '_run_setup'):
+        lattice_file = model._SimData__adapter._run_setup(model).lattice
         file_list.append(model_path.joinpath(lattice_file))
-    except AttributeError:
-        pass
 
     # Get all supporting files
     _sim_data, _, _schema = sirepo.sim_data.template_globals(code_name)
@@ -106,7 +105,7 @@ def configuration(config, ignore=None, add=None):
 
     for job in _config.jobs:
         files = _get_files_from_job(job)
-        ignore.extend(job.ignored_files(with_path=True))
+        ignore.extend(job.get_ignored_files(with_path=True))
         file_list.extend(files)
 
     files = _get_files_from_options(_config)
