@@ -107,7 +107,6 @@ def configuration(config, ignore=None, add=None):
     :return: None
     """
 
-    file_list = [config, ]
     if not ignore:
         ignore = []
 
@@ -134,7 +133,7 @@ def configuration(config, ignore=None, add=None):
     if add:
         for file in add:
             if file not in file_list:
-                file_list.append(file)
+                file_list.add(file)
             else:
                 print(f'File: {file} already found in rsopt configuration. Skipping add.')
 
