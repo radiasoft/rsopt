@@ -1,9 +1,15 @@
-from rsopt.libe_tools.sampler import GridSampler, SingleSample, LHSampler
+from rsopt.libe_tools import sampler
 from rsopt import mpi
 from rsopt import parse
+from rsopt.configuration import Configuration
 
 
-def startup_sequence(config):
+def startup_sequence(config: str) -> Configuration:
+    """
+    Safely initialize rsopt accounting for the local MPI configuration (if any)
+    :param config: Path to configuration file that will be used
+    :return: (rsopt.configuration.configuration.Configuration) object
+    """
     config_yaml = parse.read_configuration_file(config)
     _config = parse.parse_yaml_configuration(config_yaml)
     mpi_environment = mpi.get_mpi_environment()
@@ -30,21 +36,28 @@ def local_optimizer(config):
 
 
 def grid_sampler(config):
-    sample = GridSampler()
+    sample = sampler.GridSampler()
     sample.load_configuration(config)
 
     return sample
 
 
 def single_sampler(config):
-    sample = SingleSample()
+    sample = sampler.SingleSample()
     sample.load_configuration(config)
 
     return sample
 
 
 def lh_sampler(config):
-    sample = LHSampler()
+    sample = sampler.LHSampler()
+    sample.load_configuration(config)
+
+    return sample
+
+
+def restart_sampler(config, history):
+    sample = sampler.RestartSampler(restart_from=history)
     sample.load_configuration(config)
 
     return sample

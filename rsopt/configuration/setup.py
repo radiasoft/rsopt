@@ -3,6 +3,7 @@ import sys
 import jinja2
 import pickle
 import typing
+import pathlib
 import sirepo.lib
 from rsopt import util
 from rsopt.codes import _TEMPLATED_CODES
@@ -166,6 +167,12 @@ class Setup:
             assert type(ignored_file_list) == list, f"ignored files for code {self.NAME} as not a list"
             return ignored_file_list
         return []
+
+    @property
+    def input_file_path(self) -> pathlib.Path:
+        p = pathlib.Path(self.setup.get('input_file') or '')
+
+        return p.parent
 
     def generate_input_file(self, kwarg_dict, directory):
         # stub

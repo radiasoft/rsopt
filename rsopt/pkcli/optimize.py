@@ -4,6 +4,15 @@ from rsopt import util
 
 
 def configuration(config):
+    """Runs an optimization job.
+
+    An optimization job will be started based on the content of the configuration file.
+    The configuration file should have the software field in options set to one of:
+      nlopt, dfols, scipy, aposmm, nsga2, pysot, dlib, mobo
+
+    :param config: (str) Name of configuration file to use
+    :return: None
+    """
     _config = run.startup_sequence(config)
 
     software = _config.options.NAME
