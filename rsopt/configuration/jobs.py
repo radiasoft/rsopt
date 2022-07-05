@@ -194,4 +194,4 @@ class Job:
         if self._setup.setup.get('input_file'):
             self._setup.input_file_model = self._setup.parse_input_file(self._setup.setup.get('input_file'),
                                                                         self.setup.get('execution_type', False) == 'shifter',
-                                                                        self.ignored_files)
+                                                                        self.get_ignored_files())
