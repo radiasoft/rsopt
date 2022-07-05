@@ -215,6 +215,9 @@ class Setup:
 
         return run_command
 
+    def get_sym_link_targets(self) -> set:
+        return set()
+
     def _handle_preprocess(self, value):
         # Run in the rsopt calling directory, not worker directories
         module_path, function_name = value
@@ -269,6 +272,9 @@ class Python(Setup):
             if key not in (cls._KNOWN_KEYS + cls.__REQUIRED_KEYS):
                 raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
         Setup._check_setup(setup)
+
+    def get_sym_link_targets(self):
+        return {self.setup['input_file']}
 
     def generate_input_file(self, kwarg_dict, directory):
         # TODO: is_parallel has to be checked in several places. Should be refactored to a method of setup.
@@ -433,6 +439,13 @@ class User(Python):
             if key not in (cls._KNOWN_KEYS + cls.__REQUIRED_KEYS):
                 raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
         Setup._check_setup(setup)
+
+    def get_sym_link_targets(self):
+        if self.setup['input_file'] not in self.setup['file_mapping'].values():
+            # If file name in file_mapping then input_file being created dynamically, otherwise copy here
+            return {self.setup['input_file']}
+
+        return set()
 
     def generate_input_file(self, kwarg_dict, directory):
 

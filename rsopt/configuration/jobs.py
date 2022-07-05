@@ -124,6 +124,10 @@ class Job:
             return True
         return False
 
+    @property
+    def sym_link_targets(self) -> set:
+        return self._setup.get_sym_link_targets()
+
     def get_ignored_files(self, with_path: bool = False) -> typing.List[str]:
         """Get files that should be ignored by sirepo.lib parse.
 
@@ -190,4 +194,4 @@ class Job:
         if self._setup.setup.get('input_file'):
             self._setup.input_file_model = self._setup.parse_input_file(self._setup.setup.get('input_file'),
                                                                         self.setup.get('execution_type', False) == 'shifter',
-                                                                        self.get_ignored_files())
+                                                                        self.ignored_files)
