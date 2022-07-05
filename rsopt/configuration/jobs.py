@@ -124,6 +124,10 @@ class Job:
         return False
 
     @property
+    def sym_link_targets(self) -> set:
+        return self._setup.get_sym_link_targets()
+
+    @property
     def ignored_files(self) -> list:
         # Get files that should be ignore by sirepo.lib parse
         ignored_files = self._setup.get_ignored_files
