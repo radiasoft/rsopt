@@ -4,7 +4,8 @@ import subprocess
 import sys
 import time
 
-run_string = 'rsmpi -n {n} -h {h} -t {t} {args}'
+run_string = 'rsmpi -n {n} -h {h} {t_flag} {args}'
+t_flag = '-t {t}'
 
 parser = argparse.ArgumentParser(description="Wrap rsmpi for use by libensemble. Converts required MPICH flags"
                                              "to rsmpi flags.")
@@ -46,7 +47,9 @@ else:
     h = parsed_args.hosts
 args = ' '.join(parsed_args.args)
 
-formatted_run_string = run_string.format(n=parsed_args.n, h=h, t=parsed_args.t, args=args).split()
+formatted_run_string = run_string.format(n=parsed_args.n, h=h,
+                                         t_flag=t_flag.format(t=parsed_args.t) if parsed_args.t else '',
+                                         args=args).split()
 
 # Execute
 try:
