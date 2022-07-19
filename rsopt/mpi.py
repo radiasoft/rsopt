@@ -1,3 +1,8 @@
+import os
+import subprocess
+from inspect import currentframe, getframeinfo
+import rsopt
+
 __active_env = None
 
 def get_mpi_environment():
@@ -25,8 +30,7 @@ def get_mpi_environment():
     # If we already ran this process and have an environment, return the active environment
     if __active_env:
         return __active_env
-
-    from inspect import currentframe, getframeinfo
+    
     frameinfo = getframeinfo(currentframe())
     print(f"Initializing MPI from {frameinfo.filename}:L{frameinfo.lineno}", flush=True)
 
@@ -35,9 +39,6 @@ def get_mpi_environment():
     #faulthandler.enable(file=sys.stderr, all_threads=True)
 
     # Test MPI intialization in another thread
-    import subprocess
-    import os
-    import rsopt
     fname = os.path.dirname(rsopt.__file__) + "/__main__.py"
     pp = subprocess.run(["python", fname])
     
