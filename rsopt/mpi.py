@@ -1,4 +1,8 @@
+active_env = None
+
 def get_mpi_environment():
+    global active_env
+
     # Test for mpi4py install
     try:
         import mpi4py
@@ -7,6 +11,10 @@ def get_mpi_environment():
     except ModuleNotFoundError:
         # mpi4py not installed so it can't be used
         return None
+
+    # If we already ran this process, return the active environment
+    if active_env:
+        return active_env
 
     from inspect import currentframe, getframeinfo
     frameinfo = getframeinfo(currentframe())
@@ -37,5 +45,8 @@ def get_mpi_environment():
     nworkers = MPI.COMM_WORLD.Get_size() - 1
     is_manager = MPI.COMM_WORLD.Get_rank() == 0
     mpi_environment = {'mpi_comm': MPI.COMM_WORLD, 'comms': 'mpi', 'nworkers': nworkers, 'is_manager': is_manager}
+
+    # Save global environment
+    active_env = mpi_environment
 
     return mpi_environment
