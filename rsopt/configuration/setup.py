@@ -4,7 +4,6 @@ import jinja2
 import pickle
 import typing
 import pathlib
-import sirepo.lib
 from rsopt import util
 from rsopt.codes import _TEMPLATED_CODES
 from rsopt import _SETUP_SCHEMA
@@ -68,7 +67,7 @@ def _validate_execution_type(key):
         return False
 
 
-def _shifter_parse_model(name: str, input_file: str, ignored_files: list) -> sirepo.lib.SimData or None:
+def _shifter_parse_model(name: str, input_file: str, ignored_files: list) -> typing.Type['sirepo.lib.SimData'] or None:
     # Sidesteps the difficulty of Sirepo install on NERSC by running a script that parses to the Sirepo model
     import shlex
     from subprocess import Popen, PIPE
@@ -149,7 +148,8 @@ class Setup:
 
     @classmethod
     def parse_input_file(cls, input_file: str, shifter: str,
-                         ignored_files: typing.Optional[typing.List[str]] = None) -> sirepo.lib.SimData or None:
+                         ignored_files: typing.Optional[typing.List[str]] = None) -> typing.Type['sirepo.lib.SimData'] \
+                                                                                     or None:
 
         if shifter:
             # Must pass a list to ignored_files here since it is sent to subprocess
@@ -295,7 +295,8 @@ class Python(Setup):
         for k in dict_item_str.keys():
             kwarg_dict.pop(k)
 
-        output_template = template.render(dict_item=kwarg_dict, dict_item_str=dict_item_str, full_input_file_path=self.setup['input_file'],
+        output_template = template.render(dict_item=kwarg_dict, dict_item_str=dict_item_str,
+                                          full_input_file_path=self.setup['input_file'],
                                           function=self.setup['function'])
 
         file_path = os.path.join(directory, _PARALLEL_PYTHON_RUN_FILE)

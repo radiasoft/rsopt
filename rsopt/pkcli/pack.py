@@ -1,10 +1,8 @@
 import rsopt.parse as parse
-import sirepo.sim_data  # Can't run import sirepo and call sirepo.sim_data. ??
 import modulefinder
 import tarfile
 import pathlib
 import os
-from sirepo.template import lattice
 
 
 def _get_local_modules(script_name):
@@ -32,6 +30,9 @@ def _get_processing(job):
 
 
 def _get_file_list_from_model(model, code_name, input_file_path):
+    import sirepo.sim_data
+    from sirepo.template import lattice
+
     # Use same path as configuration file when packing
     model_path = pathlib.Path(input_file_path).parents[0]
     # Get input and lattice if exists

@@ -1,3 +1,4 @@
+"""Script is called inside Shifter container with Sirepo installed and returns parsed model information"""
 import pickle
 import sys
 import sirepo.lib
