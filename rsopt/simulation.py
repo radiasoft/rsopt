@@ -5,7 +5,7 @@ import os
 import rsopt.conversion
 from libensemble import message_numbers
 from libensemble.executors.executor import Executor
-from collections import Iterable
+from collections.abc import Iterable
 
 # TODO: This should probably be in libe_tools right?
 
