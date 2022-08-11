@@ -26,7 +26,7 @@ import libensemble.gen_funcs
 libensemble.gen_funcs.rc.aposmm_optimizers = available_opt
 
 import numpy as np
-from libensemble.gen_funcs.aposmm_localopt_support import LocalOptInterfacer, ConvergedMsg, simulate_recv_from_manager
+from rsopt.libe_tools.generator_functions.rsopt_localopt_support import LocalOptInterfacer, ConvergedMsg, simulate_recv_from_manager
 from libensemble.message_numbers import STOP_TAG, PERSIS_STOP, FINISHED_PERSISTENT_GEN_TAG, EVAL_GEN_TAG
 from libensemble.tools.persistent_support import PersistentSupport
 
