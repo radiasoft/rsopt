@@ -1,7 +1,7 @@
 This directory has two examples. One for a global optimizer setup and one for a parameter scan.
 
 config_six_hump_camel.yaml:
-Example of running a global optimizer through rsopt. Uses the optimization algorith APOSMM [1] through libEnsemble.
+Example of running a global optimizer through rsopt. Uses the optimization algorithm APOSMM [1] through libEnsemble.
 Runs 4 workers on the six-hump camel problem and should find 4 of the 6 global minima.
 
 To run in a terminal: rsopt optimize configuration config_six_hump_camel.yaml
