@@ -7,4 +7,4 @@ Sampler Restart
 README
 ------
 
-.. include:: ../../examples/sampler_restart/README
+.. literalinclude:: ../../examples/sampler_restart/README

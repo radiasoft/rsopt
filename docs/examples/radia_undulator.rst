@@ -6,4 +6,4 @@ Radia Undulator
 README
 ------
 
-.. include:: ../../examples/python_radia_undulator_example/README
+.. literalinclude:: ../../examples/python_radia_undulator_example/README

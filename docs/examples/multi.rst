@@ -6,4 +6,4 @@ Multi-code
 README
 ------
 
-.. include:: ../../examples/multi_code_example/README
+.. literalinclude:: ../../examples/multi_code_example/README

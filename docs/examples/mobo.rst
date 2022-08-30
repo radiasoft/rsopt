@@ -3,10 +3,13 @@
 MOBO
 ====
 
-This is an example of how to use the MOBO optimizer
+This is an example of how to use the MOBO optimizer::
+
+    test code
+
 
 README
 ------
 
-.. include:: ../../examples/mobo_example/README
+.. literalinclude:: ../../examples/mobo_example/README
 

@@ -6,4 +6,4 @@ Elegant Matching
 README
 ------
 
-.. include:: ../../examples/elegant_matching_parallel_execution_example/README
+.. literalinclude:: ../../examples/elegant_matching_parallel_execution_example/README

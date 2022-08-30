@@ -49,3 +49,14 @@ Finally to install rsopt::
 
 It is normal to see error messages stating Sirepo has dependencies which are not installed. These dependencies
 are not needed for use of Sirepo by rsopt and intentionally left out during the NERSC installation process.
+
+
+Regression Testing
+------------------
+
+Regression tests can be run by issuing the following command from the `tests` folder at the root of the python module:
+
+    python -m unittest discover
+
+Test failures are often due to issues with incompatible versions and incompatibilities with `rsopt` dependencies. Please report any issues for the `rsopt` github.
+

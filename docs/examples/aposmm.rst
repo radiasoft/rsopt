@@ -11,4 +11,4 @@ This example runs the six-hump camel problem using the APOSMM optimization algor
 README
 ------
 
-.. include:: ../../examples/python_aposmm_example/README
+.. literalinclude:: ../../examples/python_aposmm_example/README
