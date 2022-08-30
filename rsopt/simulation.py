@@ -3,6 +3,7 @@ import time
 import numpy as np
 import os
 import rsopt.conversion
+import rsopt.util
 from libensemble import message_numbers
 from libensemble.executors.executor import Executor
 from collections.abc import Iterable
@@ -80,8 +81,7 @@ def format_evaluation(sim_specs, container):
 
 
 class SimulationFunction:
-
-    def __init__(self, jobs: list, objective_function: callable):
+    def __init__(self, jobs: list, objective_function: list):
         # Received from libEnsemble during function evaluation
         self.H = None
         self.J = {}
@@ -164,9 +164,10 @@ class SimulationFunction:
                 f_post(self.J)
 
         if self.J['sim_status'] == message_numbers.WORKER_DONE and not halt_job_sequence:
-            # Use objective function is present
-            if self.objective_function:
-                val = self.objective_function(self.J)
+            # Use objective function if given
+            _obj_f = rsopt.util.get_objective_function(self.objective_function)
+            if _obj_f:
+                val = _obj_f(self.J)
                 output = format_evaluation(self.sim_specs, val)
                 self.log.info('val: {}, output: {}'.format(val, output))
             else:
