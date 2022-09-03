@@ -6,6 +6,8 @@ u"""rsopt setup script
 """
 from setuptools import setup
 
+# TODO add proper hooks to run if pkcli is being installed
+
 setup(
     name='rsopt',
     author='RadiaSoft LLC',
