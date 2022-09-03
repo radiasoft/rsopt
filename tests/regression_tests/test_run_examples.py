@@ -1,14 +1,18 @@
 import unittest
 import numpy as np
 import os
-from rsopt.pkcli.optimize import configuration
-from rsopt.pkcli import cleanup
-from rsopt import _EXAMPLE_SYMLINK, _EXAMPLE_REGISTRY
-from pykern import pkyaml
 import shutil
 import glob
 
-_EXAMPLES = pkyaml.load_file(_EXAMPLE_REGISTRY)['examples']
+from ruamel.yaml import YAML
+
+from rsopt.pkcli.optimize import configuration
+from rsopt.pkcli import cleanup
+from rsopt import _EXAMPLE_SYMLINK, _EXAMPLE_REGISTRY
+
+yaml = YAML(typ="safe")
+with open(_EXAMPLES, 'r') as rf:
+    _EXAMPLES = yaml.load(rf)['examples']
 
 
 def copy_example_files(example):

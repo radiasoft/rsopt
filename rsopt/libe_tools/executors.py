@@ -5,19 +5,15 @@ import logging
 from libensemble.executors.mpi_executor import MPIExecutor
 from libensemble.executors.executor import Executor, Task, ExecutorException
 from libensemble.resources.resources import Resources
-from ruamel.yaml import YAML
+from rsopt.util import load_yaml_from_file
 from rsopt import _EXECUTOR_SCHEMA
 import pathlib
 
-yaml = YAML(typ='safe')
-print(_EXECUTOR_SCHEMA)
-with open(_EXECUTOR_SCHEMA, 'r') as rf:
-    EXECUTOR_SCHEMA = yaml.load(rf)
+EXECUTOR_SCHEMA = load_yaml_from_file(_EXECUTOR_SCHEMA)
+
 logger = logging.getLogger(__name__)
 # To change logging level for just this module
 # logger.setLevel(logging.DEBUG)
-
-yaml.dump(EXECUTOR_SCHEMA, sys.stdout)
 
 _RSMPI_CONFIG_PATH = EXECUTOR_SCHEMA['rsmpi']['config_path']
 

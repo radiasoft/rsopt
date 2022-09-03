@@ -4,13 +4,16 @@ This module makes use of the APOSMM local optimizer interface functions. The gen
 in this module was adapted from the persistent APOSMM generator as defined in:
 https://github.com/Libensemble/libensemble/blob/a870bd4beffccbc863f79dfd7ab3940f2a57a269/libensemble/gen_funcs/persistent_aposmm.py
 """
-
+import os
+from rsopt import _OPTIMIZER_SCHEMA
 from importlib import util
 from pykern import pkio
 from pykern import pkresource
 from pykern import pkyaml
+from rsopt.util import load_yaml_from_file
 
-_OPT_SCHEMA = pkyaml.load_file(pkio.py_path(pkresource.filename('optimizer_schema.yml')))
+_OPT_SCHEMA = load_yaml_from_file(_OPTIMIZER_SCHEMA)
+
 allowed_optimizer_list = [s for s, v in _OPT_SCHEMA.items() if v['type'] == 'local']
 available_opt = []
 for optimizer in allowed_optimizer_list:

@@ -7,9 +7,6 @@ u""":mod:`rsopt` package
 from __future__ import absolute_import, division, print_function
 import pkg_resources
 import os
-from pykern import pkio
-from pykern import pkresource
-
 
 try:
     # We only have a version once the package is installed.
@@ -17,10 +14,8 @@ try:
 except pkg_resources.DistributionNotFound:
     pass
 
-# TODO These all need to change to a pathlib type
-# Determine location of _this_ file, and work backwards
-_MYPATH = os.path.abspath(os.path.dirname(__file__))
-_MY_PDATA = os.path.join(_MYPATH, 'package_data')
+_PDATA_ROOT = os.path.abspath(os.path.dirname(__file__))
+_MY_PDATA = os.path.join(_PDATA_ROOT, 'package_data')
 _EXAMPLE_SYMLINK = os.path.join(_MY_PDATA, 'examples')
 _EXAMPLE_REGISTRY = os.path.join(_MY_PDATA, 'example_registry.yml')
 _EXECUTOR_SCHEMA = os.path.join(_MY_PDATA, 'executor_schema.yml')

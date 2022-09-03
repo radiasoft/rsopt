@@ -1,6 +1,6 @@
-from pykern import pkrunpy
-from pykern import pkyaml
 from rsopt import _OPTIONS_SCHEMA, _OPTIMIZER_SCHEMA
+from rsopt.util import load_yaml_from_file
+from rsopt.util import run_path_as_module
 import sys
 import os
 
@@ -20,8 +20,8 @@ _TYPE_MAPPING = {
 class Options:
     NAME = 'options'
     __REQUIRED_KEYS = ('software',)
-    _REGISTERED_OPTIONS = pkyaml.load_file(_OPTIONS_SCHEMA)
-    _OPT_SCHEMA = pkyaml.load_file(_OPTIMIZER_SCHEMA)
+    _REGISTERED_OPTIONS = load_yaml_from_file(_OPTIONS_SCHEMA)
+    _OPT_SCHEMA = load_yaml_from_file(_OPTIMIZER_SCHEMA)
     REQUIRED_OPTIONS = ()
 
     def __init__(self):
@@ -94,7 +94,7 @@ class Options:
         if len(self.objective_function) == 2:
             module_path, function = self.objective_function
             sys.path.append(os.getcwd())
-            module = pkrunpy.run_path_as_module(module_path)
+            module = run_path_as_module(module_path)
             function = getattr(module, function)
         else:
             function = None

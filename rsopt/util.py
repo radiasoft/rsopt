@@ -6,11 +6,26 @@ import numpy as np
 import pickle
 import importlib.machinery
 import importlib.util
+from ruamel.yaml import YAML
 
 from libensemble.tools import save_libE_output
 
 SLURM_PREFIX = 'nid'
 
+
+def load_yaml_from_file(fpath):
+    """Loads YAML from file
+
+    Args:
+        fpath (str or path): path to file to be read
+    Returns:
+        yaml_data: YAML data as dict-like
+    """
+    yaml = YAML(typ='safe')
+    with open(fpath, 'r') as rf:
+        yaml_data = yaml.load(rf)
+
+    return yaml_data
 
 def run_path_as_module(fname):
     """Runs ``fname`` in a module. Copied from pkrunpy in pykern.

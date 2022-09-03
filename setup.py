@@ -4,9 +4,10 @@ u"""rsopt setup script
 :copyright: Copyright (c) 2020 RadiaSoft LLC.  All Rights Reserved.
 :license: http://www.apache.org/licenses/LICENSE-2.0.html
 """
-from pykern import pksetup
+from setuptools import setup
 
-pksetup.setup(
+
+setup(
     name='rsopt',
     author='RadiaSoft LLC',
     author_email='pip@radiasoft.net',
@@ -18,7 +19,7 @@ pksetup.setup(
         'nlopt',
         'mpmath',
         'jinja2>=3.0.1'
-        'docutils==0.17'  # docutils>=0.18 may be breaking documentation build
+        'docutils==0.17',  # docutils>=0.18 may be breaking documentation build
     ],
     extras_require={
         'nersc': ['rsbeams@git+https://github.com/radiasoft/rsbeams',
@@ -29,8 +30,11 @@ pksetup.setup(
                   'flask',
                   'user-agents',
                   'aenum',
-                  'SQLAlchemy'
+                  'SQLAlchemy',
                   ],
+        'console': [
+            'pykern',
+        ],
         'full': [
             'rsbeams@git+https://github.com/radiasoft/rsbeams',
             'sirepo@git+https://github.com/radiasoft/sirepo',
@@ -38,7 +42,8 @@ pksetup.setup(
             'DFO-LS',  # If using dfols optimizer
             'pandas',  # Needed for some post-processing utilities
             'xopt',  # If using MOBO algorithm for optimization
-            'pymoo'  # Used by some MOBO examples
+            'pymoo',  # Used by some MOBO examples
+            'pykern',  # Used by console 
         ]
     },
     license='http://www.apache.org/licenses/LICENSE-2.0.html',

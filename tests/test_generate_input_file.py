@@ -7,7 +7,6 @@ from ruamel.yaml import YAML
 from rsopt import _EXAMPLE_REGISTRY
 from rsopt.configuration import setup
 from rsopt.util import run_path_as_module
-#from pykern import pkrunpy
 
 # Load YAML
 SUPPORT_PATH = './support/'

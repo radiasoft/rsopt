@@ -4,22 +4,21 @@ import jinja2
 import pickle
 import typing
 import pathlib
+from copy import deepcopy
+
 from rsopt import util
 from rsopt.codes import _TEMPLATED_CODES
 from rsopt import _SETUP_SCHEMA
-from copy import deepcopy
-from pykern import pkrunpy
-from pykern import pkio
-from pykern import pkresource
-from pykern import pkyaml
+from rsopt import _MY_PDATA
 from libensemble.executors.mpi_executor import MPIExecutor
 from rsopt.libe_tools.executors import register_rsmpi_executor
 
 _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
-_TEMPLATE_PATH = pkio.py_path(pkresource.filename(''))
-_SHIFTER_BASH_FILE = pkio.py_path(pkresource.filename('shifter_exec.sh'))
-_SHIFTER_SIREPO_SCRIPT = pkio.py_path(pkresource.filename('shifter_sirepo.py'))
+_TEMPLATE_PATH = _MY_PDATA
+print(_TEMPLATE_PATH, _MY_PDATA)
+_SHIFTER_BASH_FILE = os.path.join(_MY_PDATA, 'shifter_exec.sh')
+_SHIFTER_SIREPO_SCRIPT = os.path.join(_MY_PDATA, 'shifter_sirepo.py')
 _SHIFTER_IMAGE = 'radiasoft/sirepo:prod'
 _EXECUTION_TYPES = {'serial': MPIExecutor,  # Serial jobs executed in the shell use the MPIExecutor for simplicity
                     'parallel': MPIExecutor,
@@ -107,7 +106,7 @@ class Setup:
     _REQUIRED_KEYS = ('execution_type',)  # code specific keys that are required
     _OPTIONAL_KEYS = ()  # code specific keys that are not required
     # keys that can be used by any code
-    _KNOWN_KEYS = tuple(pkyaml.load_file(_SETUP_SCHEMA)) + _REQUIRED_KEYS + _OPTIONAL_KEYS
+    _KNOWN_KEYS = tuple(util.load_yaml_from_file(_SETUP_SCHEMA)) + _REQUIRED_KEYS + _OPTIONAL_KEYS
     RUN_COMMAND = None
     NAME = None
     SHIFTER_COMMAND = f'shifter --image={_SHIFTER_IMAGE} /bin/bash {_SHIFTER_BASH_FILE}'
@@ -221,7 +220,7 @@ class Setup:
     def _handle_preprocess(self, value):
         # Run in the rsopt calling directory, not worker directories
         module_path, function_name = value
-        module = pkrunpy.run_path_as_module(module_path)
+        module = util.run_path_as_module(module_path)
         function = getattr(module, function_name)
         self.preprocess.append(function)
         return True
@@ -229,7 +228,7 @@ class Setup:
     def _handle_postprocess(self, value):
         # Run in the rsopt calling directory, not worker directories
         module_path, function_name = value
-        module = pkrunpy.run_path_as_module(module_path)
+        module = util.run_path_as_module(module_path)
         function = getattr(module, function_name)
         self.postprocess.append(function)
         return True
@@ -247,7 +246,7 @@ class Python(Setup):
             # libEnsemble workers change active directory - sys.path will not record locally available modules
             sys.path.append('.')
 
-            module = pkrunpy.run_path_as_module(self.setup['input_file'])
+            module = util.run_path_as_module(self.setup['input_file'])
             function = getattr(module, self.setup['function'])
             return function
 
@@ -407,7 +406,8 @@ class User(Python):
 
     def __init__(self):
         super().__init__()
-        self._BASE_RUN_PATH = pkio.py_path()
+        # TODO requires testing or a test for this
+        self._BASE_RUN_PATH = pathlib.Path()
 
     def get_run_command(self, is_parallel):
         # run_command is provided by user so no check for serial or parallel run mode

@@ -1,6 +1,5 @@
 from numpy import ndarray
 import numpy as np
-from pykern.pkcollections import PKDict
 
 _EXTERNAL_PARAMETER_CATEGORIES = ('min', 'max', 'start')
 _OPTIONAL_PARAMETER_CATEGORIES = ('samples', )
@@ -41,7 +40,6 @@ def read_parameter_dict(obj):
 _PARAMETER_READERS = {
     ndarray: read_parameter_array,
     dict: read_parameter_dict,
-    PKDict: read_parameter_dict
 }
 
 

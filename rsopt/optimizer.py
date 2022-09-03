@@ -1,6 +1,6 @@
 from rsopt.configuration import Configuration, Job
 from rsopt.parse import read_configuration_file, parse_yaml_configuration
-from pykern.pkcollections import PKDict
+from typing import Mapping
 from os import path
 import numpy as np
 
@@ -53,15 +53,15 @@ class Optimizer:
     def start(self, value=None):
         pass
 
-    def load_configuration(self, config: dict or PKDict or Configuration or str):
+    def load_configuration(self, config: Mapping or Configuration or str):
         """
         Load a configuration file to setup an optimization run.
         May be given as a dictionary or path to configuration stored in YAML format
 
-        :param config: (dict or PKDict or str) The configuration file definition or path to the file
+        :param config: (dict or typing.Mapping or str) The configuration file definition or path to the file
         :return: None
         """
-        if isinstance(config, dict) or isinstance(config, PKDict):
+        if isinstance(config, dict):
             parse_yaml_configuration(config, self._config)
         elif isinstance(config, Configuration):
             self._config = config

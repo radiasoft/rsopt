@@ -7,13 +7,13 @@ from rsopt.libe_tools import tools
 from rsopt.optimizer import Optimizer
 from rsopt.libe_tools.interface import get_local_optimizer_method
 from rsopt.simulation import SimulationFunction
-from pykern import pkyaml
+from rsopt.util import load_yaml_from_file
 from rsopt import _EXECUTOR_SCHEMA, _OPTIMIZER_SCHEMA
 import logging
 
 logger = logging.getLogger('libensemble')
-OPT_SCHEMA = pkyaml.load_file(_OPTIMIZER_SCHEMA)
-EXECUTOR_SCHEMA = pkyaml.load_file(_EXECUTOR_SCHEMA)
+OPT_SCHEMA = load_yaml_from_file(_OPTIMIZER_SCHEMA)
+EXECUTOR_SCHEMA = load_yaml_from_file(_EXECUTOR_SCHEMA)
 
 # dtype dimensions > 1 are set at run time
 persistent_local_opt_gen_out = [('x', float, None),
