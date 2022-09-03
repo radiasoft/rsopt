@@ -6,7 +6,6 @@ u"""rsopt setup script
 """
 from setuptools import setup
 
-
 setup(
     name='rsopt',
     author='RadiaSoft LLC',
@@ -59,4 +58,6 @@ setup(
         'Programming Language :: Python',
         'Topic :: Utilities',
     ],
+    packages=['rsopt'],
+    include_package_data=True,
 )
