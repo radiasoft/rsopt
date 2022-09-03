@@ -1,4 +1,5 @@
-% YAML 1.1
+%YAML 1.1
+---
 # listing of fields known by all code's setup
 # setup classes currently maintain knowledge of strictly required fields and code specific fields
 - preprocess

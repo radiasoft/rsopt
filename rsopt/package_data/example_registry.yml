@@ -1,4 +1,5 @@
-% YAML 1.1
+%YAML 1.1
+---
 # CONFIG FILE MUST ALWAYS BE LAST in `files` LIST
 examples:
   start:

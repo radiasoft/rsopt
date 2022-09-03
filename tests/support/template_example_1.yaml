@@ -1,4 +1,5 @@
-% YAML 1.1
+%YAML 1.1
+---
 # List of codes in execution order
 codes:
   # Code names should be validated as usable during read

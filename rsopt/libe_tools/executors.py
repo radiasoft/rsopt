@@ -1,16 +1,23 @@
 import os
+import sys
 import logging
 
 from libensemble.executors.mpi_executor import MPIExecutor
 from libensemble.executors.executor import Executor, Task, ExecutorException
 from libensemble.resources.resources import Resources
-from pykern import pkyaml
+from ruamel.yaml import YAML
 from rsopt import _EXECUTOR_SCHEMA
+import pathlib
 
-EXECUTOR_SCHEMA = pkyaml.load_file(_EXECUTOR_SCHEMA)
+yaml = YAML(typ='safe')
+print(_EXECUTOR_SCHEMA)
+with open(_EXECUTOR_SCHEMA, 'r') as rf:
+    EXECUTOR_SCHEMA = yaml.load(rf)
 logger = logging.getLogger(__name__)
 # To change logging level for just this module
 # logger.setLevel(logging.DEBUG)
+
+yaml.dump(EXECUTOR_SCHEMA, sys.stdout)
 
 _RSMPI_CONFIG_PATH = EXECUTOR_SCHEMA['rsmpi']['config_path']
 

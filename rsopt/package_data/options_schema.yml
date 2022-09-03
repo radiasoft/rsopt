@@ -1,4 +1,5 @@
-% YAML 1.1
+%YAML 1.1
+---
 # listing of fields known (but not necessarily required) by base options
 # type specification and validation are left to the class implementation
 options: &options

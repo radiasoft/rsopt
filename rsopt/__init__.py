@@ -6,6 +6,7 @@ u""":mod:`rsopt` package
 """
 from __future__ import absolute_import, division, print_function
 import pkg_resources
+import os
 from pykern import pkio
 from pykern import pkresource
 
@@ -16,9 +17,13 @@ try:
 except pkg_resources.DistributionNotFound:
     pass
 
-_EXAMPLE_SYMLINK = pkio.py_path(pkresource.filename('examples'))
-_EXAMPLE_REGISTRY = pkio.py_path(pkresource.filename('example_registry.yml'))
-_EXECUTOR_SCHEMA = pkio.py_path(pkresource.filename('executor_schema.yml'))
-_OPTIMIZER_SCHEMA = pkio.py_path(pkresource.filename('optimizer_schema.yml'))
-_SETUP_SCHEMA = pkio.py_path(pkresource.filename('setup_schema.yml'))
-_OPTIONS_SCHEMA = pkio.py_path(pkresource.filename('options_schema.yml'))
+# TODO These all need to change to a pathlib type
+# Determine location of _this_ file, and work backwards
+_MYPATH = os.path.abspath(os.path.dirname(__file__))
+_MY_PDATA = os.path.join(_MYPATH, 'package_data')
+_EXAMPLE_SYMLINK = os.path.join(_MY_PDATA, 'examples')
+_EXAMPLE_REGISTRY = os.path.join(_MY_PDATA, 'example_registry.yml')
+_EXECUTOR_SCHEMA = os.path.join(_MY_PDATA, 'executor_schema.yml')
+_OPTIMIZER_SCHEMA = os.path.join(_MY_PDATA, 'optimizer_schema.yml')
+_SETUP_SCHEMA = os.path.join(_MY_PDATA, 'setup_schema.yml')
+_OPTIONS_SCHEMA = os.path.join(_MY_PDATA, 'options_schema.yml')

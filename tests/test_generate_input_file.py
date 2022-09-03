@@ -1,12 +1,19 @@
 import unittest
 import tempfile
 import os
+
+from ruamel.yaml import YAML
+
 from rsopt import _EXAMPLE_REGISTRY
 from rsopt.configuration import setup
-from pykern import pkyaml
-from pykern import pkrunpy
+from rsopt.util import run_path_as_module
+#from pykern import pkrunpy
+
+# Load YAML
 SUPPORT_PATH = './support/'
-_EXAMPLES = pkyaml.load_file(_EXAMPLE_REGISTRY)['examples']
+yaml = YAML(typ="safe")
+with open(_EXAMPLE_REGISTRY, 'r') as rf:
+    _EXAMPLES = yaml.load(rf)['examples']
 
 # TODO: Need tests for:
 # opal
@@ -86,7 +93,7 @@ class TestPythonRunFile(unittest.TestCase):
              'c': 'c'}
         s.generate_input_file(d, self.run_dir.name)
         path = os.path.join(self.run_dir.name, setup._PARALLEL_PYTHON_RUN_FILE)
-        module = pkrunpy.run_path_as_module(path)
+        module = run_path_as_module(path)
         input_dict = getattr(module, 'input_dict')
 
         for k, v in d.items():

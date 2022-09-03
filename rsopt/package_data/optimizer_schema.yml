@@ -1,4 +1,5 @@
-% YAML 1.1
+%YAML 1.1
+---
 nlopt:
   type: local  #  nlopt has global methods, but we don't support right now (chang to 'mixed' if we ever do)
   methods:

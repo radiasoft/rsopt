@@ -1,4 +1,5 @@
-% YAML 1.1
+%YAML 1.1
+---
 # Top level key is `codes` which should be a list (note the dash in front of `- python`) of codes to be executed to complete an evaluation
 codes:
     - python:

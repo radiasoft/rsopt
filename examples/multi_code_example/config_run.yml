@@ -1,4 +1,5 @@
-% YAML 1.1
+%YAML 1.1
+---
 codes:
     # OPAL Block for adjusting capture cavity settings
     - opal:

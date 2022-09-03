@@ -1,11 +1,32 @@
 import re
 import os
+import sys
 import logging
 import numpy as np
 import pickle
+import importlib.machinery
+import importlib.util
+
 from libensemble.tools import save_libE_output
 
 SLURM_PREFIX = 'nid'
+
+
+def run_path_as_module(fname):
+    """Runs ``fname`` in a module. Copied from pkrunpy in pykern.
+    
+    Args:
+        fname (str or py.path.local): file to be exec'd
+    Returns:
+        module: imported file as a module
+    """
+    fname = str(fname)
+    mn = os.path.basename(fname).replace(".", "_")
+    m = importlib.util.module_from_spec(importlib.machinery.ModuleSpec(mn, None))
+    with open(fname, "rt") as f:
+        code = compile(f.read(), fname, "exec")
+    exec(code, m.__dict__)
+    return m
 
 
 def _expand_idx(idx):
