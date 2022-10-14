@@ -4,6 +4,7 @@ import logging
 import numpy as np
 import pickle
 from libensemble.tools import save_libE_output
+from .mpi import get_mpi_environment
 
 SLURM_PREFIX = 'nid'
 
@@ -54,12 +55,11 @@ def return_nodelist(nodelist_string):
 
 def return_used_nodes():
     """Returns all used processor names to rank 0 or an empty list if MPI not used. For ranks != 0  returns None."""
-    try:
-        from mpi4py import MPI
-    except ModuleNotFoundError:
-        # If MPI not being used to start rsopt then no nodes will have srun executed yet
+    if not get_mpi_environment():
         return []
 
+    from mpi4py import MPI
+    
     rank = MPI.COMM_WORLD.Get_rank()
     name = MPI.Get_processor_name()
     all_names = MPI.COMM_WORLD.gather(name, root=0)
@@ -92,11 +92,10 @@ def return_unused_node():
 
 def broadcast(data, root_rank=0):
     """broadcast, or don't bother"""
-    try:
-        from mpi4py import MPI
-    except ModuleNotFoundError:
-        # If MPI not available for import then assume it isn't needed
+    if not get_mpi_environment():
         return data
+
+    from mpi4py import MPI
 
     if MPI.COMM_WORLD.Get_size() == 1:
         return data
