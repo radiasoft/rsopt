@@ -1,8 +1,7 @@
-from pykern import pkrunpy
+import pathlib
+import typing
 from pykern import pkyaml
 from rsopt import _OPTIONS_SCHEMA, _OPTIMIZER_SCHEMA
-import sys
-import os
 
 
 _TYPE_MAPPING = {
@@ -25,7 +24,7 @@ class Options:
     REQUIRED_OPTIONS = ()
 
     def __init__(self):
-        self.objective_function = []
+        self._objective_function = []
         self.exit_criteria = {}
         self.software_options = {}
         self.executor_options = {}
@@ -69,6 +68,21 @@ class Options:
         for key in cls.REQUIRED_OPTIONS:
             assert options.get(key), f"{key} must be defined in options for {name}"
 
+    @property
+    def objective_function(self) -> typing.List[str]:
+        _obj_f = self._objective_function.copy()
+        if len(self._objective_function) == 2:
+            _obj_f[0] = str(pathlib.Path(self._objective_function[0]).resolve())
+
+        return _obj_f
+
+    @objective_function.setter
+    def objective_function(self, objective_function: typing.List[str]):
+        assert len(objective_function) == 2 or len(objective_function) == 0, "If options.objective_function is set " \
+                                                                             "it should contain: " \
+                                                                             "[path to module, function name]"
+        self._objective_function = objective_function
+
     def _validate_input(self, name, value):
         # Ensure each option key is recognized. Check typing for each option value.
         co = self._REGISTERED_OPTIONS[self.NAME]
@@ -88,18 +102,6 @@ class Options:
         # so we can impose more checks here compared to other categories
         if self._validate_input(name, value):
             self.__setattr__(name, value)
-
-    def get_objective_function(self):
-        # import the objective function if given
-        if len(self.objective_function) == 2:
-            module_path, function = self.objective_function
-            sys.path.append(os.getcwd())
-            module = pkrunpy.run_path_as_module(module_path)
-            function = getattr(module, function)
-        else:
-            function = None
-
-        return function
 
     def get_sim_specs(self):
         # This is the most common sim_spec setting. It is updated by libEnsembleOptimizer if a different value needed.
