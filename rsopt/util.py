@@ -1,8 +1,10 @@
 import re
 import os
-import logging
+import sys
 import numpy as np
 import pickle
+import typing
+from pykern import pkrunpy
 from libensemble.tools import save_libE_output
 
 SLURM_PREFIX = 'nid'
@@ -122,3 +124,25 @@ def _libe_save(H, persis_info, mess, filename):
 
     with open(filename + ".pickle", "wb") as f:
         pickle.dump(persis_info, f)
+
+
+def get_objective_function(import_list: typing.List[str]) -> callable:
+    """Returns the function object from module.
+
+    Args:
+        import_list: (list) [path to module (str), function name (str)]
+
+    Returns: (callable) function
+
+    """
+
+    # import the objective function if given
+    if len(import_list) == 2:
+        module_path, function = import_list
+        sys.path.append(os.getcwd())
+        module = pkrunpy.run_path_as_module(module_path)
+        function = getattr(module, function)
+    else:
+        function = None
+
+    return function
