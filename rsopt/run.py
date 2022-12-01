@@ -6,7 +6,11 @@ from pykern import pkio
 from pykern import pkresource
 from pykern import pkyaml
 import pathlib
-import datetime
+
+# path from libEnsemble install directory to .opt_modules.csv
+# This must be hardcoded because importing libensemble.gen_funcs to check the expected file name
+# will instantiate gen_funcs.RC before .opt_modules.csv is created by rsopt
+_OPT_MODULES_RELPATH = './gen_funcs/.opt_modules.csv'
 
 
 def startup_sequence(config: str) -> Configuration:
@@ -38,8 +42,6 @@ def startup_sequence(config: str) -> Configuration:
 
 
 def _local_opt_startup():
-    # TODO: Remove CLEANUP
-
     _OPT_SCHEMA = pkyaml.load_file(pkio.py_path(pkresource.filename('optimizer_schema.yml')))
     allowed_optimizer_list = [s for s, v in _OPT_SCHEMA.items() if v['type'] == 'local']
     available_opt = []
@@ -49,16 +51,10 @@ def _local_opt_startup():
         if util.find_spec(optimizer):
             available_opt.append(optimizer)
 
-    import libensemble.gen_funcs
-    _libensemble_path = pathlib.Path(libensemble.gen_funcs.__file__)
-    # make sure .opt_modules.csv is removed for testing purposes
-    _libensemble_path.parents[0].joinpath(libensemble.gen_funcs.rc._csv_path).unlink()
-    with open(_libensemble_path.parents[0].joinpath(libensemble.gen_funcs.rc._csv_path), 'w') as ff:
+    import libensemble
+    _opt_modules_path = pathlib.Path(libensemble.__file__).parents[0].joinpath(_OPT_MODULES_RELPATH)
+    with open(_opt_modules_path, 'w') as ff:
         ff.write(','.join(available_opt))
-
-
-    print("I made a CSV:", _libensemble_path.parents[0].joinpath(libensemble.gen_funcs.rc._csv_path))  # CLEANUP
-    print("I made it just before: ",  datetime.datetime.now())  # CLEANUP
 
 
 def local_optimizer(config):
