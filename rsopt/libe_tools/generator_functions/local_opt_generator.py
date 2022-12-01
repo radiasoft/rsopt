@@ -5,34 +5,8 @@ in this module was adapted from the persistent APOSMM generator as defined in:
 https://github.com/Libensemble/libensemble/blob/a870bd4beffccbc863f79dfd7ab3940f2a57a269/libensemble/gen_funcs/persistent_aposmm.py
 """
 
-from importlib import util
-from pykern import pkio
-from pykern import pkresource
-from pykern import pkyaml
-import pathlib
-
-# _OPT_SCHEMA = pkyaml.load_file(pkio.py_path(pkresource.filename('optimizer_schema.yml')))
-# allowed_optimizer_list = [s for s, v in _OPT_SCHEMA.items() if v['type'] == 'local']
-# available_opt = []
-# for optimizer in allowed_optimizer_list:
-#     if optimizer == 'external':
-#         continue
-#     if util.find_spec(optimizer):
-#         # print('found', optimizer)
-#         available_opt.append(optimizer)
-#     # else:
-#     #     print(f'Package {optimizer} not installed. Will not be available.')
-
-# import libensemble
-# _libensemble_path = pathlib.Path(libensemble.__file__)
-# print('_libensemble_path',  _libensemble_path, _libensemble_path.parents[0], _libensemble_path.parents[0].joinpath('/gen_funcs/.opt_modules.csv'))
-# with open(_libensemble_path.parents[0].joinpath('gen_funcs/.opt_modules.csv'), 'w') as ff:
-#     ff.write(','.join(available_opt))
-
-# libensemble.gen_funcs.rc.aposmm_optimizers = available_opt
-
 import numpy as np
-from libensemble.gen_funcs.aposmm_localopt_support import LocalOptInterfacer, ConvergedMsg, simulate_recv_from_manager
+from libensemble.gen_funcs.aposmm_localopt_support import LocalOptInterfacer, ConvergedMsg
 from libensemble.message_numbers import STOP_TAG, PERSIS_STOP, FINISHED_PERSISTENT_GEN_TAG, EVAL_GEN_TAG
 from libensemble.tools.persistent_support import PersistentSupport
 

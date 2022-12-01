@@ -2,6 +2,7 @@ from rsopt import mpi
 from rsopt import parse
 from rsopt.configuration import Configuration
 from importlib import util
+from pykern import pkcollections
 from pykern import pkio
 from pykern import pkresource
 from pykern import pkyaml
@@ -41,7 +42,12 @@ def startup_sequence(config: str) -> Configuration:
     return _config
 
 
-def _local_opt_startup():
+def _local_opt_startup() -> None:
+    """Write .opt_modules.csv
+
+    Returns:
+
+    """
     _OPT_SCHEMA = pkyaml.load_file(pkio.py_path(pkresource.filename('optimizer_schema.yml')))
     allowed_optimizer_list = [s for s, v in _OPT_SCHEMA.items() if v['type'] == 'local']
     available_opt = []
@@ -57,7 +63,7 @@ def _local_opt_startup():
         ff.write(','.join(available_opt))
 
 
-def local_optimizer(config):
+def local_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
     from rsopt.libe_tools.optimizer import libEnsembleOptimizer
     opt = libEnsembleOptimizer()
     opt.load_configuration(config)
@@ -65,7 +71,7 @@ def local_optimizer(config):
     return opt
 
 
-def grid_sampler(config):
+def grid_sampler(config: dict or pkcollections.PKDict or Configuration or str):
     from rsopt.libe_tools import sampler
     sample = sampler.GridSampler()
     sample.load_configuration(config)
@@ -73,7 +79,7 @@ def grid_sampler(config):
     return sample
 
 
-def single_sampler(config):
+def single_sampler(config: dict or pkcollections.PKDict or Configuration or str):
     from rsopt.libe_tools import sampler
     sample = sampler.SingleSample()
     sample.load_configuration(config)
@@ -81,7 +87,7 @@ def single_sampler(config):
     return sample
 
 
-def lh_sampler(config):
+def lh_sampler(config: dict or pkcollections.PKDict or Configuration or str):
     from rsopt.libe_tools import sampler
     sample = sampler.LHSampler()
     sample.load_configuration(config)
@@ -89,7 +95,7 @@ def lh_sampler(config):
     return sample
 
 
-def restart_sampler(config, history):
+def restart_sampler(config: dict or pkcollections.PKDict or Configuration or str, history: str):
     from rsopt.libe_tools import sampler
     sample = sampler.RestartSampler(restart_from=history)
     sample.load_configuration(config)
@@ -97,7 +103,7 @@ def restart_sampler(config, history):
     return sample
 
 
-def aposmm_optimizer(config):
+def aposmm_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
     from rsopt.libe_tools.optimizer_aposmm import AposmmOptimizer
     opt = AposmmOptimizer()
     opt.load_configuration(config)
@@ -105,7 +111,7 @@ def aposmm_optimizer(config):
     return opt
 
 
-def nsga2_optimizer(config):
+def nsga2_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
     from rsopt.libe_tools.optimizer_nsga2 import EvolutionaryOptimizer
     opt = EvolutionaryOptimizer()
     opt.load_configuration(config)
@@ -113,7 +119,7 @@ def nsga2_optimizer(config):
     return opt
 
 
-def pysot_optimizer(config):
+def pysot_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
     from rsopt.libe_tools.optimizer_pysot import PysotOptimizer
     opt = PysotOptimizer()
     opt.load_configuration(config)
@@ -121,7 +127,7 @@ def pysot_optimizer(config):
     return opt
 
 
-def dlib_optimizer(config):
+def dlib_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
     from rsopt.libe_tools.optimizer_dlib import DlibOptimizer
     opt = DlibOptimizer()
     opt.load_configuration(config)
@@ -129,7 +135,7 @@ def dlib_optimizer(config):
     return opt
 
 
-def mobo_optimizer(config):
+def mobo_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
     from rsopt.libe_tools.optimizer_mobo import MoboOptimizer
     opt = MoboOptimizer()
     opt.load_configuration(config)
