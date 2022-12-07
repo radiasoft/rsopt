@@ -1,0 +1,17 @@
+codes:
+    - madx:
+        settings:
+            TWISS.BETX: 40.042
+            BEAM.ENERGY: 5.000001
+        parameters:
+            UQ12.K1:
+                min: -0.125
+                max:  0.125
+                start: -0.1203435362
+                samples: 5
+        setup:
+            input_file: ATR-U-and-W-lines.madx
+            execution_type: serial
+options:
+    software: mesh_scan
+    run_dir: madx_scan
