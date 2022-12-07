@@ -401,6 +401,14 @@ class Opal(Elegant):
         Setup._check_setup(setup)
 
 
+class Madx(Elegant):
+    __REQUIRED_KEYS = ('input_file', )
+    RUN_COMMAND = 'madx'
+    SERIAL_RUN_COMMAND = 'madx'
+    PARALLEL_RUN_COMMAND = None
+    NAME = 'madx'
+
+
 class User(Python):
     __REQUIRED_KEYS = ('input_file', 'run_command', 'file_mapping', 'file_definitions')
     NAME = 'user'
@@ -526,6 +534,7 @@ setup_classes = {
     'python': Python,
     'elegant': Elegant,
     'opal': Opal,
+    'madx': Madx,
     'user': User,
     'genesis': Genesis
 }
