@@ -12,13 +12,15 @@ While an executable can be used (see the User section below) special support is 
 ..
    * :doc:`Python<codes/python>`
    * :doc:`elegant<codes/elegant>`
-   * :doc:`opal<codes/opal>`
+   * :doc:`OPAL<codes/opal>`
+   * :doc:`MAD-X<codes/madx>`
    * :doc:`user<codes/user>`
-   * :doc:`genesis<codes/genesis>`
+   * :doc:`Genesis<codes/genesis>`
 
 ..
    .. include:: codes/python.rst
    .. include:: codes/elegant.rst
    .. include:: codes/opal.rst
+   .. include:: codes/madx.rst
    .. include:: codes/user.rst
    .. include:: codes/genesis.rst

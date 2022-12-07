@@ -112,6 +112,30 @@ Would become::
 This is important to be aware of when writing post-processing scripts and objective functions that will be used during
 your rsopt run to ensure the correct file name is used.
 
+
+Distribution Piping
+-------------------
+
+When running a job with a sequence of codes output particle distributions from OPAL  can be be automatically
+piped to ``elegant`` and used as an ``sdds_beam`` input. In the settings section for the first code you must supply
+the `output_distribution` parameter (keeping in mind possible :ref:`name mangling<elegant_name_mangling>`).
+For example::
+
+    codes:
+        - opal
+            setup:
+                input_file: injector.in
+                output_distribution: injector.h5  # will automatically use the final step in the file
+                execution_type: parallel
+                cores: 20
+        - elegant:
+            setup:
+                input_file: elegant.ele
+                input_distribution: from_injector.sdds  # distribution taken from OPAL will be written to this file
+                execution_type: parallel
+                cores: 4
+
+
 Providing an objective value
 ----------------------------
 When using ``elegant`` as the final code of an optimization run in rsopt you will need to provide an objective function in the
