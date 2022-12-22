@@ -1,0 +1,5 @@
+Simple example of running a 1D parameter scan over the strength of a quadrupole in a MAD-X simulation.
+
+To run in terminal: rsopt sample configuration config_madx.yml
+
+A notebook (analyze_madx_scan.ipynb) demonstrating how to load in the results after the scan is run is also provided.
