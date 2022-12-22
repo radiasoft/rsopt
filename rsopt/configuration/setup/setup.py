@@ -3,8 +3,8 @@ import pathlib
 import pickle
 import typing
 from rsopt import util
-from rsopt.codes import _TEMPLATED_CODES
-from rsopt import _SETUP_SCHEMA
+from rsopt.codes import TEMPLATED_CODES
+from rsopt import SETUP_SCHEMA
 from pykern import pkrunpy
 from pykern import pkio
 from pykern import pkresource
@@ -51,8 +51,9 @@ class Setup(abc.ABC):
     _REQUIRED_KEYS = ('execution_type',)  # code specific keys that are required
     _OPTIONAL_KEYS = ()  # code specific keys that are not required
     # keys that can be used by any code
-    _KNOWN_KEYS = tuple(pkyaml.load_file(_SETUP_SCHEMA)) + _REQUIRED_KEYS + _OPTIONAL_KEYS
-    RUN_COMMAND = None
+    _KNOWN_KEYS = tuple(pkyaml.load_file(SETUP_SCHEMA)) + _REQUIRED_KEYS + _OPTIONAL_KEYS
+    SERIAL_RUN_COMMAND = None
+    PARALLEL_RUN_COMMAND = None
     NAME = None
     SHIFTER_COMMAND = f'shifter --image={_SHIFTER_IMAGE} /bin/bash {_SHIFTER_BASH_FILE}'
 
@@ -101,7 +102,7 @@ class Setup(abc.ABC):
 
     @classmethod
     def templated(cls):
-        return cls.NAME in _TEMPLATED_CODES
+        return cls.NAME in TEMPLATED_CODES
 
     @classmethod
     def parse_input_file(cls, input_file: str, shifter: bool,

@@ -1,6 +1,6 @@
 from pykern.pkyaml import load_file
 from rsopt.configuration import Configuration, Job, Options
-from rsopt.codes import _SUPPORTED_CODES
+from rsopt.codes import SUPPORTED_CODES
 
 _CODE_FIELD = 'codes'  # TODO: Might be more consistent to change this this field title to 'jobs'
 _PARAMETERS_FIELD = 'parameters'
@@ -23,7 +23,7 @@ def _sanitize_fields(field: str):
 
 def _is_code_supported(code_name):
     # code can be run by rsopt
-    return code_name in _SUPPORTED_CODES
+    return code_name in SUPPORTED_CODES
 
 
 def _read_codes_to_jobs(template: dict):

@@ -4,7 +4,6 @@ from rsopt.configuration.setup.elegant import Elegant
 @SetupTemplated.register_setup()
 class Madx(Elegant):
     __REQUIRED_KEYS = ('input_file', )
-    RUN_COMMAND = 'madx'
     SERIAL_RUN_COMMAND = 'madx'
     # MAD-X does not support parallel execution. However, setting PARALLEL_RUN_COMMAND allows MAD-X
     # to work when the force_executor option is invoked. Parallel execution will be stopped by Madx._check_setup.

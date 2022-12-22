@@ -3,12 +3,12 @@ import tempfile
 import os
 
 import rsopt.configuration.setup.python
-from rsopt import _EXAMPLE_REGISTRY
+from rsopt import EXAMPLE_REGISTRY
 from rsopt.configuration import setup
 from pykern import pkyaml
 from pykern import pkrunpy
 SUPPORT_PATH = './support/'
-_EXAMPLES = pkyaml.load_file(_EXAMPLE_REGISTRY)['examples']
+_EXAMPLES = pkyaml.load_file(EXAMPLE_REGISTRY)['examples']
 
 # TODO: Need tests for:
 # opal

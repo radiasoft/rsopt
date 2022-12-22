@@ -1,11 +1,11 @@
 import shutil
 import os
 from pykern import pkyaml
-from rsopt import _EXAMPLE_SYMLINK, _EXAMPLE_REGISTRY
+from rsopt import EXAMPLE_SYMLINK, EXAMPLE_REGISTRY
 
 
 def _get_example_file_list(example_name):
-    registry = pkyaml.load_file(_EXAMPLE_REGISTRY)
+    registry = pkyaml.load_file(EXAMPLE_REGISTRY)
     return registry['examples'][example_name]['files']
 
 
@@ -29,7 +29,7 @@ def start():
     https://rsopt.readthedocs.io/en/latest/quick_start
     """  # TODO: Make sure this link exists
     for filename in example_file_list:
-        filepath = os.path.join(_EXAMPLE_SYMLINK, filename)
+        filepath = os.path.join(EXAMPLE_SYMLINK, filename)
         shutil.copyfile(filepath, filename, follow_symlinks=True)
 
     print(start_message)
