@@ -68,3 +68,13 @@ docs/_build/
 # PyBuilder
 target/
 /.idea/*
+
+# Simulation files
+*.sdds
+*.semaphore
+*.out
+*.anb
+*.err
+*.dfl
+auth.db
+machinefile_autogen*
