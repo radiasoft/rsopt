@@ -13,6 +13,6 @@ def iter_setup_dict(setup: dict):
         yield name, values
 
 
-_SETUP_READERS = {
+SETUP_READERS = {
     dict: iter_setup_dict
 }

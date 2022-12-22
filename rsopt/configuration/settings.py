@@ -5,7 +5,7 @@ def read_setting_dict(input):
         yield name, values
 
 
-_SETTING_READERS = {
+SETTING_READERS = {
     dict: read_setting_dict
 }
 
