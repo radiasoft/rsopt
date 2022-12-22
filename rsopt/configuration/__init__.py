@@ -6,6 +6,7 @@ from rsopt.configuration.setup.setup import SetupTemplated
 from rsopt.configuration.setup.elegant import Elegant
 from rsopt.configuration.setup.genesis import Genesis
 from rsopt.configuration.setup.opal import Opal
+from rsopt.configuration.setup.madx import Madx
 from rsopt.configuration.setup.python import Python
 from rsopt.configuration.setup.user import User
 from rsopt.configuration.options import Options
