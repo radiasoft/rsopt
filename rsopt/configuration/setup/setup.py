@@ -133,7 +133,7 @@ class Setup(abc.ABC):
         return p.parent
 
     @abc.abstractmethod
-    def generate_input_file(self, kwarg_dict: dict, directory: str):
+    def generate_input_file(self, kwarg_dict: dict, directory: str, is_parallel: bool):
         pass
 
     def parse(self, name, value):

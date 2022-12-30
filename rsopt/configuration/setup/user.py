@@ -52,7 +52,7 @@ class User(Python):
 
         return set()
 
-    def generate_input_file(self, kwarg_dict, directory):
+    def generate_input_file(self, kwarg_dict, directory, is_parallel):
 
         # Get strings for each file and fill in arguments for this job
         for key, val in self.setup['file_mapping'].items():

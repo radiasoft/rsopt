@@ -111,7 +111,7 @@ class SimulationFunction:
             for f_pre in job.pre_process:
                 f_pre(self.J)
             # Generate input files for simulation
-            job._setup.generate_input_file(kwargs, '.')
+            job._setup.generate_input_file(kwargs, '.', job.is_parallel)
             if self.switchyard and job.input_distribution:
                 if os.path.exists(job.input_distribution):
                     os.remove(job.input_distribution)

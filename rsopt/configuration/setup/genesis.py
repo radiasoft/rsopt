@@ -60,7 +60,7 @@ class Genesis(Elegant):
 
         return model
 
-    def generate_input_file(self, kwarg_dict, directory):
+    def generate_input_file(self, kwarg_dict, directory, is_parallel):
         model = self._edit_input_file_schema(kwarg_dict)
         model.configure_genesis(workdir='.')
 
