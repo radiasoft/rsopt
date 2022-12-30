@@ -1,7 +1,7 @@
 import pathlib
 import typing
 from pykern import pkyaml
-from rsopt import _OPTIONS_SCHEMA, _OPTIMIZER_SCHEMA
+from rsopt import OPTIONS_SCHEMA, OPTIMIZER_SCHEMA
 
 
 _TYPE_MAPPING = {
@@ -19,8 +19,8 @@ _TYPE_MAPPING = {
 class Options:
     NAME = 'options'
     __REQUIRED_KEYS = ('software',)
-    _REGISTERED_OPTIONS = pkyaml.load_file(_OPTIONS_SCHEMA)
-    _OPT_SCHEMA = pkyaml.load_file(_OPTIMIZER_SCHEMA)
+    _REGISTERED_OPTIONS = pkyaml.load_file(OPTIONS_SCHEMA)
+    _OPT_SCHEMA = pkyaml.load_file(OPTIMIZER_SCHEMA)
     REQUIRED_OPTIONS = ()
 
     def __init__(self):

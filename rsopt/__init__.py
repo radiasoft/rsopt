@@ -16,9 +16,9 @@ try:
 except pkg_resources.DistributionNotFound:
     pass
 
-_EXAMPLE_SYMLINK = pkio.py_path(pkresource.filename('examples'))
-_EXAMPLE_REGISTRY = pkio.py_path(pkresource.filename('example_registry.yml'))
-_EXECUTOR_SCHEMA = pkio.py_path(pkresource.filename('executor_schema.yml'))
-_OPTIMIZER_SCHEMA = pkio.py_path(pkresource.filename('optimizer_schema.yml'))
-_SETUP_SCHEMA = pkio.py_path(pkresource.filename('setup_schema.yml'))
-_OPTIONS_SCHEMA = pkio.py_path(pkresource.filename('options_schema.yml'))
+EXAMPLE_SYMLINK = pkio.py_path(pkresource.filename('examples'))
+EXAMPLE_REGISTRY = pkio.py_path(pkresource.filename('example_registry.yml'))
+EXECUTOR_SCHEMA = pkio.py_path(pkresource.filename('executor_schema.yml'))
+OPTIMIZER_SCHEMA = pkio.py_path(pkresource.filename('optimizer_schema.yml'))
+SETUP_SCHEMA = pkio.py_path(pkresource.filename('setup_schema.yml'))
+OPTIONS_SCHEMA = pkio.py_path(pkresource.filename('options_schema.yml'))

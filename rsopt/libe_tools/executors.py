@@ -5,9 +5,9 @@ from libensemble.executors.mpi_executor import MPIExecutor
 from libensemble.executors.executor import Executor, Task, ExecutorException
 from libensemble.resources.resources import Resources
 from pykern import pkyaml
-from rsopt import _EXECUTOR_SCHEMA
+from rsopt import EXECUTOR_SCHEMA
 
-EXECUTOR_SCHEMA = pkyaml.load_file(_EXECUTOR_SCHEMA)
+EXECUTOR_SCHEMA = pkyaml.load_file(EXECUTOR_SCHEMA)
 logger = logging.getLogger(__name__)
 # To change logging level for just this module
 # logger.setLevel(logging.DEBUG)

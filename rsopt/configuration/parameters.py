@@ -38,7 +38,7 @@ def read_parameter_dict(obj):
         yield name, output
 
 
-_PARAMETER_READERS = {
+PARAMETER_READERS = {
     ndarray: read_parameter_array,
     dict: read_parameter_dict,
     PKDict: read_parameter_dict

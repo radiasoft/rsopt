@@ -1,8 +1,8 @@
 from rsopt.configuration import Options
 from rsopt.configuration import parameters
 from rsopt.configuration import settings
-from rsopt.configuration import setup
-from rsopt.configuration.setup import _EXECUTION_TYPES
+from rsopt.configuration.setup import setup
+from rsopt.configuration.setup import EXECUTION_TYPES
 _EXECUTORS = {'parallel'}
 
 
@@ -144,7 +144,7 @@ class Configuration:
             raise NotImplementedError("rsmpi is not supported in combination with other executors")
 
         # Right now we implicitly guarantee all executors will be same type
-        executor = _EXECUTION_TYPES[executors[0]]
+        executor = EXECUTION_TYPES[executors[0]]
 
         return executor(**self.options.executor_options)
 

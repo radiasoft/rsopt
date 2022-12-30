@@ -1,6 +1,6 @@
 import tempfile
 import unittest
-from rsopt.configuration.setup import Elegant
+from rsopt.configuration.setup.elegant import Elegant
 
 _TMP_DIR = 'tmp'
 

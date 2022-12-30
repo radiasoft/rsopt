@@ -3,18 +3,18 @@ import numpy as np
 import os
 from rsopt.pkcli.optimize import configuration
 from rsopt.pkcli import cleanup
-from rsopt import _EXAMPLE_SYMLINK, _EXAMPLE_REGISTRY
+from rsopt import EXAMPLE_SYMLINK, EXAMPLE_REGISTRY
 from pykern import pkyaml
 import shutil
 import glob
 
-_EXAMPLES = pkyaml.load_file(_EXAMPLE_REGISTRY)['examples']
+_EXAMPLES = pkyaml.load_file(EXAMPLE_REGISTRY)['examples']
 
 
 def copy_example_files(example):
     example_file_list = example['files']
     for filename in example_file_list:
-        filepath = os.path.join(_EXAMPLE_SYMLINK, filename)
+        filepath = os.path.join(EXAMPLE_SYMLINK, filename)
         shutil.copyfile(filepath, filename, follow_symlinks=True)
 
     return example_file_list

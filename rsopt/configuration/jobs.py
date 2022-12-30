@@ -1,6 +1,8 @@
-from rsopt.configuration.parameters import _PARAMETER_READERS, Parameters
-from rsopt.configuration.settings import _SETTING_READERS, Settings
-from rsopt.configuration.setup import _SETUP_READERS, Setup, _PARALLEL_PYTHON_RUN_FILE
+from rsopt.configuration.parameters import PARAMETER_READERS, Parameters
+from rsopt.configuration.settings import SETTING_READERS, Settings
+from rsopt.configuration.setup import SETUP_READERS
+from rsopt.configuration.setup.python import _PARALLEL_PYTHON_RUN_FILE
+from rsopt.configuration.setup.setup import Setup
 import pathlib
 import typing
 
@@ -8,9 +10,9 @@ _USE_SIM_DIRS_DEFAULT = ['elegant', 'opal', 'genesis']
 
 
 def get_reader(obj, category):
-    config_categories = {'parameters': _PARAMETER_READERS,
-                         'settings': _SETTING_READERS,
-                         'setup': _SETUP_READERS}
+    config_categories = {'parameters': PARAMETER_READERS,
+                         'settings': SETTING_READERS,
+                         'setup': SETUP_READERS}
     reader_options = config_categories[category]
     for key, value in reader_options.items():
         if isinstance(obj, key):
