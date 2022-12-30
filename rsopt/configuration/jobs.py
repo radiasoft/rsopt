@@ -95,8 +95,9 @@ class Job:
 
     @property
     def is_parallel(self) -> bool:
+        # parser will have already guaranteed that execution_type exists and is a valid value
         return ((self.setup.get('cores', 1) > 1) & (self.setup.get('execution_type') != 'serial')) or \
-                            self.setup.get('force_executor')
+                            self.setup.get('force_executor', False)
 
     @property
     def input_distribution(self):
