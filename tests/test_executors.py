@@ -1,7 +1,9 @@
-import unittest
+import pathlib
 import tempfile
-import os
+import unittest
 import rsopt.libe_tools.executors as execs
+from pykern import pkyaml
+from rsopt import parse
 
 _SSH_CONFIG = \
     """
@@ -24,7 +26,7 @@ class TestExecutorrsmpi(unittest.TestCase):
 
     def test_generate_rsmpi_node_file(self):
         execs._generate_rsmpi_node_file(4)
-        self.assertTrue(os.path.isfile('libe_nodes'))
+        self.assertTrue(pathlib.Path('libe_nodes').is_file())
 
     def test_detect_rsmpi_resources(self):
         hosts = execs._detect_rsmpi_resources()
@@ -35,18 +37,83 @@ class TestExecutorrsmpi(unittest.TestCase):
         hosts = [6, 5]
         controller = execs.register_rsmpi_executor(hosts=hosts)
         self.assertIsInstance(controller, MPIExecutor)
-        self.assertTrue(os.path.isfile('libe_nodes'))
+        self.assertTrue(pathlib.Path('libe_nodes').is_file())
 
     def test_register_rsmpi_executor_auto(self):
         from libensemble.executors.mpi_executor import MPIExecutor
         hosts = 'auto'
         controller = execs.register_rsmpi_executor(hosts=hosts)
         self.assertIsInstance(controller, MPIExecutor)
-        self.assertTrue(os.path.isfile('libe_nodes'))
+        self.assertTrue(pathlib.Path('libe_nodes').is_file())
 
     def tearDown(self):
         self.test_config_file.close()
-        try:
-            os.remove('libe_nodes')
-        except OSError:
-            pass
+        pathlib.Path('libe_nodes').unlink(missing_ok=True)
+
+class TestIsParallel(unittest.TestCase):
+
+    def setUp(self) -> None:
+        config_file = pathlib.Path('./support/config_six_hump_camel.yaml')
+        self.config = pkyaml.load_file(config_file)
+
+    def test_serial_explicit(self):
+        _config = self.config.copy()
+        _config['codes'][0]['python']['setup']['execution_type'] = 'serial'
+        _config = parse.parse_yaml_configuration(_config)
+
+        self.assertFalse(_config.jobs[0].is_parallel)
+
+    def test_serial_one_core_parallel(self):
+        _config = self.config.copy()
+        _config['codes'][0]['python']['setup']['execution_type'] = 'parallel'
+        _config['codes'][0]['python']['setup']['cores'] = 1
+        _config = parse.parse_yaml_configuration(_config)
+
+        self.assertFalse(_config.jobs[0].is_parallel)
+
+    def test_serial_one_core_rsmpi(self):
+        _config = self.config.copy()
+        _config['codes'][0]['python']['setup']['execution_type'] = 'rsmpi'
+        _config['codes'][0]['python']['setup']['cores'] = 1
+        _config = parse.parse_yaml_configuration(_config)
+
+        self.assertFalse(_config.jobs[0].is_parallel)
+
+    def test_parallel(self):
+        _config = self.config.copy()
+        _config['codes'][0]['python']['setup']['execution_type'] = 'parallel'
+        _config['codes'][0]['python']['setup']['cores'] = 2
+        _config = parse.parse_yaml_configuration(_config)
+
+        self.assertTrue(_config.jobs[0].is_parallel)
+
+    def test_rsmpi(self):
+        _config = self.config.copy()
+        _config['codes'][0]['python']['setup']['execution_type'] = 'rsmpi'
+        _config['codes'][0]['python']['setup']['cores'] = 2
+        _config = parse.parse_yaml_configuration(_config)
+
+        self.assertTrue(_config.jobs[0].is_parallel)
+
+    def test_force_executor_parallel(self):
+        _config = self.config.copy()
+        _config['codes'][0]['python']['setup']['execution_type'] = 'parallel'
+        _config['codes'][0]['python']['setup']['cores'] = 1
+        _config['codes'][0]['python']['setup']['force_executor'] = True
+        _config = parse.parse_yaml_configuration(_config)
+
+        self.assertTrue(_config.jobs[0].is_parallel)
+
+    def test_force_executor_rsmpi(self):
+        _config = self.config.copy()
+        _config['codes'][0]['python']['setup']['execution_type'] = 'rsmpi'
+        _config['codes'][0]['python']['setup']['cores'] = 1
+        _config['codes'][0]['python']['setup']['force_executor'] = True
+        _config = parse.parse_yaml_configuration(_config)
+
+        self.assertTrue(_config.jobs[0].is_parallel)
+
+
+
+
+

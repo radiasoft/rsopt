@@ -53,11 +53,7 @@ class Python(Setup):
     def get_sym_link_targets(self):
         return {self.setup['input_file']}
 
-    def generate_input_file(self, kwarg_dict, directory):
-        # TODO: is_parallel has to be checked in several places. Should be refactored to a method of setup.
-        is_parallel = self.setup.get('execution_type', False) == 'parallel' or \
-                      self.setup.get('execution_type', False) == 'rsmpi' or \
-                      self.setup.get('force_executor', False)
+    def generate_input_file(self, kwarg_dict, directory, is_parallel):
         if not is_parallel:
             return None
 

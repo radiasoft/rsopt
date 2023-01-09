@@ -75,15 +75,15 @@ class Job:
         self.executor_args = {}  # Arguments configured by Job for the libEnsemble Executor.submit
 
     @property
-    def parameters(self):
+    def parameters(self) -> dict:
         return self._parameters.parameters
 
     @property
-    def settings(self):
+    def settings(self) -> dict:
         return self._settings.settings
 
     @property
-    def setup(self):
+    def setup(self) -> dict or None:
         if self._setup:
             return self._setup.setup
         else:
@@ -92,6 +92,12 @@ class Job:
     @property
     def execute(self):
         return self._setup.function
+
+    @property
+    def is_parallel(self) -> bool:
+        # parser will have already guaranteed that execution_type exists and is a valid value
+        return ((self.setup.get('cores', 1) > 1) & (self.setup.get('execution_type') != 'serial')) or \
+                            self.setup.get('force_executor', False)
 
     @property
     def input_distribution(self):
@@ -177,19 +183,15 @@ class Job:
             self._setup.parse(name, value)
 
         # Setup for Executor
-        is_parallel = ((self.setup.get('cores', 1) > 1) & (self.setup.get('execution_type') != 'serial')) or \
-                        self.setup.get('force_executor')
-        # TODO: Probably a cleaner way of making sure cores is set for this case
         if self.setup.get('force_executor') and not self.setup.get('cores'):
             self.setup['cores'] = 1
 
-        if (not is_parallel) & (self.setup.get('cores', 1) > 1):
+        if (not self.is_parallel) & (self.setup.get('cores', 1) > 1):
             print('Warning! serial execution requested with more than 1 core. Serial execution will be used.')
-        self.full_path = self._setup.get_run_command(is_parallel=is_parallel)
+        self.full_path = self._setup.get_run_command(is_parallel=self.is_parallel)
         self.executor_args = create_executor_arguments(self._setup.setup)
 
-        # TODO: This might be better generalized by creating an option to supply app_args
-        if is_parallel and self.code == 'python':
+        if self.is_parallel and self.code == 'python':
             self.executor_args['app_args'] = _PARALLEL_PYTHON_RUN_FILE
 
         # Import input_file
