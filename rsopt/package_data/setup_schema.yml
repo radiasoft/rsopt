@@ -10,3 +10,5 @@
 - timeout
 - force_executor
 - ignored_files
+- shifter_image
+- code_arguments

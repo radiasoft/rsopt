@@ -129,6 +129,11 @@ class libEnsembleOptimizer(Optimizer):
         self.libE_specs['dedicated_mode'] = True  # This used to be called 'central_mode' and was set in Executor
         self.libE_specs['disable_resource_manager'] = False  # This used to be called 'auto_resources and was set in Executor
 
+        # TODO: Need to enable once 9.3 is supported
+        # self.libE_specs['stats_fmt'] = {'task_timing': True,
+        #                                 'task_datetime': True
+        #                                 }
+
         if self._config.rsmpi_executor:
             self.libE_specs['resource_info'] = {'cores_on_node':
                                                     (EXECUTOR_SCHEMA['rsmpi']['cores_on_node']['physical_cores'],

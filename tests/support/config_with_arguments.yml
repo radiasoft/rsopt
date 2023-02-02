@@ -1,0 +1,30 @@
+codes:
+  - elegant:
+      settings:
+      parameters:
+          run_setup.p_central_mev:
+            min: 500
+            max: 1500
+            start: 1001
+      setup:
+        input_file: ignored_files/elegant.ele
+        execution_type: serial
+        ignored_files:
+          - transverse_w_type1.sdds
+  - opal:
+      settings:
+      parameters:
+      setup:
+        input_file: ignored_files/opal.in
+        execution_type: serial
+        code_arguments:
+          "--info": 4
+          "--help-command": Monitor
+          "--git-revision":
+        ignored_files:
+          - opal.dist
+options:
+  software: nlopt
+  method: LN_BOBYQA
+  exit_criteria:
+    sim_max: 2
