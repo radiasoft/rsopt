@@ -32,7 +32,7 @@ def _shifter_parse_model(name: str, input_file: str, ignored_files: list) -> typ
 
     node_to_use = util.return_unused_node()
     if node_to_use:
-        # TODO: rewrite this using the new command formatting?
+        # TODO:  rewrite this using the new command formatting?
         run_string = f"srun -w {node_to_use} --ntasks 1 --nodes 1 shifter --image={_DEFAULT_SHIFTER_IMAGE} " \
                      f"/bin/bash {_SHIFTER_BASH_FILE} python {_SHIFTER_SIREPO_SCRIPT}"
         run_string = ' '.join([run_string, name, input_file, *ignored_files])
@@ -138,11 +138,15 @@ class Setup(abc.ABC):
             shifter_setup = ''
             shifter_app = ''
 
-        app_arguments = " ".join([f"{k}{v}" for k, v in self.setup.get('code_arguments', {})])
+        app_arguments = " ".join([f"{k} {v if v else ''}" for k, v in self.setup.get('code_arguments', {}).items()])
 
         task_string = task_string.format(shifter_setup=shifter_setup,
                                          shifter_app=shifter_app,
-                                         app_arguments=app_arguments)
+                                         app_arguments=app_arguments,
+                                         filename=pathlib.Path(
+                                             self.setup.get('input_file', '')
+                                         ).name
+                                         )
 
         return task_string
 
