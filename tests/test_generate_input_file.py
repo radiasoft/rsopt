@@ -27,7 +27,7 @@ class TestInputFileCreation(unittest.TestCase):
         d = {'a': 1,
              'b': 2,
              'c': 'c'}
-        s.generate_input_file(d, self.run_dir.name)
+        s.generate_input_file(d, self.run_dir.name, is_parallel=False)
         self.assertFalse(os.path.isfile(os.path.join(self.run_dir.name,
                                                      rsopt.configuration.setup.python._PARALLEL_PYTHON_RUN_FILE)))
 
@@ -39,7 +39,7 @@ class TestInputFileCreation(unittest.TestCase):
         d = {'a': 1,
              'b': 2,
              'c': 'c'}
-        s.generate_input_file(d, self.run_dir.name)
+        s.generate_input_file(d, self.run_dir.name, is_parallel=True)
         self.assertTrue(os.path.isfile(os.path.join(self.run_dir.name,
                                                     rsopt.configuration.setup.python._PARALLEL_PYTHON_RUN_FILE)))
 
@@ -51,12 +51,14 @@ class TestInputFileCreation(unittest.TestCase):
         d = {'a': 1,
              'b': 2,
              'c': 'c'}
-        s.generate_input_file(d, self.run_dir.name)
+        s.generate_input_file(d, self.run_dir.name, is_parallel=True)
         self.assertTrue(os.path.isfile(os.path.join(self.run_dir.name,
                                                     rsopt.configuration.setup.python._PARALLEL_PYTHON_RUN_FILE)))
 
     def test_force_executor_python(self):
-        # Will not work until is_parallel refactored into setup class
+        # NOTE: This test is somewhat outdated. force_executor is now checked by the
+        #  Job which will return is_parallel==True
+
         s = rsopt.configuration.setup.python.Python()
         s.setup['execution_type'] = 'serial'
         s.setup['force_executor'] = True
@@ -65,7 +67,7 @@ class TestInputFileCreation(unittest.TestCase):
         d = {'a': 1,
              'b': 2,
              'c': 'c'}
-        s.generate_input_file(d, self.run_dir.name)
+        s.generate_input_file(d, self.run_dir.name, is_parallel=True)
         self.assertTrue(os.path.isfile(os.path.join(self.run_dir.name,
                                                     rsopt.configuration.setup.python._PARALLEL_PYTHON_RUN_FILE)))
 
@@ -90,7 +92,7 @@ class TestPythonRunFile(unittest.TestCase):
         d = {'a': 1,
              'b': 2,
              'c': 'c'}
-        s.generate_input_file(d, self.run_dir.name)
+        s.generate_input_file(d, self.run_dir.name, is_parallel=True)
         path = os.path.join(self.run_dir.name,
                             rsopt.configuration.setup.python._PARALLEL_PYTHON_RUN_FILE)
         module = pkrunpy.run_path_as_module(path)

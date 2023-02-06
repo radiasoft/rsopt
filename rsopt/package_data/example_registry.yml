@@ -24,4 +24,3 @@ examples:
       - match_parallel.yml
     result: 4.2644972852249e-18
 # python_radia_undulator_example takes too long to be run routinely
-

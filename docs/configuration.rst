@@ -80,6 +80,7 @@ Currently accepted execution modes are:
 * ``serial``: Serial execution of the code
 * ``parallel``: Parallel execution of the code with MPI. libEnsemble automatically detects MPI implementation and will automatically format input commands
 * ``shifter``: For use on NERSC. Runs inside of a Shifter container from the radiasoft/sirepo:prod image.
+               ``shifter_image`` can also be provided in Setup to request a particular image. The default is `radiasoft/sirepo:prod`.
 * ``rsmpi``: Special command for users who have servers registered to them on jupyter.radiasoft.org_. If rsmpi is being used for any code it must be used for all. The number of cores requested may vary from code to code though.
 
 When using ``parallel``, ``shifter``, or ``rsmpi`` you must also specify the number of cores used to execute each code.
@@ -88,6 +89,25 @@ This corresponds to the input for the ``-n`` flag in the usual ``mpiexec`` comma
             - setup:
                 - execution_type: parallel
                 - cores: 16
+
+
+The optional field ``code_arguments`` can be provided to give arguments that will be given to the code execution
+in the Setup block at run time. For example:
+
+.. code-block:: yaml
+
+  - opal:
+      settings:
+      parameters:
+      setup:
+        input_file: opal.in
+        execution_type: serial
+        code_arguments:
+          "--info": 4
+          "--help-command": Monitor
+          "--git-revision":
+
+Would execute OPAL with `opal --info 4 --help-command Monitor --git-revision  opal.in`.
 
 .. _jupyter.radiasoft.org: https://jupyter.radiasoft.org/
 

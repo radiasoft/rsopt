@@ -48,7 +48,7 @@ class TestExecutorrsmpi(unittest.TestCase):
 
     def tearDown(self):
         self.test_config_file.close()
-        pathlib.Path('libe_nodes').unlink(missing_ok=True)
+        pathlib.Path('libe_nodes').unlink()
 
 class TestIsParallel(unittest.TestCase):
 

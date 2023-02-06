@@ -1,6 +1,7 @@
 import abc
 import pathlib
 import pickle
+import shutil
 import typing
 from rsopt import util
 from rsopt.codes import TEMPLATED_CODES
@@ -14,7 +15,7 @@ from rsopt.configuration.setup import EXECUTION_TYPES
 
 _SHIFTER_BASH_FILE = pkio.py_path(pkresource.filename('shifter_exec.sh'))
 _SHIFTER_SIREPO_SCRIPT = pkio.py_path(pkresource.filename('shifter_sirepo.py'))
-_SHIFTER_IMAGE = 'radiasoft/sirepo:prod'
+_DEFAULT_SHIFTER_IMAGE = 'radiasoft/sirepo:prod'
 
 
 def _validate_execution_type(key: str) -> bool:
@@ -31,7 +32,8 @@ def _shifter_parse_model(name: str, input_file: str, ignored_files: list) -> typ
 
     node_to_use = util.return_unused_node()
     if node_to_use:
-        run_string = f"srun -w {node_to_use} --ntasks 1 --nodes 1 shifter --image={_SHIFTER_IMAGE} " \
+        # TODO: rewrite this using the new command formatting?
+        run_string = f"srun -w {node_to_use} --ntasks 1 --nodes 1 shifter --image={_DEFAULT_SHIFTER_IMAGE} " \
                      f"/bin/bash {_SHIFTER_BASH_FILE} python {_SHIFTER_SIREPO_SCRIPT}"
         run_string = ' '.join([run_string, name, input_file, *ignored_files])
         cmd = Popen(shlex.split(run_string), stderr=PIPE, stdout=PIPE)
@@ -46,6 +48,12 @@ def _shifter_parse_model(name: str, input_file: str, ignored_files: list) -> typ
     return util.broadcast(d)
 
 
+def _get_application_path(application_name: str) -> str:
+    full_path = shutil.which(application_name)
+    assert full_path, f"Could not find a path for application: {full_path}"
+    return full_path
+
+
 class Setup(abc.ABC):
     _REGISTRY = {}
     _REQUIRED_KEYS = ('execution_type',)  # code specific keys that are required
@@ -55,7 +63,7 @@ class Setup(abc.ABC):
     SERIAL_RUN_COMMAND = None
     PARALLEL_RUN_COMMAND = None
     NAME = None
-    SHIFTER_COMMAND = f'shifter --image={_SHIFTER_IMAGE} /bin/bash {_SHIFTER_BASH_FILE}'
+    SHIFTER_COMMAND = '--image={SHIFTER_IMAGE} --entrypoint'
 
     def __init__(self):
         self.setup = {
@@ -118,6 +126,31 @@ class Setup(abc.ABC):
 
         return d
 
+
+    def format_task_string(self, is_parallel: bool) -> str:
+        task_string = '{shifter_setup} {shifter_app} {app_arguments} {filename}'
+        if self.setup.get('execution_type') == 'shifter':
+            shifter_setup = self.SHIFTER_COMMAND.format(
+                SHIFTER_IMAGE=self.setup.get('shifter_image', _DEFAULT_SHIFTER_IMAGE)
+            )
+            shifter_app = self._get_run_command(is_parallel)
+        else:
+            shifter_setup = ''
+            shifter_app = ''
+
+        app_arguments = " ".join([f"{k} {v if v else ''}" for k, v in self.setup.get('code_arguments', {}).items()])
+
+        task_string = task_string.format(shifter_setup=shifter_setup,
+                                         shifter_app=shifter_app,
+                                         app_arguments=app_arguments,
+                                         filename=pathlib.Path(
+                                             self.setup.get('input_file', '')
+                                         ).name
+                                         )
+
+        return task_string
+
+
     @property
     def get_ignored_files(self) -> list:
         ignored_file_list = self.setup.get('ignored_files')
@@ -155,19 +188,23 @@ class Setup(abc.ABC):
         else:
             return value
 
-    def get_run_command(self, is_parallel: bool) -> str:
-        # There is an argument for making this a method of the Job class
-        # if it continues to grow in complexity it is worth moving out to a higher level
-        # class that has more information about the run configuration
+    def _get_run_command(self, is_parallel: bool) -> str:
         if is_parallel:
             run_command = self.PARALLEL_RUN_COMMAND
         else:
             run_command = self.SERIAL_RUN_COMMAND
 
-        if self.setup.get('execution_type') == 'shifter':
-            run_command = ' '.join([self.SHIFTER_COMMAND, run_command])
-
         return run_command
+
+    def get_run_command(self, is_parallel: bool) -> str:
+
+        if self.setup.get('execution_type') == 'shifter':
+            run_command = 'shifter'
+            return _get_application_path(run_command)
+
+        run_command = self._get_run_command(is_parallel)
+
+        return _get_application_path(run_command)
 
     def get_sym_link_targets(self) -> set:
         return set()
