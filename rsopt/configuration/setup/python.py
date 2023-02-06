@@ -5,7 +5,7 @@ import typing
 from pykern import pkrunpy
 from pykern import pkio
 from pykern import pkresource
-from rsopt.configuration.setup.setup import Setup
+from rsopt.configuration.setup.setup import Setup, _get_application_path
 
 _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
@@ -77,14 +77,13 @@ class Python(Setup):
         with open(file_path, 'w') as ff:
             ff.write(output_template)
 
-    def get_run_command(self, is_parallel):
-        # Python has no serial run command. Force the parallel run mode if using shifter.
-        if is_parallel:
-            run_command = self.PARALLEL_RUN_COMMAND
-        else:
-            run_command = self.SERIAL_RUN_COMMAND
+    def get_run_command(self, is_parallel: bool) -> str:
 
         if self.setup.get('execution_type') == 'shifter':
-            run_command = ' '.join([self.SHIFTER_COMMAND, self.PARALLEL_RUN_COMMAND])
+            run_command = 'shifter'
+            return _get_application_path(run_command)
+        if is_parallel:
+            run_command = self._get_run_command(is_parallel)
+            return _get_application_path(run_command)
 
-        return run_command
+        return ''

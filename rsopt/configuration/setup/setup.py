@@ -32,7 +32,7 @@ def _shifter_parse_model(name: str, input_file: str, ignored_files: list) -> typ
 
     node_to_use = util.return_unused_node()
     if node_to_use:
-        # TODO:  rewrite this using the new command formatting?
+        # TODO: rewrite this using the new command formatting?
         run_string = f"srun -w {node_to_use} --ntasks 1 --nodes 1 shifter --image={_DEFAULT_SHIFTER_IMAGE} " \
                      f"/bin/bash {_SHIFTER_BASH_FILE} python {_SHIFTER_SIREPO_SCRIPT}"
         run_string = ' '.join([run_string, name, input_file, *ignored_files])
