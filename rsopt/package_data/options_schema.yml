@@ -40,6 +40,9 @@ options: &options
   output_file:
     typing:
       - str
+  copy_final_logs:
+    typing:
+      - bool
 nlopt:                
   <<: *options
 scipy:

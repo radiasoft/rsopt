@@ -34,6 +34,7 @@ class Options:
         self.nworkers = 2
         self.use_worker_dirs = True
         self.sim_dirs_make = True
+        self.copy_final_logs = True
         self.run_dir = './ensemble'
         self.record_interval = 0
         self.output_file = ''

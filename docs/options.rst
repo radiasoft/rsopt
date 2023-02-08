@@ -59,7 +59,9 @@ Global Options
 - `use_worker_dirs` [bool]:
   If true then sim directories are organized under a common worker directory. This is used by default
   if parallel execution is being used.
-
+- `copy_final_logs` [bool]:
+  Defaults to True. If True then ensemble.log, libE_stats.txt, the configuration file, and the final history file
+  will be copied to the top level of `run_dir`. This copying does not occur if the run terminates unexpectedly.
 - `executor_options` [dict]:
   Options given here are passed directly to the libEnsemble Executor.
     - `hosts` [list] (rsmpi only): A list of rsmpi host indices that workers can use. To see your available host indices run

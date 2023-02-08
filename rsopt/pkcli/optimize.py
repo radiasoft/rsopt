@@ -1,8 +1,7 @@
 import numpy as np
 from rsopt import run
-from rsopt import util
 
-
+@run.cleaup
 def configuration(config):
     """Runs an optimization job.
 
@@ -16,19 +15,14 @@ def configuration(config):
     _config = run.startup_sequence(config)
 
     software = _config.options.NAME
-    try:
-        nworkers = _config.options.nworkers
-    except AttributeError:
-        # Any method that doesn't allow user specification must use 2 workers
-        nworkers = 2
-
     runner = run.run_modes[software](_config)
     H, persis_info, _ = runner.run()
 
     if _config.is_manager:
-        util.save_final_history(config, _config, H, persis_info, nworkers, message='Run completed')
         if software in _final_result:
             _final_result[software](H)
+
+    return H, persis_info, _config
 
 
 def _final_local_result(H):

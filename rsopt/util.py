@@ -1,14 +1,17 @@
-import re
-import os
-import sys
 import numpy as np
+import pathlib
 import pickle
+import os
+import re
+import shutil
+import sys
 import typing
 from pykern import pkrunpy
-from libensemble.tools import save_libE_output
+import libensemble.tools
+
 
 SLURM_PREFIX = 'nid'
-
+_FINAL_LOGS = ('ensemble.log', 'libE_stats.txt')
 
 def _expand_idx(idx):
     if idx.startswith('['):
@@ -106,24 +109,52 @@ def broadcast(data, root_rank=0):
     return MPI.COMM_WORLD.bcast(data, root=root_rank)
 
 
-def save_final_history(config_filename, config, H, persis_info, nworkers, message):
+def save_final_history(config, H, persis_info, message) -> (str, str):
     if config.options.output_file:
         filename = config.options.output_file
-        _libe_save(H, persis_info, message, filename)
+
+        return save_libE_output(H, persis_info, filename, message, custom_filename=True)
     else:
-        filename = os.path.splitext(config_filename)[0]
-        history_file_name = "H_sample_" + filename + ".npy"
-        save_libE_output(H, persis_info, history_file_name, nworkers, mess=message)
+        filename = pathlib.Path(config.configuration_file).stem
+        history_file_name = "H_" + filename
+
+        return save_libE_output(H, persis_info, history_file_name, config.options.nworkers, mess=message)
 
 
-def _libe_save(H, persis_info, mess, filename):
-    # copy of the file save portion of libensemble.tools.save_libE_output, but with full control of save filename
-    status_mess = ' '.join(['------------------', mess, '-------------------'])
-    print('{}\nSaving results to file: {}'.format(status_mess, filename))
-    np.save(filename, H)
+def save_libE_output(H, persis_info, calling_file, nworkers, mess="Run completed", custom_filename=False) -> (str, str):
+    """Writes out history array and persis_info to files.
 
-    with open(filename + ".pickle", "wb") as f:
+    Args:
+        H: (numpy.ndarray) Structured NumPy array with libEnsemble history.
+        persis_info: (dict) Dictionary with libEnsemble worker persis info.
+        calling_file: (str) Name of configuration file or a custom file name.
+        nworkers: (int or str) Number of workers used.
+        mess: (str) Message printed at save.
+        custom_filename: (bool) Treat `calling_file` as custom filename. In this case the usual name mangling for
+         the history and persis_info files is not performed. They will be saved as:
+         $calling_file.npy and $calling_file.pickle.
+
+    Returns:
+        NumPy save history filename (str), persis_info pickle filename (str)
+    """
+
+    name = pathlib.Path(calling_file).stem
+    prob_str = "length-" + str(len(H)) + "_evals-" + str(sum(H["sim_ended"])) + "_workers-" + str(nworkers)
+    if custom_filename:
+        h_filename = calling_file
+        p_filename = calling_file
+    else:
+        h_filename = name + "_history_" + prob_str
+        p_filename = name + "_persis_info_" + prob_str
+
+    status_mess = " ".join(["------------------", mess, "-------------------"])
+    print("{}\nSaving results to file: {}".format(status_mess, h_filename))
+    np.save(h_filename, H)
+
+    with open(p_filename + ".pickle", "wb") as f:
         pickle.dump(persis_info, f)
+
+    return h_filename + ".npy", p_filename + ".pickle"
 
 
 def get_objective_function(import_list: typing.List[str]) -> callable:
@@ -146,3 +177,21 @@ def get_objective_function(import_list: typing.List[str]) -> callable:
         function = None
 
     return function
+
+
+def copy_final_logs(config_filename: str,
+                    options: "rsopt.configuration.options.Options",
+                    history_filename: str or None = None):
+    run_dir = pathlib.Path(options.run_dir)
+    for filename in _FINAL_LOGS + (config_filename,):
+        filename = pathlib.Path(filename)
+        if filename.exists():
+            shutil.copy(filename, run_dir.joinpath(filename.name))
+        else:
+            print(f"Could not find {filename} at run end. Will not be copied to run directory.")
+    if history_filename:
+        history_path = pathlib.Path(history_filename)
+        if history_path.exists():
+            shutil.copy(history_path, run_dir.joinpath(history_path.name))
+        else:
+            print(f"Could not find {history_filename} at run end. Will not be copied to run directory.")

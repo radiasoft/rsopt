@@ -1,12 +1,13 @@
 from rsopt import mpi
 from rsopt import parse
 from rsopt.configuration import Configuration
-from importlib import util
 from pykern import pkcollections
 from pykern import pkio
 from pykern import pkresource
 from pykern import pkyaml
 import pathlib
+import rsopt.util
+import importlib.util
 
 # path from libEnsemble install directory to .opt_modules.csv
 # This must be hardcoded because importing libensemble.gen_funcs to check the expected file name
@@ -27,7 +28,9 @@ def startup_sequence(config: str) -> Configuration:
     _local_opt_startup()
     config_yaml = parse.read_configuration_file(config)
     _config = parse.parse_yaml_configuration(config_yaml)
+    _config.configuration_file = config
     mpi_environment = mpi.get_mpi_environment()
+
     if not mpi_environment:
         return _config
     else:
@@ -42,6 +45,17 @@ def startup_sequence(config: str) -> Configuration:
     return _config
 
 
+def cleaup(action):
+
+    def inner(*args, **kwargs):
+        H, persis_info, config = action(*args, **kwargs)
+        if config.is_manager:
+            history, _ = rsopt.util.save_final_history(config, H, persis_info, message='Run finished')
+            if config.options.copy_final_logs:
+                rsopt.util.copy_final_logs(config.configuration_file, config.options, history)
+    return inner
+
+
 def _local_opt_startup() -> None:
     """Write .opt_modules.csv
 
@@ -54,7 +68,7 @@ def _local_opt_startup() -> None:
     for optimizer in allowed_optimizer_list:
         if optimizer == 'external':
             continue
-        if util.find_spec(optimizer):
+        if importlib.util.find_spec(optimizer):
             available_opt.append(optimizer)
 
     import libensemble

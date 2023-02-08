@@ -20,6 +20,7 @@ class Configuration:
         self.comms = 'local'  # Will be either local or mpi
         self.mpi_comm = None
         self.is_manager = True
+        self.configuration_file = ''
         # self.rsmpi_executor = False  # Is set to true if any executor uses rsmpi
 
     @property
