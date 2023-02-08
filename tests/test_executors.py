@@ -48,7 +48,11 @@ class TestExecutorrsmpi(unittest.TestCase):
 
     def tearDown(self):
         self.test_config_file.close()
-        pathlib.Path('libe_nodes').unlink()
+        try:
+            pathlib.Path('libe_nodes').unlink()
+        except FileNotFoundError:
+            # Not all tests create libe_nodes
+            pass
 
 class TestIsParallel(unittest.TestCase):
 
