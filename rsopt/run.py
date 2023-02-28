@@ -5,9 +5,10 @@ from pykern import pkcollections
 from pykern import pkio
 from pykern import pkresource
 from pykern import pkyaml
+import functools
+import importlib.util
 import pathlib
 import rsopt.util
-import importlib.util
 
 # path from libEnsemble install directory to .opt_modules.csv
 # This must be hardcoded because importing libensemble.gen_funcs to check the expected file name
@@ -46,7 +47,8 @@ def startup_sequence(config: str) -> Configuration:
 
 
 def cleaup(action):
-
+    # Make inner's metadata look like action. Allows it to be registered with pkcli.
+    @functools.wraps(action)
     def inner(*args, **kwargs):
         H, persis_info, config = action(*args, **kwargs)
         if config.is_manager:
