@@ -52,9 +52,17 @@ def parse_stat_file(filename):
 
 
 def filter_completed_history(H: numpy.ndarray) -> numpy.ndarray:
-    completed = H['returned']
+    if 'returned' in H.dtype.names:
+        # libE version < 0.9.0
+        field_sim_ended = 'returned'
+        field_sim_started = 'given'
+    else:
+        field_sim_ended = 'sim_ended'
+        field_sim_started = 'sim_started'
+
+    completed = H[field_sim_ended]
     # If any points were given but not returned mark them not given
-    H['given'] = H['given'] * H['returned']
+    H[field_sim_started] = H[field_sim_started] * H[field_sim_ended]
 
     return H[~completed]
 
