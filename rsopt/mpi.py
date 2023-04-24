@@ -1,5 +1,15 @@
+from libensemble.resources import mpi_resources
+
 
 def get_mpi_environment():
+    # If using openmpi it is not safe to `from mpi4py import MPI` this alone will move you to working in a nested
+    # environment. Even if MPI.COMM_WORLD.Get_size() use of an MPIExecutor will fail (potentially without an error
+    # message) you will just get error code = 1 from the subprocess that tried to use mpirun.
+
+    if mpi_resources.get_MPI_variant() == "openmpi":
+        print("openmpi use detected. MPI communication will not be used.")
+        return
+
     try:
         from mpi4py import MPI
     except ModuleNotFoundError:
