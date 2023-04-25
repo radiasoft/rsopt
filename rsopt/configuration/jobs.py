@@ -35,7 +35,8 @@ def create_executor_arguments(setup: Setup, is_parallel: bool) -> dict:
         # 'stderr': None, # Handled at optimizer setup
         # 'stage_inout': None,  # Not used in rsopt
         # 'dry_run': False, # No support for dry runs in rsopt
-        # 'extra_args': None  # Unused (goes to MPI runner)
+        # TODO: This should only be used for openmpi
+        'extra_args': "--bind-to none" # args go to MPI runner command directly
     }
 
     # TODO: Should there really be this kind of hidden interface to override executor setup?
