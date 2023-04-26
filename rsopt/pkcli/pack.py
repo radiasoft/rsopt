@@ -12,7 +12,8 @@ def _get_local_modules(script_name):
     finder.run_script(script_name)
     for name, mod in finder.modules.items():
         if mod.__file__:  # Skips standard library imports
-            file_list.append(mod.__file__)
+            # Already assume we get only local files so truncate off any path info.
+            file_list.append(pathlib.Path(mod.__file__).name)
 
     return file_list
 
