@@ -3,6 +3,7 @@ from rsopt.configuration.settings import SETTING_READERS, Settings
 from rsopt.configuration.setup import SETUP_READERS
 from rsopt.configuration.setup.python import _PARALLEL_PYTHON_RUN_FILE
 from rsopt.configuration.setup.setup import Setup
+from rsopt.codes import serial_python
 import typing
 
 _USE_SIM_DIRS_DEFAULT = ['elegant', 'opal', 'genesis']
@@ -81,9 +82,9 @@ class Job:
         else:
             return None
 
-    @property
-    def execute(self):
-        return self._setup.function
+    def execute(self, *args, **kwargs):
+        executor = serial_python.SERIAL_MODES[self.setup.get('serial_mode', serial_python.SERIAL_MODE_DEFAULT)]
+        return executor(self._setup.function, *args, **kwargs)
 
     @property
     def is_parallel(self) -> bool:
