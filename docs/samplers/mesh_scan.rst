@@ -6,7 +6,7 @@ Mesh Scan
 Samples a points on a uniform mesh, or from a user defined set of values.
 The mesh is either constructed from (min, max, samples), taking equally
 spaced `samples` between `min` and `max` or can be from a user defined mesh stored in NumPy's default `.npy` format.
-For N parameters and M `samples` this will result in the evaluation of N*M points in total.
+For N parameters and M `samples` this will result in the evaluation of  M^N in total.
 
 For a mesh scan if the final code of the job chain is serial Python and if an objective function is not provided (see below)
 then the return value of the Python function must be either :code:`None` or :code:`float`.
