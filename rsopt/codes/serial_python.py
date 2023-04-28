@@ -19,13 +19,14 @@ def run_process(function, *args, **kwargs):
                                 args=(function, result_queue, *args), kwargs=kwargs)
     p.start()
     p.join()
-    result = result_queue.get()
-
+    
     if p.exitcode != 0:
         return_code = message_numbers.TASK_FAILED
+        result = None
     else:
         return_code = message_numbers.WORKER_DONE
-
+        result = result_queue.get()
+    
     return {RESULT: result, CODE: return_code}
 
 
