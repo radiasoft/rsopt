@@ -44,10 +44,12 @@ def run_thread(function, *args, **kwargs):
 
     if container[0] == _NULL_RESULT:
         return_code = message_numbers.TASK_FAILED
+        result = None
     else:
         return_code = message_numbers.WORKER_DONE
+        result = container[0]
 
-    return {RESULT: container[0], CODE: return_code}
+    return {RESULT: result, CODE: return_code}
 
 
 def run_worker(function, *args, **kwargs):
