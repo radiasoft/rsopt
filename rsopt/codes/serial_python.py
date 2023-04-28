@@ -8,10 +8,25 @@ CODE = 'return_code'
 _NULL_RESULT = 'xo9cHSVI35KmWc1V'
 
 
+def _process_wrapper(function, queue, *args, **kwargs):
+    result = function(*args, **kwargs)
+    queue.put(result)
+
+
 def run_process(function, *args, **kwargs):
-    p = multiprocessing.Process(target=function, args=args, kwargs=kwargs)
+    result_queue = multiprocessing.Queue()
+    p = multiprocessing.Process(target=_process_wrapper,
+                                args=(function, result_queue, *args), kwargs=kwargs)
     p.start()
     p.join()
+    result = result_queue.get()
+
+    if p.exitcode != 0:
+        return_code = message_numbers.TASK_FAILED
+    else:
+        return_code = message_numbers.WORKER_DONE
+
+    return {RESULT: result, CODE: return_code}
 
 
 def _thread_wrapper(function, container, *args, **kwargs):
