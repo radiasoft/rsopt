@@ -21,6 +21,19 @@ Required ``setup`` fields for ``python`` are:
 * ``function``: Name of a function in `input_file` to be executed
 * ``execution_type``: Method to use when executing the Python code. See :ref:`Execution Methods<exec_methods>` for accepted types.
 
+Optional fields:
+
+* ``serial_mode``: By default Python functions will be executed directly by the assigned Worker process. This is convenient
+from a speed-of-execution perspective but can cause problems in some cases. For example if the code being executed by the Job
+requires special cleanup between executions; or if you expect some Jobs to fail, this will result in rsopt exiting
+prematurely since the error will occur directly on the process. In these cases it can be useful to select an alternate mode.
+    - `worker`: The default option. Python functions are executed directly by the worker process.
+    - `process`: The worker will initiate a subprocess to run the function. Return values of the function will be automatically
+                 passed back to rsopt. This option should be selected if it is required that each simulation be initiated
+                 in a clean memory space. This option does carry the highest overhead.
+    - `thread`: Run the function in a thread. Memory is still shared, but errors produced by the simulation function
+                will normally not be fatal for the rsopt process. Overhead cost should normally be on par with `worker`.
+
 ``function`` Specification
 --------------------------
 
