@@ -17,13 +17,13 @@ General Setup Fields
 - `execution_type` [str]:
     Specify the method used to run the code. Availability may vary depending on resources being used. Available options
     are. Nested entries are additional fields that may be specified for the given mode.:
-        * ``serial``: Serial execution of the code. If ``serial`` mode is used the simulation will always be executed on
-                        the same resources as the worker assigned the job. This can be a consideration if many workers
-                        will be running computationally intensive work.
+
+        * ``serial``: Serial execution of the code. If ``serial`` mode is used the simulation will always be executed on the same resources as the worker assigned the job. This can be a consideration if many workers will be running computationally intensive work.
         * ``parallel``: Parallel execution of the code with MPI. libEnsemble automatically detects MPI implementation and will automatically format input commands
         * ``shifter``: For use on NERSC. Runs inside of a Shifter container from the radiasoft/sirepo:prod image.
             - ``shifter_image`` can also be provided in Setup to request a particular image. The default is `radiasoft/sirepo:prod`.
         * ``rsmpi``: Special command for users who have servers registered to them on jupyter.radiasoft.org_. If rsmpi is being used for any code it must be used for all. The number of cores requested may vary from code to code though.
+
 - `cores` [int]:
     Number of cores to use for parallel run modes (``parallel``, ``shifter``, ``rsmpi``). This is ignored for ``serial``.
     By default if `cores: 1` is given then rsopt will use ``serial`` execution, if available. This behavior can be
@@ -75,6 +75,7 @@ Templated Code Fields
 ---------------------
 Additional specifications that can be given under `setup` for templated codes only, that is: elegant, MAD-X, OPAL, and
 Genesis. In particular there is special handling in rsopt for converting particle phase space distribution files between these four codes.
+
 - `input_distribution` [str]
     Name of the initial distribution file that the simulation expects to read in. If this simulation is not the first
     in the list of `codes` in the configuration file then the preceding code's `output_distribution` will be used to
@@ -93,6 +94,7 @@ Genesis. In particular there is special handling in rsopt for converting particl
 Serial Python Fields
 --------------------
 For serial Python an additional field can be given to specify how the Python function should be executed by the worker.
+
 - `serial_mode` [str]
     Can be ``thread``, ``process``, or ``worker``. Default is ``worker``. See :ref:`Python<codes/python>` for a
     description of the options.
