@@ -82,7 +82,16 @@ class Job:
         else:
             return None
 
-    def execute(self, *args, **kwargs):
+    def execute(self, *args, **kwargs) -> dict:
+        """ Execute a Python simulation.
+
+        Args:
+            *args: (list) Arguments passed to the Python simulation function.
+            **kwargs: (dict) Key word arguments passed to the Python simulation function.
+
+        Returns:
+            (dict) Dictionary with result of simulation (if any) and return code.
+        """
         executor = serial_python.SERIAL_MODES[self.setup.get('serial_mode', serial_python.SERIAL_MODE_DEFAULT)]
         return executor(self._setup.function, *args, **kwargs)
 

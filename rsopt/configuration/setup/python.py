@@ -11,6 +11,7 @@ _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
 _TEMPLATE_PATH = pkio.py_path(pkresource.filename(''))
 
+
 @Setup.register_setup()
 class Python(Setup):
     __REQUIRED_KEYS = ('function',)
@@ -19,7 +20,7 @@ class Python(Setup):
     NAME = 'python'
 
     @property
-    def function(self):
+    def function(self) -> typing.Callable:
         if self.setup.get('input_file'):
             # libEnsemble workers change active directory - sys.path will not record locally available modules
             sys.path.append('.')
