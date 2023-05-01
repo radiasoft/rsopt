@@ -36,7 +36,7 @@ class TestSetupFeatures(unittest.TestCase):
 
         frame = tools.parse_stat_file('libE_stats.txt')
         frame.to_csv('resr.csv')
-        for row in frame.status[:2]:
+        for row in frame.status[1:3]:
             self.assertEqual(row, TIMEOUT_STATUS_MESSAGE)
 
     def test_executor_complete_with_timeout(self):
@@ -50,7 +50,7 @@ class TestSetupFeatures(unittest.TestCase):
         H, persis_info, _ = runner.run()
 
         frame = tools.parse_stat_file('libE_stats.txt')
-        for row in frame.status[:2]:
+        for row in frame.status[1:3]:
             self.assertEqual(row, COMPLETED_STATUS_MESSAGE)
 
     def test_force_executor(self):
