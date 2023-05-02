@@ -59,7 +59,7 @@ class Setup(abc.ABC):
     _REQUIRED_KEYS = ('execution_type',)  # code specific keys that are required
     _OPTIONAL_KEYS = ()  # code specific keys that are not required
     # keys that can be used by any code
-    _KNOWN_KEYS = tuple(pkyaml.load_file(SETUP_SCHEMA)) + _REQUIRED_KEYS + _OPTIONAL_KEYS
+    _KNOWN_KEYS = tuple(pkyaml.load_file(SETUP_SCHEMA)) #+ _REQUIRED_KEYS + _OPTIONAL_KEYS
     SERIAL_RUN_COMMAND = None
     PARALLEL_RUN_COMMAND = None
     NAME = None
@@ -75,6 +75,10 @@ class Setup(abc.ABC):
                          'postprocess': self._handle_postprocess}
         self.preprocess = []
         self.postprocess = []
+
+    @classmethod
+    def _known_keys(cls) -> tuple:
+        return cls._KNOWN_KEYS + cls._REQUIRED_KEYS + cls._OPTIONAL_KEYS
 
     @classmethod
     def register_setup(cls):

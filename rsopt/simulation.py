@@ -7,7 +7,7 @@ import rsopt.util
 from libensemble import message_numbers
 from libensemble.executors.executor import Executor
 from collections.abc import Iterable
-
+from rsopt.codes.serial_python import RESULT, CODE
 # TODO: This should probably be in libe_tools right?
 
 _POLL_TIME = 1  # seconds
@@ -148,8 +148,9 @@ class SimulationFunction:
                         break
             else:
                 # Serial Python Job
-                f = job.execute(**kwargs)
-                self.J['sim_status'] = message_numbers.WORKER_DONE
+                result_dict = job.execute(**kwargs)
+                f = result_dict[RESULT]
+                self.J['sim_status'] = result_dict[CODE]
                 # NOTE: Right now f is not passed to the objective function. Would need to go inside J. Or pass J into
                 #       function job.execute(**kwargs)
 

@@ -11,15 +11,17 @@ _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
 _TEMPLATE_PATH = pkio.py_path(pkresource.filename(''))
 
+
 @Setup.register_setup()
 class Python(Setup):
     __REQUIRED_KEYS = ('function',)
+    _OPTIONAL_KEYS = ('serial_python_mode',)
     SERIAL_RUN_COMMAND = None  # serial not executed by subprocess so no run command is needed
     PARALLEL_RUN_COMMAND = 'python'
     NAME = 'python'
 
     @property
-    def function(self):
+    def function(self) -> typing.Callable:
         if self.setup.get('input_file'):
             # libEnsemble workers change active directory - sys.path will not record locally available modules
             sys.path.append('.')
@@ -46,7 +48,7 @@ class Python(Setup):
         # Validate for all keys (field in config file) are known to setup
         for key in setup.keys():
             # Can be made private if non-required code-specific fields are ever added
-            if key not in (cls._KNOWN_KEYS + cls.__REQUIRED_KEYS):
+            if key not in (cls._known_keys() + cls.__REQUIRED_KEYS):
                 raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
         Setup.check_setup(setup)
 
