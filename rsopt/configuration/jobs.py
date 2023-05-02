@@ -92,7 +92,7 @@ class Job:
         Returns:
             (dict) Dictionary with result of simulation (if any) and return code.
         """
-        executor = serial_python.SERIAL_MODES[self.setup.get('serial_mode', serial_python.SERIAL_MODE_DEFAULT)]
+        executor = serial_python.SERIAL_MODES[self.setup.get('serial_python_mode', serial_python.SERIAL_MODE_DEFAULT)]
         return executor(self._setup.function, *args, **kwargs)
 
     @property

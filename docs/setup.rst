@@ -95,7 +95,7 @@ Serial Python Fields
 --------------------
 For serial Python an additional field can be given to specify how the Python function should be executed by the worker.
 
-- `serial_mode` [str]
+- `serial_python_mode` [str]
     Can be ``thread``, ``process``, or ``worker``. Default is ``worker``. See :ref:`Python<codes/python>` for a
     description of the options.
 
