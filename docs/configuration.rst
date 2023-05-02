@@ -60,10 +60,12 @@ and starting values for that parameter. Depending on the software being run by r
 other run parameters (e.g. a run with just 1 step would begin at the start values, execute, and stop)
 all of these values may be used at run, however, they must always be given in the configuration.
 
-Execution Methods
------------------
+Setup and Execution
+-------------------
 .. _exec_methods:
 
+The ``setup`` block defines input files, execution methods, and other runtime options for each code. A brief overview
+of the execution is given here. For a full description see :ref:`Setup<setup>`.
 Under ``setup`` for each ``code`` an ``execution_type`` must be specified::
 
     codes:
