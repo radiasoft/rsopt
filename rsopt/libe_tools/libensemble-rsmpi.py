@@ -50,7 +50,6 @@ try:
         for key, _ in sel.select():
             data = key.fileobj.read1().decode()
             if not data:
-                print("was not data")
                 break
             if key.fileobj is run_status.stdout:
                 print(data, end="", file=sys.stdout, flush=True)
