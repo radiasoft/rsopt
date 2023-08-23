@@ -1,7 +1,6 @@
 from libensemble.libE import libE
 from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_local_opt
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
-from libensemble.tools import check_inputs
 from libensemble.tools import add_unique_random_streams
 from rsopt.libe_tools import tools
 from rsopt.optimizer import Optimizer
@@ -66,9 +65,6 @@ class libEnsembleOptimizer(Optimizer):
     def run(self, clean_work_dir=False):
         self.clean_working_directory = clean_work_dir
         self._configure_libE()
-        # Check of H0 needs to be run after sim/alloc/gen specs are finalized
-        if self.H0 is not None:
-            check_inputs(H0=self.H0, sim_specs=self.sim_specs, alloc_specs=self.alloc_specs, gen_specs=self.gen_specs)
 
         H, persis_info, flag = libE(self.sim_specs, self.gen_specs, self.exit_criteria, self.persis_info,
                                     self.alloc_specs, self.libE_specs, H0=self.H0)

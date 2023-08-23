@@ -47,8 +47,7 @@ class GridSampler(libEnsembleOptimizer):
         self.exit_criteria = {'sim_max': sim_max}
 
     def _configure_allocation(self):
-        # If not setting alloc_specs it must be None and not empty dict
-        self.alloc_specs = None
+        self.alloc_specs = {}
 
     def _configure_persistant_info(self):
         # _configure_specs must have been already called
@@ -138,8 +137,7 @@ class LHSampler(libEnsembleOptimizer):
         self.exit_criteria = {'sim_max': self._config.options.batch_size}
 
     def _configure_allocation(self):
-        # If not setting alloc_specs it must be None and not empty dict
-        self.alloc_specs = None
+        self.alloc_specs = {}
 
     def _configure_persistant_info(self):
         # _configure_specs must have been already called
