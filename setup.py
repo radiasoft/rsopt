@@ -17,8 +17,7 @@ pksetup.setup(
         'numpy',
         'nlopt',
         'mpmath',
-        'jinja2>=3.0.1',
-        'docutils==0.17'  # docutils>=0.18 may be breaking documentation build
+        'jinja2>=3.0.1'
     ],
     extras_require={
         'nersc': ['rsbeams@git+https://github.com/radiasoft/rsbeams',
