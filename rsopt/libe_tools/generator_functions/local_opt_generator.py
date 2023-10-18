@@ -12,6 +12,14 @@ from libensemble.tools.persistent_support import PersistentSupport
 
 
 def persistent_local_opt(H, persis_info, gen_specs, libE_info):
+    local_opter = None
+    run_order = None
+
+    def _done():
+        clean_up_and_stop(local_opter)
+        persis_info['run_order'] = run_order
+        return local_H, persis_info, FINISHED_PERSISTENT_GEN_TAG
+
     try:
         # Setup
         persistent = PersistentSupport(libE_info, EVAL_GEN_TAG)
@@ -34,27 +42,24 @@ def persistent_local_opt(H, persis_info, gen_specs, libE_info):
                                          local_H['grad'] if 'grad' in fields_to_pass else None)
         pass_to_local_opter = local_H[0][fields_to_pass]
         x_new = local_opter.iterate(pass_to_local_opter)
+        if isinstance(x_new, ConvergedMsg):
+            return _done()
+            
         add_to_local_H(local_H, x_new, user_specs, local_flag=1, on_cube=True)
         persistent.send(local_H[[-1]][[i[0] for i in gen_specs['out']]])
 
         while True:
             tag, Work, calc_in = persistent.recv()
             if tag in [STOP_TAG, PERSIS_STOP]:
-                clean_up_and_stop(local_opter)
-                persis_info['run_order'] = run_order
-                break
+                return _done()
             n_s, n_r = update_local_H_after_receiving(local_H, n, n_s, user_specs, Work, calc_in, fields_to_pass)
             for row in calc_in:
                 x_new = local_opter.iterate(row[fields_to_pass])
             if isinstance(x_new, ConvergedMsg):
-                clean_up_and_stop(local_opter)
-                persis_info['run_order'] = run_order
-                break
+                return _done()
             else:
                 add_to_local_H(local_H, x_new, user_specs, local_flag=1, on_cube=True)
                 persistent.send(local_H[[-1]][[i[0] for i in gen_specs['out']]])
-
-        return local_H, persis_info, FINISHED_PERSISTENT_GEN_TAG
 
     finally:
         try:
