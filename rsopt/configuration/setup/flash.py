@@ -26,7 +26,7 @@ def _write_file(par_dict: dict, new_par_path: str) -> None:
     for key, val in par_dict.items():
         text.append("{} = {} \n".format(key.strip(), val))
 
-    with open(new_par_path) as ff:
+    with open(new_par_path, 'w') as ff:
         ff.write(''.join(text))
 
 class _Model:
@@ -75,6 +75,8 @@ class Flash(SetupTemplated):
         return model
 
     def generate_input_file(self, kwarg_dict, directory, is_parallel):
+        # `directory` is not used for the flash file write because it does not go through sirepo.lib
         model = self._edit_input_file_schema(kwarg_dict)
 
-        model.write_files(directory)
+        # This function is always being called in a worker run directory so path is just file name
+        model.write_files(self.setup['input_file'])

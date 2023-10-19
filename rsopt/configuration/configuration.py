@@ -158,7 +158,7 @@ class Configuration:
             sym_link_files.update(job.sym_link_targets)
             # Each flash simulation may be a unique executable and will not be in PATH
             if job.code == 'flash':
-                sym_link_files.add(job.setup.setup['executable'])
+                sym_link_files.add(job.setup['executable'])
         sym_link_files.update(self._options.sym_links)
 
         return list(sym_link_files)
