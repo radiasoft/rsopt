@@ -50,7 +50,7 @@ def _shifter_parse_model(name: str, input_file: str, ignored_files: list) -> typ
 
 def _get_application_path(application_name: str) -> str:
     full_path = shutil.which(application_name)
-    assert full_path, f"Could not find a path for application: {full_path}"
+    assert full_path, f"Could not find a path for application: {application_name}"
     return full_path
 
 

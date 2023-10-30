@@ -4,7 +4,7 @@ import typing
 from rsopt.configuration.setup.setup import SetupTemplated
 
 def _parse_file(par_path: str) -> dict:
-    "Read in a FLASH .par file and return a dictionary of parameters and values"
+    """Read in a FLASH .par file and return a dictionary of parameters and values."""
 
     res = {}
     par_text = open(par_path)
@@ -19,7 +19,7 @@ def _parse_file(par_path: str) -> dict:
 
 
 def _write_file(par_dict: dict, new_par_path: str) -> None:
-    "Write a dictionary of parameters/values to a `flash.par` file"
+    """Write a dictionary of parameters/values to a `flash.par` file."""
 
     text = []
 
@@ -36,14 +36,24 @@ class _Model:
     def write_files(self, directory: str) -> None:
         return _write_file(self.kwarg_dict, directory)
 
+def _is_executable(executable_name):
+    import os
+    assert os.path.isfile(executable_name), f"Could not find the FLASH executable: {executable_name}"
+    assert os.access(executable_name, os.X_OK), f"FLASH executable {executable_name} does not have execution permission"
+
+    return True
+
 @SetupTemplated.register_setup()
 class Flash(SetupTemplated):
     __REQUIRED_KEYS = ('input_file', 'executable')
     # Run commands for flash are set at runtime by _get_run_command
-    # TODO: Must always symlink executable into run directory
     SERIAL_RUN_COMMAND = './'
     PARALLEL_RUN_COMMAND = './'
     NAME = 'flash'
+
+    def __init__(self):
+        super().__init__()
+        self.validators['executable'] = _is_executable
 
     def _get_run_command(self, is_parallel: bool) -> str:
         # setup['executable'] guaranteed to exist at run time by self.check_setup
@@ -54,7 +64,7 @@ class Flash(SetupTemplated):
 
         return run_command
 
-    # I don't like that this now has to return a dict - breaks with super
+    # TODO: I don't like that this now has to return a dict - breaks with super
     @classmethod
     def parse_input_file(cls, input_file: str, shifter: bool,
                          ignored_files: typing.Optional[typing.List[str]] = None) -> dict:
