@@ -31,6 +31,8 @@ def create_executor_arguments(setup: Setup, is_parallel: bool) -> dict:
         'app_args': setup.format_task_string(is_parallel),
         'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
         'wait_on_start': True,
+        'auto_assign_gpus': setup.setup.get('gpu', False),
+        'match_procs_to_gpus': setup.setup.get('gpu', False),
         # 'app_name': None,  # Handled at optimizer setup
         # 'stdout': None,  # Handled at optimizer setup
         # 'stderr': None, # Handled at optimizer setup
