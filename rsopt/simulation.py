@@ -154,6 +154,11 @@ class SimulationFunction:
                 # NOTE: Right now f is not passed to the objective function. Would need to go inside J. Or pass J into
                 #       function job.execute(**kwargs)
 
+            if job.executor_args.get('auto_assign_gpus'):
+                from libensemble.tools.test_support import check_gpu_setting
+                if self.log.level == logging.DEBUG:
+                    self.log.debug(check_gpu_setting(task, assert_setting=False, print_setting=True))
+
             if halt_job_sequence:
                 break
 
