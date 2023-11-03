@@ -50,18 +50,18 @@ try:
         for key, _ in sel.select():
             data = key.fileobj.read1().decode()
             if not data:
-                break
+                run_status.poll()
+                sys.exit(run_status.returncode)
             if key.fileobj is run_status.stdout:
                 print(data, end="", file=sys.stdout, flush=True)
             else:
                 print(data, end="", file=sys.stderr, flush=True)
-
-    sys.exit(run_status.returncode)
-
 except KeyboardInterrupt:
-    run_status.kill()
-    out, err = run_status.communicate()
-    sys.stdout.write(out.decode())
-    sys.stderr.write(err.decode())
-    sys.stderr.flush()
-    sys.exit(run_status.returncode)
+    try:
+        run_status.kill()
+        out, err = run_status.communicate()
+        sys.stdout.write(out.decode())
+        sys.stderr.write(err.decode())
+        sys.stderr.flush()
+    except NameError:
+        sys.exit(1)
