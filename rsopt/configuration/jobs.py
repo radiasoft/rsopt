@@ -24,7 +24,7 @@ def get_reader(obj, category):
 def create_executor_arguments(setup: Setup, is_parallel: bool) -> dict:
     # Really creates Executor.submit() arguments
     args = {
-        'num_procs': setup.setup.get('cores', 1),
+        'num_procs': None if setup.setup.get('gpu', False) else setup.setup.get('cores', 1),
         'num_nodes': None,  # No user interface right now
         'procs_per_node': None, # No user interface right now
         'machinefile': None,  # Add in  setup.machinefile if user wants to control
