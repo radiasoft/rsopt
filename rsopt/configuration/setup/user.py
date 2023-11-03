@@ -1,17 +1,24 @@
 import os
+import typing
 from pykern import pkio, pkrunpy
-from rsopt.configuration.setup.setup import Setup
-from rsopt.configuration.setup.python import Python
-from rsopt.configuration.setup.setup import Setup
+from rsopt.configuration.setup.setup import Setup, _get_application_path
+
 
 @Setup.register_setup()
-class User(Python):
+class User(Setup):
     __REQUIRED_KEYS = ('input_file', 'run_command', 'file_mapping', 'file_definitions')
     NAME = 'user'
 
     def __init__(self):
         super().__init__()
         self._BASE_RUN_PATH = pkio.py_path()
+
+    @classmethod
+    def parse_input_file(cls, input_file: str, shifter: str,
+                         ignored_files: typing.Optional[typing.List[str]] = None) -> None:
+        # Python does not use text input files. Functions are dynamically imported by `function`.
+        assert os.path.isfile(input_file), f'Could not find input_file: {input_file}'
+        return None
 
     def get_run_command(self, is_parallel):
         # run_command is provided by user so no check for serial or parallel run mode
@@ -24,7 +31,7 @@ class User(Python):
         if self.setup.get('execution_type') == 'shifter':
             run_command = ' '.join([self.SHIFTER_COMMAND, run_command])
 
-        return run_command
+        return _get_application_path(run_command)
 
     def get_file_def_module(self):
 
