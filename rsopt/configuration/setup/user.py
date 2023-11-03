@@ -20,7 +20,7 @@ class User(Setup):
         assert os.path.isfile(input_file), f'Could not find input_file: {input_file}'
         return None
 
-    def get_run_command(self, is_parallel):
+    def get_run_command(self, is_parallel: bool):
         # run_command is provided by user so no check for serial or parallel run mode
         run_command = self.setup['run_command']
 
@@ -52,14 +52,14 @@ class User(Setup):
                 raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
         Setup._check_setup(setup)
 
-    def get_sym_link_targets(self):
+    def get_sym_link_targets(self) -> set:
         if self.setup['input_file'] not in self.setup['file_mapping'].values():
             # If file name in file_mapping then input_file being created dynamically, otherwise copy here
             return {self.setup['input_file']}
 
         return set()
 
-    def generate_input_file(self, kwarg_dict, directory, is_parallel):
+    def generate_input_file(self, kwarg_dict: dict, directory: str, is_parallel: bool):
 
         # Get strings for each file and fill in arguments for this job
         for key, val in self.setup['file_mapping'].items():
