@@ -66,10 +66,10 @@ class Setup(abc.ABC):
     SHIFTER_COMMAND = '--image={SHIFTER_IMAGE} --entrypoint'
 
     def __init__(self):
-        self.setup = {
+        self.setup: dict = {
             'cores': 1
         }
-        self.input_file_model = None
+        self.input_file_model: dict = {}
         self.validators = {'execution_type': _validate_execution_type}
         self.handlers = {'preprocess': self._handle_preprocess,
                          'postprocess': self._handle_postprocess}

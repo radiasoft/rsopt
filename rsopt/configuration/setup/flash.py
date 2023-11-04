@@ -74,11 +74,13 @@ class Flash(SetupTemplated):
         return d
 
     def _edit_input_file_schema(self, kwarg_dict:dict) -> _Model:
-        # TODO: This has no protection on value typing because we have no Sirepo schema
-
+        # This editor has no protection on value typing because we have no Sirepo schema
         model = copy.deepcopy(self.input_file_model)
         for n, v in kwarg_dict.items():
-            model[n] = v
+            # Parser sets all keys to be lower case
+            n_lower = n.lower()
+            assert n_lower in model.keys(), f"Parameter/Setting: {n} is not defined and cannot be edited."
+            model[n_lower] = v
 
         model = _Model(model)
 
