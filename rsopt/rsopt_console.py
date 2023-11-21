@@ -8,10 +8,13 @@ See :mod:`pykern.pkcli` for how this module is used.
 """
 from __future__ import absolute_import, division, print_function
 from pykern import pkcli
+from rsopt import codes
+import os
 import sys
 
 
 def main():
+    os.environ['SIREPO_FEATURE_CONFIG_SIM_TYPES'] = ':'.join(codes.SIREPO_SIM_TYPES)
     return pkcli.main('rsopt')
 
 
