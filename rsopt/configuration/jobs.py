@@ -23,25 +23,25 @@ def get_reader(obj, category):
 
 def create_executor_arguments(setup: Setup, is_parallel: bool) -> dict:
     # Really creates Executor.submit() arguments
-    args = {
-        'num_procs': setup.setup.get('cores', 1),
-        'num_nodes': None,  # No user interface right now
-        'procs_per_node': None, # No user interface right now
-        'machinefile': None,  # Add in  setup.machinefile if user wants to control
-        'app_args': setup.format_task_string(is_parallel),
-        'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
-        'wait_on_start': True,
-        # 'app_name': None,  # Handled at optimizer setup
-        # 'stdout': None,  # Handled at optimizer setup
-        # 'stderr': None, # Handled at optimizer setup
-        # 'stage_inout': None,  # Not used in rsopt
-        # 'dry_run': False, # No support for dry runs in rsopt
-        # 'extra_args': None  # Unused (goes to MPI runner)
-    }
-
-    # TODO: Should there really be this kind of hidden interface to override executor setup?
-    # for key, value in args.items():
-    #     args[key] = setup.setup.get(key, value)
+    if is_parallel:
+        args = {
+            'num_procs': setup.setup.get('cores', 1),
+            'num_nodes': None,  # No user interface right now
+            'procs_per_node': None, # No user interface right now
+            'machinefile': None,  # Add in  setup.machinefile if user wants to control
+            'app_args': setup.format_task_string(is_parallel),
+            'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
+            # 'app_name': None,  # Handled at optimizer setup
+            # 'stdout': None,  # Handled at optimizer setup
+            # 'stderr': None, # Handled at optimizer setup
+            # 'stage_inout': None,  # Not used in rsopt
+            # 'dry_run': False, # No support for dry runs in rsopt
+            # 'extra_args': None  # Unused (goes to MPI runner)
+        }
+    else:
+        args = {
+            'app_args': setup.format_task_string(is_parallel)
+        }
 
     # Cannot be overridden
     args['calc_type'] = 'sim'
