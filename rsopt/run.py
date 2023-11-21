@@ -75,8 +75,11 @@ def _local_opt_startup() -> None:
 
     import libensemble
     _opt_modules_path = pathlib.Path(libensemble.__file__).parents[0].joinpath(_OPT_MODULES_RELPATH)
-    with open(_opt_modules_path, 'w') as ff:
-        ff.write(','.join(available_opt))
+    try:
+        with open(_opt_modules_path, 'w') as ff:
+            ff.write(','.join(available_opt))
+    except OSError:
+        print("Writing .opt_modules.csv failed")
 
 
 def local_optimizer(config: dict or pkcollections.PKDict or Configuration or str):

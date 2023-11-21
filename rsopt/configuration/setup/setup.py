@@ -50,7 +50,7 @@ def _shifter_parse_model(name: str, input_file: str, ignored_files: list) -> typ
 
 def _get_application_path(application_name: str) -> str:
     full_path = shutil.which(application_name)
-    assert full_path, f"Could not find a path for application: {full_path}"
+    assert full_path, f"Could not find a path for application: {application_name}"
     return full_path
 
 
@@ -66,10 +66,10 @@ class Setup(abc.ABC):
     SHIFTER_COMMAND = '--image={SHIFTER_IMAGE} --entrypoint'
 
     def __init__(self):
-        self.setup = {
+        self.setup: dict = {
             'cores': 1
         }
-        self.input_file_model = None
+        self.input_file_model: dict = {}
         self.validators = {'execution_type': _validate_execution_type}
         self.handlers = {'preprocess': self._handle_preprocess,
                          'postprocess': self._handle_postprocess}
