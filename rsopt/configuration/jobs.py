@@ -98,8 +98,7 @@ class Job:
     @property
     def is_parallel(self) -> bool:
         # parser will have already guaranteed that execution_type exists and is a valid value
-        return ((self.setup.get('cores', 1) > 1) & (self.setup.get('execution_type') != 'serial')) or \
-                            self.setup.get('force_executor', False)
+        return (self.setup.get('cores', 1) > 1) & (self.setup.get('execution_type') != 'serial')
 
     @property
     def input_distribution(self):
@@ -190,10 +189,10 @@ class Job:
 
         if (not self.is_parallel) & (self.setup.get('cores', 1) > 1):
             print('Warning! serial execution requested with more than 1 core. Serial execution will be used.')
-        self.full_path = self._setup.get_run_command(is_parallel=self.is_parallel)
+        self.full_path = self._setup.get_run_command(is_parallel=self.is_parallel or self.setup.get('force_executor'))
         self.executor_args = create_executor_arguments(self._setup, self.is_parallel)
 
-        if self.is_parallel and self.code == 'python':
+        if (self.is_parallel or self.setup.get('force_executor')) and self.code == 'python':
             self.executor_args['app_args'] = _PARALLEL_PYTHON_RUN_FILE
 
         # Import input_file
