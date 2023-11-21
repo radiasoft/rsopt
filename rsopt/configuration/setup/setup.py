@@ -148,7 +148,8 @@ class Setup(abc.ABC):
                                          shifter_app=shifter_app,
                                          app_arguments=app_arguments,
                                          filename=pathlib.Path(
-                                             self.setup.get('input_file', '')
+                                             # empty string allows for input_file of None in user jobs
+                                             self.setup.get('input_file', '') or ''
                                          ).name
                                          )
 

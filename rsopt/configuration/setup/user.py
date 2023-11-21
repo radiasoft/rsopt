@@ -16,7 +16,10 @@ class User(Setup):
     @classmethod
     def parse_input_file(cls, input_file: str, shifter: str,
                          ignored_files: typing.Optional[typing.List[str]] = None) -> None:
-        # Python does not use text input files. Functions are dynamically imported by `function`.
+        # user mode allows for explicitly skipping an input_file
+        if input_file is None:
+            return None
+
         assert os.path.isfile(input_file), f'Could not find input_file: {input_file}'
         return None
 
@@ -53,7 +56,7 @@ class User(Setup):
         Setup._check_setup(setup)
 
     def get_sym_link_targets(self) -> set:
-        if self.setup['input_file'] not in self.setup['file_mapping'].values():
+        if self.setup['input_file'] not in self.setup['file_mapping'].values() and self.setup['input_file']:
             # If file name in file_mapping then input_file being created dynamically, otherwise copy here
             return {self.setup['input_file']}
 
