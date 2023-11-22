@@ -1,0 +1,11 @@
+This example executes the NERSC provided executable "check-mpi.gnu.pm" which will provide a printout of the
+Node placement and process affinity assignment. This can be useful to check resource allocation while setting up
+larger jobs. This also illustates the ability of "user" jobs in rsopt to run without supplying an input file, in the
+case where you just have an executable.
+
+The batch script (rsopt_resource_check.sh) assumes that rsopt has been installed into a conda environment.
+If you have done this you should edit INSERT_RSOPT_CONDA_ENV on line 9 with the name of your environment.
+
+To run: "sbatch rsopt_resource_check.sh"
+The resulting printouts will be in the worker log files in their directories (ensemble/worker#/sim#/).
+
