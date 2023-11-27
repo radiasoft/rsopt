@@ -12,6 +12,8 @@ class User(Setup):
     def __init__(self):
         super().__init__()
         self._BASE_RUN_PATH = pkio.py_path()
+        self.setup['file_mapping'] = {}
+        self.setup['input_file'] = ''
 
     @classmethod
     def parse_input_file(cls, input_file: str, shifter: str,
