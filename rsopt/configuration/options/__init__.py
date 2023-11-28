@@ -30,6 +30,7 @@ class Options:
         self.executor_options = {}
         self.software = ''
         self.method = ''
+        self.seed = ''
         self.sym_links = []
         self.nworkers = 2
         self.use_worker_dirs = True
