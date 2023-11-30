@@ -72,7 +72,11 @@ class Elegant(SetupTemplated):
                 assert index or len(commands[field.lower()]) == 1, \
                     "{} is not unique in {}. Please add identifier".format(n, self.setup['input_file'])
                 fid = commands[field.lower()][int(index) - 1 if index else 0]
-                model.models.commands[fid][name.lower()] = v
+                if model.models.commands[fid].get(name.lower()) is not None:
+                    model.models.commands[fid][name.lower()] = v
+                else:
+                    command_type = model.models.commands[fid]["_type"]
+                    raise NameError(f"Field: '{name}' is not found for command {command_type}")
             elif field.upper() in elements:  # Sirepo maintains element name case so we standardize to upper here
                 fid = elements[field.upper()][0]
                 if model.models.elements[fid].get(name.lower()) is not None:
@@ -82,7 +86,7 @@ class Elegant(SetupTemplated):
                     ele_name = model.models.elements[fid]["name"]
                     raise NameError(f"Parameter: {name} is not found for element {ele_name} with type {ele_type}")
             else:
-                raise ValueError("{} was not found in the {} lattice loaded from {}".format(n, self.NAME,
+                raise ValueError("{} was not found in the {} lattice or commands loaded from {}".format(n, self.NAME,
                                                                                             self.setup['input_file']))
 
         return model
