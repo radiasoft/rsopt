@@ -56,7 +56,7 @@ class Elegant(SetupTemplated):
         # ELEMENT TYPES
         # element parameters
         # command _type
-        # command parameters
+        # coMmaNd PaRaMetErs
 
         # While exact element name case is kept at model read all elements are written to upper case. I think elegant
         # doesn't distinguish case anyway. For the element parser we'll assume element names are unique regardless of
@@ -72,11 +72,14 @@ class Elegant(SetupTemplated):
                 assert index or len(commands[field.lower()]) == 1, \
                     "{} is not unique in {}. Please add identifier".format(n, self.setup['input_file'])
                 fid = commands[field.lower()][int(index) - 1 if index else 0]
-                if model.models.commands[fid].get(name.lower()) is not None:
-                    model.models.commands[fid][name.lower()] = v
+                if name.lower() in map(str.lower, model.models.commands[fid].keys()):  # Command fields are case-sensitive in schema so we standardize to lower
+                    model.models.commands[fid][name] = v
                 else:
                     command_type = model.models.commands[fid]["_type"]
-                    raise NameError(f"Field: '{name}' is not found for command {command_type}")
+                    available_fields = '\nRecognized fields are:\n  ' + '\n  '.join(
+                        sorted((k for k in model.models.commands[fid].keys() if not k.startswith('_') and k != 'isDisabled'))
+                    )
+                    raise NameError(f"Field: '{name}' is not found for command {command_type}" + available_fields)
             elif field.upper() in elements:  # Sirepo maintains element name case so we standardize to upper here
                 fid = elements[field.upper()][0]
                 if model.models.elements[fid].get(name.lower()) is not None:
@@ -84,9 +87,14 @@ class Elegant(SetupTemplated):
                 else:
                     ele_type = model.models.elements[fid]["type"]
                     ele_name = model.models.elements[fid]["name"]
-                    raise NameError(f"Parameter: {name} is not found for element {ele_name} with type {ele_type}")
+                    available_parameters = '\nRecognized parameters are:\n  ' + '\n  '.join(
+                        sorted((k for k in model.models.elements[fid].keys() if
+                                not k.startswith('_') and k != 'isDisabled'))
+                    )
+                    raise NameError(f"Parameter: {name} is not found for element {ele_name} with type {ele_type}" +
+                                    available_parameters)
             else:
-                raise ValueError("{} was not found in the {} lattice or commands loaded from {}".format(n, self.NAME,
+                raise ValueError("{} was not found in the {} lattice or commands loaded from {}".format(field, self.NAME,
                                                                                             self.setup['input_file']))
 
         return model
