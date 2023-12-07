@@ -71,3 +71,37 @@ class TestElegantModels(unittest.TestCase):
 
     def tearDown(self):
         self.test_dir.cleanup()
+
+
+class TestOpalModels(unittest.TestCase):
+
+    def setUp(self):
+        self.test_dir = tempfile.TemporaryDirectory()
+        self.input_file = 'support/fast_injector/fast_injector_toX107.in'
+
+    def test_parse(self):
+        Opal.parse_input_file(self.input_file, shifter=False)
+
+
+    def test_opal_case_passing(self):
+        # Various mixtures of cases that should be valid
+        # Element Names and Parameters can be entered with any combination of case
+        # Command values are case-sensitive
+        setup = Elegant()
+        setup.setup['input_file'] = 'e.in'
+        setup.input_file_model = Opal.parse_input_file(self.input_file, shifter=False)
+
+        kwarg_dict = {
+            'distribution.1.nbin': 12,
+            # 'load_parameters.1.allow_missing_parameters': 0,
+            # 'bunched_beam.Po': 600.,  # Correct case for case-sensitive name
+            # 'TUBe.X_mAX': 42,  # Element names and parameters are never case sensitive for rsopt
+            # 'correction_matrix_output.BnL_Units': 1  # Incorrect case for case-sensitive name (is BnL_units)
+
+        }
+
+        new_model = setup._edit_input_file_schema(kwarg_dict=kwarg_dict)
+        new_model.write_files(self.test_dir.name)
+
+    def tearDown(self):
+        self.test_dir.cleanup()
