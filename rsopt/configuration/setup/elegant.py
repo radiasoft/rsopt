@@ -71,9 +71,21 @@ class Elegant(SetupTemplated):
             if field.lower() in commands.keys():
                 assert index or len(commands[field.lower()]) == 1, \
                     "{} is not unique in {}. Please add identifier".format(n, self.setup['input_file'])
+                if index:
+                    assert int(index) <= len(commands[field.lower()]), f"Cannot assign to instance {index} of command '{field}'. There are only {len(commands[field.lower()])} instances."
                 fid = commands[field.lower()][int(index) - 1 if index else 0]
                 if name.lower() in map(str.lower, model.models.commands[fid].keys()):  # Command fields are case-sensitive in schema so we standardize to lower
-                    model.models.commands[fid][name] = v
+                    for case_name in model.models.commands[fid].keys():
+                        if case_name.lower() == name.lower():
+                            model.models.commands[fid][case_name] = v
+                            break
+                    else:
+                        command_type = model.models.commands[fid]["_type"]
+                        available_fields = '\nRecognized fields are:\n  ' + '\n  '.join(
+                            sorted((k for k in model.models.commands[fid].keys() if
+                                    not k.startswith('_') and k != 'isDisabled'))
+                        )
+                        raise NameError(f"Field: '{name}' is not found for command {command_type}" + available_fields)
                 else:
                     command_type = model.models.commands[fid]["_type"]
                     available_fields = '\nRecognized fields are:\n  ' + '\n  '.join(
