@@ -15,3 +15,13 @@ def iter_setup_dict(setup: dict):
 SETUP_READERS = {
     dict: iter_setup_dict
 }
+
+# Ignored fields in sirepo schema that rsopt editor should check for - keyed by code name
+IGNORED_FIELDS = {
+    'elegant': [
+                "mpi_io_write_buffer_size",
+                "rootname",
+                "search_path",
+                "semaphore_file"
+    ],
+}

@@ -104,9 +104,9 @@ def grid_sampler(config: dict or pkcollections.PKDict or Configuration or str):
     return sample
 
 
-def single_sampler(config: dict or pkcollections.PKDict or Configuration or str):
+def single_sampler(config: dict or pkcollections.PKDict or Configuration or str, n:int = 1):
     from rsopt.libe_tools import sampler
-    sample = sampler.SingleSample()
+    sample = sampler.SingleSample(sampler_repeats=n)
     sample.load_configuration(config)
 
     return sample

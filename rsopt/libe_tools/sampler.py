@@ -70,18 +70,29 @@ class GridSampler(libEnsembleOptimizer):
 class SingleSample(GridSampler):
     # Run a single point using start values of parameters - or no parameters at all
     # mesh_file is ignored, even if given
+
+    def __init__(self, sampler_repeats:int = 1):
+        """
+
+        Args:
+            sampler_repeats: (int) Default 1. Rerun the start point this many times.
+        """
+        super().__init__()
+        self.sampler_repeats = sampler_repeats
+
     def _define_mesh_parameters(self):
         mesh_parameters = []
-        size = 1
+        size = self.sampler_repeats
 
         for lb, ub, s in zip(self.lb, self.ub, self.start):
             mesh_parameters.append(s)
         mesh_parameters = np.array(mesh_parameters).reshape(len(mesh_parameters), 1)
+        mesh_parameters = np.repeat(mesh_parameters, repeats=self.sampler_repeats, axis=1)
 
         return mesh_parameters, size
 
     def _configure_optimizer(self):
-        self.nworkers = 1
+        self.nworkers = self._config.options.nworkers
 
         mesh, sim_max = self._define_mesh_parameters()
 

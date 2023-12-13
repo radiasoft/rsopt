@@ -40,9 +40,9 @@ def start(config, n=1):
     """
     _config = run.startup_sequence(config)
 
-    # SingleSampler hardcodes nworkers to 1 and ignores user input
+    # nworkers may be set for a full scan - only use the minimum needed workers
     _config.options.nworkers = min((_config.options.nworkers, n))
-    runner = run.single_sampler(_config)
+    runner = run.single_sampler(_config, n=n)
     H, persis_info, _ = runner.run()
 
     return H, persis_info, _config
