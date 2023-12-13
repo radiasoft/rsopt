@@ -43,6 +43,10 @@ Pre-populated fields are:
 
          # No return value needs to be set for pre/postprocess functions
 
+- `rand_stream`: Holds a numpy.Generator (Generators_) object for each worker. This can allow processes on the worker
+  to generate unique, random numbers. See `seed` under :doc:`Options<options` for instructions on how to control the seeding of
+  the Generators.
+
 - `sim_status`: This is an integer code that is set after a simulation has finished that details whether the simulation
   finished successfully or not; or if something else happened. It is only available for use with postprocess functions
   and objective functions.
@@ -89,3 +93,4 @@ Pre-populated fields are:
            return MAX_ENTRIES * ENTRY_PENALTY_VALUE
 
 .. _calc_status: https://libensemble.readthedocs.io/en/main/data_structures/calc_status.html
+.. _Generators: https://numpy.org/doc/stable/reference/random/generator.html

@@ -51,7 +51,7 @@ class GridSampler(libEnsembleOptimizer):
 
     def _configure_persistant_info(self):
         # _configure_specs must have been already called
-        self.persis_info = tools.create_empty_persis_info(self.libE_specs)
+        self.persis_info = add_unique_random_streams({}, self.nworkers + 1, seed=self._config.options.seed)
 
     def _define_mesh_parameters(self):
         mesh_parameters = []

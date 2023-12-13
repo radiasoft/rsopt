@@ -56,7 +56,7 @@ class Python(Setup):
         return {self.setup['input_file']}
 
     def generate_input_file(self, kwarg_dict, directory, is_parallel):
-        if not is_parallel:
+        if not is_parallel and not self.setup.get('force_executor', False):
             return None
 
         template_loader = jinja2.FileSystemLoader(searchpath=_TEMPLATE_PATH)
