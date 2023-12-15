@@ -33,7 +33,10 @@ for parameters and settings with no additional work required by the user. An exa
 
 
 In the above example settings is being used to modify the distribution command to change the initial bunch length.
+While OPAL allows assignment of names to a number of commands (such as distribution, and fieldsolver) the rsopt parser
+only looks for the command name.
 The parameters are then used to vary the RFCAVITY `FINSS_RGUN`'s `LAG` value and SOLENOID `FIND1_MSOL10`'s strength.
+For elements the name of the element should be used as the identifier.
 
 In setup you only need to provide the input file name, there is a restriction on the parser that all OPAL input must be
 within the given input file (the CALL command is not currently supported by the parser).

@@ -113,6 +113,8 @@ n_indices =1
 !                 element_def = "Watch: watch,filename=\"frame-%s-%04ld.wpp\",mode=coord,sparse_interval=1"
 !&end
 
+&correction_matrix_output
+&end
 
 ! This option is just for lattice function.
 &bunched_beam

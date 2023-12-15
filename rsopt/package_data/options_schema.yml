@@ -43,6 +43,11 @@ options: &options
   copy_final_logs:
     typing:
       - bool
+  seed:
+    typing:
+      - None
+      - str
+      - int
 nlopt:                
   <<: *options
 scipy:
@@ -84,9 +89,4 @@ lh_scan:
   <<: *options
   batch_size:
     typing:
-      - int
-  seed:
-    typing:
-      - None
-      - str
       - int

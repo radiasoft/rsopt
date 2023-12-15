@@ -23,25 +23,25 @@ def get_reader(obj, category):
 
 def create_executor_arguments(setup: Setup, is_parallel: bool) -> dict:
     # Really creates Executor.submit() arguments
-    args = {
-        'num_procs': setup.setup.get('cores', 1),
-        'num_nodes': None,  # No user interface right now
-        'procs_per_node': None, # No user interface right now
-        'machinefile': None,  # Add in  setup.machinefile if user wants to control
-        'app_args': setup.format_task_string(is_parallel),
-        'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
-        'wait_on_start': True,
-        # 'app_name': None,  # Handled at optimizer setup
-        # 'stdout': None,  # Handled at optimizer setup
-        # 'stderr': None, # Handled at optimizer setup
-        # 'stage_inout': None,  # Not used in rsopt
-        # 'dry_run': False, # No support for dry runs in rsopt
-        # 'extra_args': None  # Unused (goes to MPI runner)
-    }
-
-    # TODO: Should there really be this kind of hidden interface to override executor setup?
-    # for key, value in args.items():
-    #     args[key] = setup.setup.get(key, value)
+    if is_parallel:
+        args = {
+            'num_procs': setup.setup.get('cores', 1),
+            'num_nodes': None,  # No user interface right now
+            'procs_per_node': None, # No user interface right now
+            'machinefile': None,  # Add in  setup.machinefile if user wants to control
+            'app_args': setup.format_task_string(is_parallel),
+            'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
+            # 'app_name': None,  # Handled at optimizer setup
+            # 'stdout': None,  # Handled at optimizer setup
+            # 'stderr': None, # Handled at optimizer setup
+            # 'stage_inout': None,  # Not used in rsopt
+            # 'dry_run': False, # No support for dry runs in rsopt
+            # 'extra_args': None  # Unused (goes to MPI runner)
+        }
+    else:
+        args = {
+            'app_args': setup.format_task_string(is_parallel)
+        }
 
     # Cannot be overridden
     args['calc_type'] = 'sim'
@@ -98,8 +98,7 @@ class Job:
     @property
     def is_parallel(self) -> bool:
         # parser will have already guaranteed that execution_type exists and is a valid value
-        return ((self.setup.get('cores', 1) > 1) & (self.setup.get('execution_type') != 'serial')) or \
-                            self.setup.get('force_executor', False)
+        return (self.setup.get('cores', 1) > 1) & (self.setup.get('execution_type') != 'serial')
 
     @property
     def input_distribution(self):
@@ -190,10 +189,10 @@ class Job:
 
         if (not self.is_parallel) & (self.setup.get('cores', 1) > 1):
             print('Warning! serial execution requested with more than 1 core. Serial execution will be used.')
-        self.full_path = self._setup.get_run_command(is_parallel=self.is_parallel)
+        self.full_path = self._setup.get_run_command(is_parallel=self.is_parallel or self.setup.get('force_executor'))
         self.executor_args = create_executor_arguments(self._setup, self.is_parallel)
 
-        if self.is_parallel and self.code == 'python':
+        if (self.is_parallel or self.setup.get('force_executor')) and self.code == 'python':
             self.executor_args['app_args'] = _PARALLEL_PYTHON_RUN_FILE
 
         # Import input_file
