@@ -19,6 +19,7 @@ class GridSampler(libEnsembleOptimizer):
     def _configure_optimizer(self):
         self.nworkers = self._config.options.nworkers
         self.exact_mesh = self._config.options.mesh_file
+        sampler_repeats = int(self._config.options.software_options.get('sampler_repeats', 1))
 
         if self.exact_mesh:
             # Mesh should have shape (number of parameters, number of samples)
@@ -29,7 +30,8 @@ class GridSampler(libEnsembleOptimizer):
 
         user_keys = {
                      'mesh_definition': mesh,
-                     'exact_mesh': True if self.exact_mesh else False
+                     'exact_mesh': True if self.exact_mesh else False,
+                     'sampler_repeats': sampler_repeats
                      }
 
         gen_out = [set_dtype_dimension(dtype, len(mesh)) for dtype in mesh_sampler_gen_out]
@@ -44,7 +46,7 @@ class GridSampler(libEnsembleOptimizer):
 
         # Overwrite any use specified exit criteria and set based on scan
         self._config.options.exit_criteria = None
-        self.exit_criteria = {'sim_max': sim_max}
+        self.exit_criteria = {'sim_max': sim_max * sampler_repeats}
 
     def _configure_allocation(self):
         self.alloc_specs = {}

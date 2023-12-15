@@ -164,6 +164,7 @@ any additional setup required.
 - ``start``: Can be used with `rsopt sample start` to run the configuration file on just the start point for each parameter.
   This is also useful as a method to help with debugging errors during simulation chains. It will ignore most other
   run configuration such as `nworkers` and `software`.
+    * ``-n`` Flag to run the start point n times. `rsopt sample start config.yml -n 5` will repeat 5 runs of the starting parameters.
 
 Miscellaneous
 -------------
