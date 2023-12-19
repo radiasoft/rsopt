@@ -1,0 +1,18 @@
+This example illustrates how to set up execution of an arbitrary executable through the "user" job.
+The fields that generally need to be filled are:
+ * run_command: An executable that must be in PATH at run time
+ * input_file: If the executable expects an input file argument it should be given here. e.g.
+        > ./foo bar.txt
+ * file_definitions: Name of a Python file containing string variables for any additional files that should
+                     be present at execution. At run time rsopt will try to fill any string format fields with
+                     values from the settings and/or parameter blocks.
+                     This field is optional.
+ * file_mapping: A mapping of the variable names in `file_definitions` to the file names each should be written to.
+                 This field is only needed if `file_definitions` is given.
+
+If you need to edit what would be your input_file with values from settings/parameters then `input_file` can be left blank
+and instead you can provide the input file through the file_definitions/file_mapping interface. You will then
+need to include the input file name through `code_arguments` (see: https://rsopt.readthedocs.io/en/latest/setup.html#general-setup-fields)
+
+The example show here can be run with:
+ > rsopt sample start config.yml

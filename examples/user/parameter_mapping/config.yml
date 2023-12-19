@@ -1,0 +1,16 @@
+codes:
+  - user:
+      settings:
+        val1: 55.e-1
+        val2: "etc, etc"
+      setup:
+        run_command: cat
+        input_file: run.py
+        file_definitions: input_files.py
+        file_mapping:
+          file_1: "parameter_file_1.txt"
+          file_2: "parameter_file_2.txt"
+        execution_type: serial
+options:
+  nworkers: 1
+  software: mesh_scan

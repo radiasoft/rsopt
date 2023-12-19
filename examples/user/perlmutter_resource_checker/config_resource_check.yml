@@ -1,0 +1,14 @@
+codes:
+  - user:
+      setup:
+        input_file:
+        run_command: check-mpi.gnu.pm
+        file_mapping: {}
+        execution_type: parallel
+        cores: 128
+        code_arguments:
+            "|":
+            "sort": "-k4"
+options:
+  nworkers: 1
+  software: mesh_scan

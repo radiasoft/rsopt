@@ -1,19 +1,31 @@
 import os
+import typing
 from pykern import pkio, pkrunpy
-from rsopt.configuration.setup.setup import Setup
-from rsopt.configuration.setup.python import Python
-from rsopt.configuration.setup.setup import Setup
+from rsopt.configuration.setup.setup import Setup, _get_application_path
+
 
 @Setup.register_setup()
-class User(Python):
+class User(Setup):
     __REQUIRED_KEYS = ('input_file', 'run_command', 'file_mapping', 'file_definitions')
     NAME = 'user'
 
     def __init__(self):
         super().__init__()
         self._BASE_RUN_PATH = pkio.py_path()
+        self.setup['file_mapping'] = {}
+        self.setup['input_file'] = ''
 
-    def get_run_command(self, is_parallel):
+    @classmethod
+    def parse_input_file(cls, input_file: str, shifter: str,
+                         ignored_files: typing.Optional[typing.List[str]] = None) -> None:
+        # user mode allows for explicitly skipping an input_file
+        if input_file is None:
+            return None
+
+        assert os.path.isfile(input_file), f'Could not find input_file: {input_file}'
+        return None
+
+    def get_run_command(self, is_parallel: bool):
         # run_command is provided by user so no check for serial or parallel run mode
         run_command = self.setup['run_command']
 
@@ -24,7 +36,7 @@ class User(Python):
         if self.setup.get('execution_type') == 'shifter':
             run_command = ' '.join([self.SHIFTER_COMMAND, run_command])
 
-        return run_command
+        return _get_application_path(run_command)
 
     def get_file_def_module(self):
 
@@ -45,14 +57,14 @@ class User(Python):
                 raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
         Setup._check_setup(setup)
 
-    def get_sym_link_targets(self):
-        if self.setup['input_file'] not in self.setup['file_mapping'].values():
+    def get_sym_link_targets(self) -> set:
+        if self.setup['input_file'] not in self.setup['file_mapping'].values() and self.setup['input_file']:
             # If file name in file_mapping then input_file being created dynamically, otherwise copy here
             return {self.setup['input_file']}
 
         return set()
 
-    def generate_input_file(self, kwarg_dict, directory, is_parallel):
+    def generate_input_file(self, kwarg_dict: dict, directory: str, is_parallel: bool):
 
         # Get strings for each file and fill in arguments for this job
         for key, val in self.setup['file_mapping'].items():
