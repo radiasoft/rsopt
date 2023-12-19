@@ -28,7 +28,8 @@ pksetup.setup(
                   'flask',
                   'user-agents',
                   'aenum',
-                  'SQLAlchemy'
+                  'SQLAlchemy',
+                  'dnspython'
                   ],
         'full': [
             'rsbeams@git+https://github.com/radiasoft/rsbeams',
