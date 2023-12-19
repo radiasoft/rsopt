@@ -100,7 +100,10 @@ class SingleSample(GridSampler):
 
         user_keys = {
                      'mesh_definition': mesh,
-                     'exact_mesh': True
+                     'exact_mesh': True,
+                     # Sampler repeats was already handled by self._define_mesh_parameters
+                     # Set to 1 here so the generator does not double up repetitions.
+                     'sampler_repeats': 1
                      }
 
         gen_out = [set_dtype_dimension(dtype, len(mesh)) for dtype in mesh_sampler_gen_out]
