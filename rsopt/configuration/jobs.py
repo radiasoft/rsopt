@@ -25,12 +25,15 @@ def create_executor_arguments(setup: Setup, is_parallel: bool) -> dict:
     # Really creates Executor.submit() arguments
     if is_parallel:
         args = {
-            'num_procs': setup.setup.get('cores', 1),
+            'num_procs': None if setup.setup.get('gpu', False) else setup.setup.get('cores', 1),
             'num_nodes': None,  # No user interface right now
             'procs_per_node': None, # No user interface right now
             'machinefile': None,  # Add in  setup.machinefile if user wants to control
             'app_args': setup.format_task_string(is_parallel),
             'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
+            'wait_on_start': True,
+            'auto_assign_gpus': setup.setup.get('gpu', False),
+            'match_procs_to_gpus': setup.setup.get('gpu', False),
             # 'app_name': None,  # Handled at optimizer setup
             # 'stdout': None,  # Handled at optimizer setup
             # 'stderr': None, # Handled at optimizer setup
@@ -42,6 +45,9 @@ def create_executor_arguments(setup: Setup, is_parallel: bool) -> dict:
         args = {
             'app_args': setup.format_task_string(is_parallel)
         }
+    # TODO: Should there really be this kind of hidden interface to override executor setup?
+    # for key, value in args.items():
+    #     args[key] = setup.setup.get(key, value)
 
     # Cannot be overridden
     args['calc_type'] = 'sim'
