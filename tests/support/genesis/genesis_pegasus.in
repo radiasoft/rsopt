@@ -1,0 +1,16 @@
+$newrun
+CURPEAK = 134.2
+DELGAM = 0.05
+FL = 49
+IDMPFLD = 1
+IDMPPAR = 1
+IPPART = 10
+IPRADI = 10
+OUTPUTFILE = 'genesis.out'
+PRAD0 = 0.1
+XLAMDS = 1.283e-05
+ZSTOP = 250
+NSEC = 2
+NWIG = 49
+
+$end
