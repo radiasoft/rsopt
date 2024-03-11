@@ -22,20 +22,28 @@ def configuration(config: str) -> ("numpy.ndarray", dict, "rsopt.configuration.c
     return H, persis_info, _config
 
 @run.cleaup
-def start(config):
+def start(config, n=1):
     """Run a single pass through the run chain in the configuration file.
 
     All settings are applied. Any parameters in the configuration are set to the value in `start`.
     The setting for `software` is ignored in this mode.
+    The run chain can be repeated multiple times. All settings and parameters will always be set to
+    their respective `start` values each time but this may be useful if there are random processes
+    in the simulation.
 
-    :param config: (str) Name of configuration file to use
-    :return:
+    Args:
+        config: (str) Name of configuration file to use
+        n: (int) Number of times to run the chain. Default is 1.
+
+    Returns:
+
     """
     _config = run.startup_sequence(config)
+    n = int(n)
 
-    # SingleSampler hardcodes nworkers to 1 and ignores user input
-    _config.options.nworkers = 1
-    runner = run.single_sampler(_config)
+    # nworkers may be set for a full scan - only use the minimum needed workers
+    _config.options.nworkers = min((_config.options.nworkers, n))
+    runner = run.single_sampler(_config, n=n)
     H, persis_info, _ = runner.run()
 
     return H, persis_info, _config

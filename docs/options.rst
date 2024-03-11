@@ -66,3 +66,20 @@ Global Options
   Options given here are passed directly to the libEnsemble Executor.
     - `hosts` [list] (rsmpi only): A list of rsmpi host indices that workers can use. To see your available host indices run
       :code:`rsmpi` on the command line. If not set rsmpi will be allowed to assign work to all rsmpi nodes available to you.
+- `seed` *[int or None or str]*: Sets the seed to initialize the pseudo-random number generator used by the sampler.
+  Behavior depends on the setting:
+    * :code:`''`: **default** If an empty string is given, or seed is not explicitly included then a fixed seed is set.
+         Seed is based on worker ID number. Repeated runs with this setting will always be repeatable.
+    * :code:`None`: If seed is set to :code: `None` then a random seed will be used. The run will not be repeatable.
+      **IMPORTANT**: To set a field to be
+      :code:`None`-type in YAML the field must be empty. So the options block should look like:
+
+        .. code-block:: yaml
+
+         options:
+          software: lh_scan
+          seed:
+          batch_size: 42
+
+
+    * :code:`int`: If set  be any integer between 0 and 2**32 - 1 inclusive then the integer is used as the seed initialize the pseudo-random number generator.

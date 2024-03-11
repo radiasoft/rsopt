@@ -27,7 +27,9 @@ The following required and optional keys can be used within the :code:`options:`
 * :code:`software` *[str (required)]*: :code:`mesh_scan`
 * :code:`mesh_file` *[str (optional)]*: The name of a file giving the points to evaluate for the scan. The array should
   be formatted to have a shape of (N, M) where N is the length of the parameter vector and M is the number of samples.
-
+* :code:`software_options` *[dict (optional)]*:
+  * :code:`sampler_repeats`: Default=1. Repeat the scan this many times. Repeated points will be run after the first
+    point until completed before new samples are run.
 
 Objective Function
 ^^^^^^^^^^^^^^^^^^

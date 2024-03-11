@@ -54,14 +54,14 @@ class TestSetupFeatures(unittest.TestCase):
             self.assertEqual(row, COMPLETED_STATUS_MESSAGE)
 
     def test_force_executor(self):
-        from libensemble.executors.mpi_executor import MPIExecutor
+        from libensemble.executors.executor import Executor
         os.chdir(self.run_dir.name)
         config_yaml = parse.read_configuration_file(self.timeout_config)
         _config = parse.parse_yaml_configuration(config_yaml)
         software = _config.options.NAME
         runner = run.run_modes[software](_config)
         runner._configure_executors()
-        self.assertTrue(isinstance(runner.executor, MPIExecutor))
+        self.assertTrue(isinstance(runner.executor, Executor))
         self.assertTrue(runner._config.jobs[0].executor)
 
     def test_ignored_files(self):

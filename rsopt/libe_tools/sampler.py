@@ -19,6 +19,7 @@ class GridSampler(libEnsembleOptimizer):
     def _configure_optimizer(self):
         self.nworkers = self._config.options.nworkers
         self.exact_mesh = self._config.options.mesh_file
+        sampler_repeats = int(self._config.options.software_options.get('sampler_repeats', 1))
 
         if self.exact_mesh:
             # Mesh should have shape (number of parameters, number of samples)
@@ -29,7 +30,8 @@ class GridSampler(libEnsembleOptimizer):
 
         user_keys = {
                      'mesh_definition': mesh,
-                     'exact_mesh': True if self.exact_mesh else False
+                     'exact_mesh': True if self.exact_mesh else False,
+                     'sampler_repeats': sampler_repeats
                      }
 
         gen_out = [set_dtype_dimension(dtype, len(mesh)) for dtype in mesh_sampler_gen_out]
@@ -44,14 +46,14 @@ class GridSampler(libEnsembleOptimizer):
 
         # Overwrite any use specified exit criteria and set based on scan
         self._config.options.exit_criteria = None
-        self.exit_criteria = {'sim_max': sim_max}
+        self.exit_criteria = {'sim_max': sim_max * sampler_repeats}
 
     def _configure_allocation(self):
         self.alloc_specs = {}
 
     def _configure_persistant_info(self):
         # _configure_specs must have been already called
-        self.persis_info = tools.create_empty_persis_info(self.libE_specs)
+        self.persis_info = add_unique_random_streams({}, self.nworkers + 1, seed=self._config.options.seed)
 
     def _define_mesh_parameters(self):
         mesh_parameters = []
@@ -70,24 +72,38 @@ class GridSampler(libEnsembleOptimizer):
 class SingleSample(GridSampler):
     # Run a single point using start values of parameters - or no parameters at all
     # mesh_file is ignored, even if given
+
+    def __init__(self, sampler_repeats:int = 1):
+        """
+
+        Args:
+            sampler_repeats: (int) Default 1. Rerun the start point this many times.
+        """
+        super().__init__()
+        self.sampler_repeats = sampler_repeats
+
     def _define_mesh_parameters(self):
         mesh_parameters = []
-        size = 1
+        size = self.sampler_repeats
 
         for lb, ub, s in zip(self.lb, self.ub, self.start):
             mesh_parameters.append(s)
         mesh_parameters = np.array(mesh_parameters).reshape(len(mesh_parameters), 1)
+        mesh_parameters = np.repeat(mesh_parameters, repeats=self.sampler_repeats, axis=1)
 
         return mesh_parameters, size
 
     def _configure_optimizer(self):
-        self.nworkers = 1
+        self.nworkers = self._config.options.nworkers
 
         mesh, sim_max = self._define_mesh_parameters()
 
         user_keys = {
                      'mesh_definition': mesh,
-                     'exact_mesh': True
+                     'exact_mesh': True,
+                     # Sampler repeats was already handled by self._define_mesh_parameters
+                     # Set to 1 here so the generator does not double up repetitions.
+                     'sampler_repeats': 1
                      }
 
         gen_out = [set_dtype_dimension(dtype, len(mesh)) for dtype in mesh_sampler_gen_out]

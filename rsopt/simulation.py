@@ -98,7 +98,7 @@ class SimulationFunction:
         self.persis_info = persis_info
         self.sim_specs = sim_specs
         self.libE_info = libE_info
-
+        self.J['rand_stream'] = self.persis_info['rand_stream']
         x = get_x_from_H(H, self.sim_specs)
 
         halt_job_sequence = False

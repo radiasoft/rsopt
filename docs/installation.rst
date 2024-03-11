@@ -6,7 +6,7 @@ Installation
 You will always need to ensure that the Python package pykern is installed prior to installing rsopt.
 If pykern is not yet installed it can be added with pip by running::
 
-    pip install pykern
+    pip install git+https://github.com/radiasoft/pykern
 
 For the minimum running configuration of rsopt you can install in a single command with::
 

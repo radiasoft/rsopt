@@ -21,7 +21,7 @@ class Genesis(Elegant):
     PARALLEL_RUN_COMMAND = 'genesis_mpi'
 
     @classmethod
-    def parse_input_file(cls, input_file: str, shifter: str,
+    def parse_input_file(cls, input_file: str, shifter: bool,
                          ignored_files: typing.Optional[typing.List[str]] = None):
         # assumes lume-genesis can be installed locally - shifter execution not needed
         # expand_paths is not used to ensure that generated input files are used if desired -
@@ -42,12 +42,14 @@ class Genesis(Elegant):
             # Can be made private if non-required code-specific fields are ever added
             if key not in (cls._KNOWN_KEYS + cls.__REQUIRED_KEYS):
                 raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
-        Setup.check_setup(setup)
+        SetupTemplated.check_setup(setup)
 
     def _edit_input_file_schema(self, kwarg_dict):
         # Name cases:
         # All lower for lume-genesis
-        param, elements = self.input_file_model.param, self.input_file_model.lattice['eles']
+        param = self.input_file_model.param
+        if self.input_file_model.lattice is not None:
+            elements = self.input_file_model.lattice['eles']
         model = deepcopy(self.input_file_model)
 
         for name, value in kwarg_dict.items():
@@ -74,5 +76,5 @@ class Genesis(Elegant):
             if os.path.isfile(full_path):
                 _create_sym_links(os.path.relpath(full_path))
 
-        # lume-genesis hard codes the input file name it write to as "genesis.in"
-        os.rename('genesis.in', self.setup['input_file'])
+        # lume-genesis hard codes the input file name it write to as "genesis_pegasus.in"
+        os.rename('genesis_pegasus.in', self.setup['input_file'])

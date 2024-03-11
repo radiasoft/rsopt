@@ -7,6 +7,7 @@ from pykern import pkresource
 from pykern import pkyaml
 import functools
 import importlib.util
+import os
 import pathlib
 import rsopt.util
 
@@ -14,6 +15,11 @@ import rsopt.util
 # This must be hardcoded because importing libensemble.gen_funcs to check the expected file name
 # will instantiate gen_funcs.RC before .opt_modules.csv is created by rsopt
 _OPT_MODULES_RELPATH = './gen_funcs/.opt_modules.csv'
+
+# Ensures that pre- and post-processing or objective functions do not encounter pickle errors on Mac
+if os.uname().sysname == 'Darwin':
+    from multiprocessing import set_start_method
+    set_start_method('fork', force=True)
 
 
 def startup_sequence(config: str) -> Configuration:
@@ -98,9 +104,9 @@ def grid_sampler(config: dict or pkcollections.PKDict or Configuration or str):
     return sample
 
 
-def single_sampler(config: dict or pkcollections.PKDict or Configuration or str):
+def single_sampler(config: dict or pkcollections.PKDict or Configuration or str, n:int = 1):
     from rsopt.libe_tools import sampler
-    sample = sampler.SingleSample()
+    sample = sampler.SingleSample(sampler_repeats=n)
     sample.load_configuration(config)
 
     return sample
