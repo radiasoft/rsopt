@@ -104,6 +104,9 @@ class Job:
     @property
     def is_parallel(self) -> bool:
         # parser will have already guaranteed that execution_type exists and is a valid value
+
+        # TODO: When force_Executor = True and cores=1 the return of create_executor_arguments doesn't return the mpiexecutor dictionary because is_parallel==False.
+        #  This causes improper core settings and ignores gpu usage requests.
         return (self.setup.get('cores', 1) > 1) & (self.setup.get('execution_type') != 'serial')
 
     @property
