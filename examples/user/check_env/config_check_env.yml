@@ -1,0 +1,12 @@
+codes:
+  - user:
+      setup:
+        run_command: get_env
+        execution_type: serial
+        force_executor: True
+        environment_variables:
+          MY_NEW_VAR: 4242
+          ANOTHER_IS: "hi_there"
+options:
+  nworkers: 1
+  software: mesh_scan
