@@ -1,6 +1,6 @@
 from rsopt.libe_tools import tools
 from rsopt.libe_tools import optimizer
-from libensemble.gen_funcs.persistent_deap_nsga2 import deap_nsga2
+from rsopt.libe_tools.generator_functions.persistent_deap_nsga2 import deap_nsga2
 from libensemble.alloc_funcs.start_only_persistent import only_persistent_gens
 
 
