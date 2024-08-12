@@ -3,7 +3,6 @@ from rsopt.configuration import parameters
 from rsopt.configuration import settings
 from rsopt.configuration.setup import setup
 from rsopt.configuration.setup import EXECUTION_TYPES
-_EXECUTORS = {'parallel'}
 
 
 class Configuration:

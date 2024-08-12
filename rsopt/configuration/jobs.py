@@ -96,9 +96,9 @@ class Job:
         return executor(self._setup.function, *args, **kwargs)
 
     @property
-    def is_parallel(self) -> bool:
+    def use_mpi(self) -> bool:
         # parser will have already guaranteed that execution_type exists and is a valid value
-        return (self.setup.get('cores', 1) > 1) & (self.setup.get('execution_type') != 'serial')
+        return self.setup.get('execution_type') != 'serial'
 
     @property
     def input_distribution(self):
@@ -184,16 +184,18 @@ class Job:
             self._setup.parse(name, value)
 
         # Setup for Executor
+        # TODO: Can this be removed if we fold force_executor into is_parallel
         if self.setup.get('force_executor') and not self.setup.get('cores'):
             self.setup['cores'] = 1
 
-        if (not self.is_parallel) & (self.setup.get('cores', 1) > 1):
+        if (not self.use_mpi) & (self.setup.get('cores', 1) > 1):
             print('Warning! serial execution requested with more than 1 core. Serial execution will be used.')
-        self.full_path = self._setup.get_run_command(is_parallel=self.is_parallel or self.setup.get('force_executor'))
-        self.executor_args = create_executor_arguments(self._setup, self.is_parallel)
+        self.full_path = self._setup.get_run_command(is_parallel=self.use_mpi)
+        self.executor_args = create_executor_arguments(self._setup, self.use_mpi)
 
-        if (self.is_parallel or self.setup.get('force_executor')) and self.code == 'python':
-            self.executor_args['app_args'] = _PARALLEL_PYTHON_RUN_FILE
+        # TODO: This should now be done by the python setup.format_task_string and can be removed from here after testing
+        # if (self.use_mpi or self.setup.get('force_executor')) and self.code == 'python':
+        #     self.executor_args['app_args'] = _PARALLEL_PYTHON_RUN_FILE
 
         # Import input_file
         if self._setup.setup.get('input_file'):
