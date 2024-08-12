@@ -70,6 +70,19 @@ General Setup Fields
               "--git-revision":
 
     Would execute OPAL with `opal --info 4 --help-command Monitor --git-revision  opal.in`.
+- `environment_variables` [dict]
+    Mapping of environment variable names and values. Environment variables will be set before each simulation is
+    started. This feature does not work with `python` code type but should work for any other code.
+
+    .. code-block:: yaml
+
+      - opal:
+          settings:
+          parameters:
+          setup:
+            environment_variables:
+              MY_NEW_VAR: 4242
+              ANOTHER_IS: "hi_there"
 
 Templated Code Fields
 ---------------------
