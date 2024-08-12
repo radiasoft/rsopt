@@ -49,9 +49,14 @@ def _shifter_parse_model(name: str, input_file: str, ignored_files: list) -> typ
 
 
 def _get_application_path(application_name: str) -> str:
-    full_path = shutil.which(application_name)
+    # Check if applications exists in the run directory 
+    full_path = shutil.which(pathlib.Path('.').joinpath(application_name).absolute())
+    # shutil.which will check in PATH and also passes if the full path to an executable was given
+    if not full_path:
+        full_path = shutil.which(application_name)
+        
     assert full_path, f"Could not find a path for application: {application_name}"
-    return full_path
+    return str(full_path)
 
 
 class Setup(abc.ABC):

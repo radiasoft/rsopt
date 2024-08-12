@@ -38,7 +38,8 @@ pksetup.setup(
             'DFO-LS',  # If using dfols optimizer
             'pandas',  # Needed for some post-processing utilities
             'xopt',  # If using MOBO algorithm for optimization
-            'pymoo'  # Used by some MOBO examples
+            'pymoo',  # Used by some MOBO examples
+            'deap'  # Used for NSGA-II algorithm implementation
         ]
     },
     license='http://www.apache.org/licenses/LICENSE-2.0.html',

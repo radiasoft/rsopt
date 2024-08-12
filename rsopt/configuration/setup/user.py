@@ -6,7 +6,8 @@ from rsopt.configuration.setup.setup import Setup, _get_application_path
 
 @Setup.register_setup()
 class User(Setup):
-    __REQUIRED_KEYS = ('input_file', 'run_command', 'file_mapping', 'file_definitions')
+    __REQUIRED_KEYS = ('run_command', )
+    __OPTIONAL_KEYS = ('file_mapping', 'file_definitions', 'input_file')
     NAME = 'user'
 
     def __init__(self):
@@ -19,10 +20,6 @@ class User(Setup):
     def parse_input_file(cls, input_file: str, shifter: str,
                          ignored_files: typing.Optional[typing.List[str]] = None) -> None:
         # user mode allows for explicitly skipping an input_file
-        if input_file is None:
-            return None
-
-        assert os.path.isfile(input_file), f'Could not find input_file: {input_file}'
         return None
 
     def get_run_command(self, is_parallel: bool):
@@ -45,17 +42,17 @@ class User(Setup):
         return module
 
     @classmethod
-    def _check_setup(cls, setup):
+    def check_setup(cls, setup):
         # Check globally required keys exist
         code = cls.NAME
         for key in cls.__REQUIRED_KEYS:
-            assert setup.get(key), f"{key} must be defined in setup for {code}"
+            assert key in setup, f"{key} must be defined in setup for {code}"
         # Validate for all keys (field in config file) are known to setup
         for key in setup.keys():
             # Can be made private if non-required code-specific fields are ever added
-            if key not in (cls._KNOWN_KEYS + cls.__REQUIRED_KEYS):
+            if key not in (cls._KNOWN_KEYS + cls.__REQUIRED_KEYS + cls.__OPTIONAL_KEYS):
                 raise KeyError(f'{key} in setup block for code-type {code} is not recognized.')
-        Setup._check_setup(setup)
+        Setup.check_setup(setup)
 
     def get_sym_link_targets(self) -> set:
         if self.setup['input_file'] not in self.setup['file_mapping'].values() and self.setup['input_file']:

@@ -3,6 +3,7 @@ The fields that generally need to be filled are:
  * run_command: An executable that must be in PATH at run time
  * input_file: If the executable expects an input file argument it should be given here. e.g.
         > ./foo bar.txt
+        then `input_file: bar.txt`. This field is optional.
  * file_definitions: Name of a Python file containing string variables for any additional files that should
                      be present at execution. At run time rsopt will try to fill any string format fields with
                      values from the settings and/or parameter blocks.

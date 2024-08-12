@@ -5,7 +5,7 @@ codes:
         val2: "etc, etc"
       setup:
         run_command: cat
-        input_file: run.py
+        input_file: parameter_file_1.txt
         file_definitions: input_files.py
         file_mapping:
           file_1: "parameter_file_1.txt"
