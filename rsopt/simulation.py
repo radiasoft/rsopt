@@ -112,6 +112,8 @@ class SimulationFunction:
                 f_pre(self.J)
             # Generate input files for simulation
             job._setup.generate_input_file(kwargs, '.', job.is_parallel)
+            # Create env setup script if required
+            env_setup_name = job.generate_env_setup()
             if self.switchyard and job.input_distribution:
                 if os.path.exists(job.input_distribution):
                     os.remove(job.input_distribution)
@@ -122,7 +124,7 @@ class SimulationFunction:
             if job.executor:
                 # MPI Job or non-Python executable
                 exctr = Executor.executor
-                task = exctr.submit(**job.executor_args)
+                task = exctr.submit(env_script=env_setup_name if env_setup_name else None, **job.executor_args)
                 while True:
                     time.sleep(_POLL_TIME)
                     task.poll()

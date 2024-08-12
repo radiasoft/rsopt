@@ -170,6 +170,11 @@ class Setup(abc.ABC):
         return []
 
     @property
+    def environment_variables(self) -> dict:
+        environment_variables = self.setup.get('environment_variables')
+        return environment_variables
+
+    @property
     def input_file_path(self) -> pathlib.Path:
         p = pathlib.Path(self.setup.get('input_file') or '')
 
