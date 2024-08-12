@@ -16,7 +16,7 @@ These are special commands that must be included in the ``setup`` portion of the
     in which case it is created dynamically at run time.
     (``input_file`` is also used by other code types, but is listed here for clarity)
 
-* ``run_command``: Command to be called when program is executed. For each simulation rsopt will execute a command.
+* ``run_command``: Executable to be called when program is run. rsopt will check for the executable in the run directory. If the executable is not found in the run directory the system PATH will be checked. The full path to the executable may also be provided.
 
 * ``file_definitions``: Python module that contains each file required by the user program to be generated at for each
     job. Each file should be entered as a string with entries that will be formatted by rsopt at run time. The variable
