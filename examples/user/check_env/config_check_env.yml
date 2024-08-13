@@ -10,8 +10,7 @@ codes:
       setup:
         run_command: get_env
         execution_type: serial
-        cores: 5
-#        force_executor: True
+        cores: 1
         environment_variables:
           MY_NEW_VAR: 4242
           ANOTHER_IS: "hi_there"
