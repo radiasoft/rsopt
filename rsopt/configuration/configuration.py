@@ -138,12 +138,10 @@ class Configuration:
         # Executor is created even for serial jobs
         # For serial Python the executor is not registerd with the Job and goes unused
 
-        # rsmpi is the only mutually exclusive option right now
-        executors = [j.setup.get('execution_type') for j in self.jobs if j.setup.get('execution_type')]
-        if executors.count('rsmpi') != len(executors) and executors.count('rsmpi') != 0:
-            raise NotImplementedError("rsmpi is not supported in combination with other executors")
-
-        # Right now we implicitly guarantee all executors will be same type
+        # libEnsemble does not support multiple types of executors
+        # Serial python can be run with exectors because it will be run by the worker directly if 'force_executor is not given
+        executors = [j.setup.get('execution_type') for j in self.jobs if (j.setup.get('execution_type') and j.use_executor)]
+        assert all([executors[0] == e for e in executors]), f"All Executors must be the same type. Executor list is: {executors}"
         executor = EXECUTION_TYPES[executors[0]]
 
         return executor(**self.options.executor_options)

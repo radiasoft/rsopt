@@ -3,7 +3,6 @@ from pykern import pkresource
 from rsopt.configuration.parameters import PARAMETER_READERS, Parameters
 from rsopt.configuration.settings import SETTING_READERS, Settings
 from rsopt.configuration.setup import SETUP_READERS
-from rsopt.configuration.setup.python import _PARALLEL_PYTHON_RUN_FILE
 from rsopt.configuration.setup.setup import Setup
 from rsopt.codes import serial_python
 import jinja2
@@ -105,6 +104,14 @@ class Job:
     def use_mpi(self) -> bool:
         # parser will have already guaranteed that execution_type exists and is a valid value
         return self.setup.get('execution_type') != 'serial'
+
+    @property
+    def use_executor(self) -> bool:
+        if self.code != 'python':
+            return True
+        if self.setup.get('force_executor'):
+            return True
+        return False
 
     @property
     def input_distribution(self):

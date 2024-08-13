@@ -26,12 +26,10 @@ General Setup Fields
 
 - `cores` [int]:
     Number of cores to use for parallel run modes (``parallel``, ``shifter``, ``rsmpi``). This is ignored for ``serial``.
-    By default if `cores: 1` is given then rsopt will use ``serial`` execution, if available. This behavior can be
-    overridden by specifying ``force_executor: True``
 - `force_executor` [bool]:
-    If True then ``parallel`` execution will be used if available even if only 1 core has been requested. Can be useful
-    to ensure that non-worker nodes (when available) are used for computationally-intensive, single-core simulations;
-    as the libEnsemble Executor will then handle distribution of the simulations to open resources.
+    If used with Python can be set to `True` to force a serial Python job to use an Executor. Otherwise Python jobs are
+    run directly by the worker. Kept as a general setup field for backwards compatibility even though it will only
+    have an effect when used with Python.
 - `timeout` [float]:
     If a simulation does not complete in `timeout` seconds the simulation will be ended and marked failed. Not currently
     an option for ``serial`` Python simulations.

@@ -84,8 +84,8 @@ class Python(Setup):
         if self.setup.get('execution_type') == 'shifter':
             run_command = 'shifter'
             return _get_application_path(run_command)
-        if is_parallel:
-            run_command = self._get_run_command(is_parallel)
+        if is_parallel or self.setup.get('force_executor'):
+            run_command = self._get_run_command(is_parallel=True)
             return _get_application_path(run_command)
 
         return ''

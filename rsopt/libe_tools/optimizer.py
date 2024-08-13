@@ -150,7 +150,7 @@ class libEnsembleOptimizer(Optimizer):
 
         # If the job has a run command then that job should use an executor
         for app_name, job in zip(app_names, self._config.jobs):
-            if not job.full_path:
+            if not job.use_executor:
                 pass
             else:
                 if not self.executor:
