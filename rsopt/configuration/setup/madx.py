@@ -11,8 +11,8 @@ class Madx(Elegant):
     NAME = 'madx'
 
     @classmethod
-    def _check_setup(cls, setup):
-        Elegant._check_setup(setup)
+    def check_setup(cls, setup):
+        Elegant.check_setup(setup)
 
         # MAD-X is serial only
         execution_type = setup.get('execution_type')

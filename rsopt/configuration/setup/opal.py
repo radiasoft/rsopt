@@ -10,7 +10,7 @@ class Opal(Elegant):
     NAME = 'opal'
 
     @classmethod
-    def _check_setup(cls, setup):
+    def check_setup(cls, setup):
         # Check globally required keys exist
         code = cls.NAME
         for key in cls.__REQUIRED_KEYS:
