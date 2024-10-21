@@ -135,6 +135,14 @@ class Setup(abc.ABC):
 
         return d
 
+    @property
+    def _get_filename(self) -> str:
+        filename = pathlib.Path(
+            # empty string allows for input_file of None in user jobs
+            self.setup.get('input_file', '') or ''
+        ).name
+
+        return filename
 
     def format_task_string(self, is_parallel: bool) -> str:
         task_string = '{shifter_setup} {shifter_app} {app_arguments} {filename}'
@@ -152,10 +160,7 @@ class Setup(abc.ABC):
         task_string = task_string.format(shifter_setup=shifter_setup,
                                          shifter_app=shifter_app,
                                          app_arguments=app_arguments,
-                                         filename=pathlib.Path(
-                                             # empty string allows for input_file of None in user jobs
-                                             self.setup.get('input_file', '') or ''
-                                         ).name
+                                         filename=self._get_filename
                                          )
 
         return task_string
