@@ -32,6 +32,13 @@ class Python(Setup):
 
         return self.setup['function']
 
+    @property
+    def _get_filename(self) -> str:
+        # Serial python is run on worker so this is never used unless is_parallel==True
+        filename = _PARALLEL_PYTHON_RUN_FILE
+
+        return filename
+
     @classmethod
     def parse_input_file(cls, input_file: str, shifter: str,
                          ignored_files: typing.Optional[typing.List[str]] = None) -> None:
