@@ -50,7 +50,7 @@ def create_executor_arguments(setup: Setup, is_parallel: bool) -> dict:
 
     # Cannot be overridden
     args['calc_type'] = 'sim'
-    args['wait_on_start'] = True
+    args['wait_on_start'] = 8
 
     return args
 
