@@ -18,6 +18,30 @@ class BaseResult(pydantic.BaseModel):
     def path(self) -> pathlib.Path:
         return self.base_path.joinpath(f"worker{self.sim_worker}/sim{self.sim_id:0{_SIM_PATH_ZEROS}}")
 
+
+class Results:
+    def __init__(self, results, parameters):
+        # Create an index for each attribute
+        self._indexed_parameters = {param: sortedcontainers.SortedDict() for param in parameters}
+        self.objects = results
+
+        # Populate the indexes
+        for obj in results:
+            for param in parameters:
+                value = getattr(obj, param)
+                if value not in self._indexed_parameters[param]:
+                    self._indexed_parameters[param][value] = []
+                self._indexed_parameters[param][value].append(obj)
+
+    def range_query(self, parameter: str, low, high):
+        index = self._indexed_parameters[parameter]
+        keys_in_range = index.irange(low, high)
+        result = []
+        for key in keys_in_range:
+            result.extend(index[key])
+        return result
+
+
 def history_to_dict(H: np.ndarray, x_names=None) -> dict:
     data = {}
     for name in H.dtype.names:
