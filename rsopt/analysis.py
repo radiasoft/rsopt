@@ -63,6 +63,17 @@ def load_results(directory: str,
     x_names = gather_config_params(config)
     model = create_model(config)
 
+    results = []
+
+    for h in history:
+        results.append(
+            model(**history_to_dict(h, x_names=x_names), base_path=directory)
+        )
+
+    return results
+
+
+
 
 
 
