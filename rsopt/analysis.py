@@ -1,5 +1,5 @@
 import pathlib
-from typing import Any
+import sortedcontainers
 from ruamel.yaml import YAML
 import numpy as np
 import pandas as pd
@@ -7,7 +7,7 @@ import pydantic
 
 _SIM_PATH_ZEROS = 4
 
-class BaseResult(pydantic.BaseModel):
+class BaseResult(pydantic.BaseModel, extra='allow'):
     sim_id: int
     sim_worker: int
     sim_ended: bool
@@ -20,10 +20,11 @@ class BaseResult(pydantic.BaseModel):
 
 
 class Results:
+    # TODO: Could try to load preprocess and set attributes from them
     def __init__(self, results, parameters):
         # Create an index for each attribute
         self._indexed_parameters = {param: sortedcontainers.SortedDict() for param in parameters}
-        self.objects = results
+        self.results = results
 
         # Populate the indexes
         for obj in results:
@@ -32,6 +33,9 @@ class Results:
                 if value not in self._indexed_parameters[param]:
                     self._indexed_parameters[param][value] = []
                 self._indexed_parameters[param][value].append(obj)
+
+    def __iter__(self):
+        return iter(self.results)
 
     def range_query(self, parameter: str, low, high):
         index = self._indexed_parameters[parameter]
@@ -77,8 +81,7 @@ def create_model(config: dict) -> pydantic.BaseModel:
 
 def load_results(directory: str,
                  config_name: str or None = None,
-                 history_name: str or None = None) -> pd.DataFrame:
-    directory = pathlib.Path(directory)
+                 history_name: str or None = None) -> list[BaseResult]:
     config = YAML(typ='safe').load(
         pathlib.Path(config_name) if config_name is not None else [f for f in directory.glob('*.yml')][0]
     )
