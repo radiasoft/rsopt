@@ -1,8 +1,8 @@
 import pydantic
 import typing
 from rsopt.configuration.schemas.parameters import NumericParameter, CategoryParameter, parameter_discriminator
+from rsopt.configuration.schemas.settings import Setting
 from typing_extensions import Annotated
-
 
 
 class Code(pydantic.BaseModel, extra='allow'):
@@ -19,20 +19,35 @@ class Code(pydantic.BaseModel, extra='allow'):
             ],
             pydantic.Discriminator(parameter_discriminator)
         ]
-    ] = None
-    settings: str  # Optional
+    ] = pydantic.Field(default_factory=list)
+    settings: list[Setting] = pydantic.Field(default_factory=list)
 
     @pydantic.field_validator('parameters', mode='before')
     @classmethod
-    def format_codes_list(cls, parsed_params: dict):
+    def format_parameters_list(cls, parsed_params: dict):
         """
         This validator transforms the list of dictionaries from the YAML format
         into a format compatible with the Pydantic model by extracting the key as 'code'.
         """
-        return [{"name": k, **v} for k, v in parsed_params.items()]
+        if parsed_params:
+            return [{"name": k, **v} for k, v in parsed_params.items()]
+        else:
+            return []
+
+    @pydantic.field_validator('settings', mode='before')
+    @classmethod
+    def format_settings_list(cls, parsed_settings: dict):
+        if parsed_settings:
+            print([{"name": k, "value": v} for k, v in parsed_settings.items()])
+            return [{"name": k, "value": v} for k, v in parsed_settings.items()]
+        else:
+            return []
 
     @pydantic.model_validator(mode='after')
     def set_dynamic_attributes(self):
         for param in self.parameters:
             setattr(self, param.name, param)
+
+        for setting in self.settings:
+            setattr(self, setting.name, setting)
         return self
