@@ -1,6 +1,7 @@
-from pykern.pkyaml import load_file
+import pathlib
 from rsopt.configuration import Configuration, Job, Options
 from rsopt.codes import SUPPORTED_CODES
+from ruamel.yaml import YAML
 
 _CODE_FIELD = 'codes'  # TODO: Might be more consistent to change this this field title to 'jobs'
 _PARAMETERS_FIELD = 'parameters'
@@ -53,13 +54,18 @@ def _read_options(template: dict):
     return options
 
 
-def read_configuration_file(filename):
+def read_configuration_file(filename: str) -> dict:
+    """Read YAML file to dict.
+
+    Args:
+        filename: (str) Path to YAML file containing rsopt configuration.
+
+    Returns: dict
+
     """
-    Load a configuration file stored in YAML format into a dictionary
-    :param filename: (str) Path to configuration file
-    :return: (PKDict) Dictionary holding the configuration
-    """
-    return load_file(filename)
+    return YAML(typ='safe').load(
+        pathlib.Path(filename)
+    )
 
 
 def parse_yaml_configuration(template: dict, configuration=None) -> Configuration:

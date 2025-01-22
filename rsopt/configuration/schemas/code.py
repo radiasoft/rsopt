@@ -4,7 +4,8 @@ from rsopt.configuration.schemas.parameters import NumericParameter, CategoryPar
 from rsopt.configuration.schemas.settings import Setting
 from typing_extensions import Annotated
 
-
+# TODO: The extra=allow is necessary with the method of dynamic parameter/setting attribute addition. But does mean
+#       that extra fields a use might have put in the parameters/settings will be silently ignored here
 class Code(pydantic.BaseModel, extra='allow'):
     """Hold data from items in code list of the configuration.
 

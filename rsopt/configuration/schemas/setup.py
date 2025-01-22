@@ -1,9 +1,13 @@
 import pydantic
 from rsopt.configuration import setup
 
+# TODO: Right now this just provides the basic validation of inputs from the config file
+#       the plan is to hand this over to the existing rsopt.configuration.setup to be used as normal
+#       In the future it could be useful to consider folding rsopt.configuration.setup classes into the pydantic models
+
 class Setup(pydantic.BaseModel):
-    preprocess: list[str, str] = None
-    postprocess: list[str, str] = None
+    preprocess: list[str] = pydantic.Field(default=None, min_length=2, max_length=2)
+    postprocess: list[str] = pydantic.Field(default=None, min_length=2, max_length=2)
     execution_type: setup.EXECUTION_TYPES
     input_file: str
     input_distribution: str = None  # TODO: could be a delayed validation against previous code (might be too hard to be worth it)

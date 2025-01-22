@@ -3,10 +3,23 @@ from libensemble.executors import MPIExecutor, Executor
 from rsopt.libe_tools.executors import register_rsmpi_executor
 
 class EXECUTION_TYPES(Enum):
-    serial: Executor
-    parallel: MPIExecutor
-    rsmpi: register_rsmpi_executor
-    shifter: MPIExecutor
+    SERIAL = 'serial'
+    PARALLEL = 'parallel'
+    RSMPI = 'rsmpi'
+    SHIFTER = 'shifter'
+
+    def __init__(self, exec_type):
+        self.exec_type = exec_type
+
+        self._map = {'serial': Executor,
+                     'parallel': MPIExecutor,
+                     'rsmpi': register_rsmpi_executor,
+                     'shifter': MPIExecutor
+        }
+
+    @property
+    def exec_obj(self):
+        return self._map[self.exec_type]
 
 def iter_setup_dict(setup: dict):
     for name, values in setup.items():
