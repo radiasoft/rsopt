@@ -5,12 +5,9 @@ import rsopt.codes
 _SUPPORTED_CODES = typing.Annotated[rsopt.codes.SUPPORTED_CODES, pydantic.Field(discriminator='code')]
 
 class Configuration(pydantic.BaseModel):
-    # TODO: I would have thought the discriminator would restrict what is checked
-    #       if the input has a value for code that matches a known model then why do
-    #       the error messages indicate that all other code models are also tried
-    # Check: https://github.com/pydantic/pydantic/issues/9830
-
     codes: list[_SUPPORTED_CODES] = pydantic.Field(discriminator='code')
+    software: OPTIONS = pydantic.Field(discriminator='software')
+
 
     @pydantic.field_validator('codes', mode='before')
     @classmethod

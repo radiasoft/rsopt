@@ -1,3 +1,4 @@
+import typing
 from typing import Any, Optional, Union, List
 import pydantic
 
@@ -18,7 +19,7 @@ class NumericParameter(Parameter):
     start: Union[int, float]
     # TODO: Checking requirement means looking at Options
     samples: Optional[int] = 1
-    # scale: Optional[]
+    scale: Union[typing.Literal['linear'], typing.Literal['log']] = 'linear'
 
 class CategoryParameter(Parameter):
     values: List[Union[int, float, str]]

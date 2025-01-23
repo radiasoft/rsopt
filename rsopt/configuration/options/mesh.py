@@ -1,12 +1,10 @@
-from rsopt.configuration.options import Options
-
+from rsopt.configuration.schemas.options import Options
+import pydantic
+import typing
 
 class Mesh(Options):
-    NAME = 'mesh_scan'
-    REQUIRED_OPTIONS = ()
+    software = typing.Literal['mesh_scan']
+    nworkers: int = 1
+    mesh_file: pydantic.FilePath = ''
 
-    def __init__(self):
-        super().__init__()
-        self.use_zero_resource = False
-        self.nworkers = 1
-        self.mesh_file = ''
+    use_zero_resources: bool = pydantic.Field(default=False, frozen=True)

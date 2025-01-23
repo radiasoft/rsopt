@@ -44,6 +44,9 @@ PARAMETER_READERS = {
     PKDict: read_parameter_dict
 }
 
+# TODO: Pydantic parameter models either need to go in Parameters.parameters
+#       or I need to just refactor the access to parameters. The latter could make for better handling
+#       of new options like 'scale'
 
 class Parameters:
     def __init__(self):
