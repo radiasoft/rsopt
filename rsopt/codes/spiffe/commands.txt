@@ -1,0 +1,5 @@
+[ExampleCommand]
+param1 = 42
+# param2 = commented out
+param3 = 3.14
+    
