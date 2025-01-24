@@ -1,10 +1,10 @@
+import abc
 import pydantic
 import typing
-
 # TODO: This will completely replace the rsopt.configuration.options.Options
 #       Options schema will also be removed
 
-class Options(pydantic.BaseModel):
+class Options(pydantic.BaseModel, abc.ABC):
     # TODO: software can probably be an enum and will be a discriminator
     software: str
     nworkers: int = 2
@@ -23,21 +23,39 @@ class Options(pydantic.BaseModel):
 
     use_zero_resources: bool = pydantic.Field(default=True, frozen=True)
 
-    # TODO: Working on implementing optimizer_schema values and getters
-    type: pydantic.ClassVar[str] = "local or global"
+    @property
+    @abc.abstractmethod
+    def type(self) -> str:
+        pass
 
+    @property
+    @abc.abstractmethod
+    def methods(self) -> list[str]:
+        pass
 
-    def get_sim_specs(self):
-        # This is the most common sim_spec setting. It is updated by libEnsembleOptimizer if a different value needed.
-        # TODO: It's not clear why this is defined here.
-        #  It is something that will vary by Option class but is otherwise static.
-        #  Maybe it should be put into the options schema?
-        sim_specs = {
-            'in': ['x'],
-            'out': [('f', float), ]
-        }
+    # def get_sim_specs(self):
+    #     # This is the most common sim_spec setting. It is updated by libEnsembleOptimizer if a different value needed.
+    #     # TODO: It's not clear why this is defined here.
+    #     #  It is something that will vary by Option class but is otherwise static.
+    #     #  Maybe it should be put into the options schema?
+    #     sim_specs = {
+    #         'in': ['x'],
+    #         'out': [('f', float), ]
+    #     }
+    #
+    #     return sim_specs
 
-        return sim_specs
+class SimSpecs(pydantic.BaseModel):
+    inputs: list[str] = pydantic.Field(alias='in')
+    outputs: list[str]
+
+class Method(pydantic.BaseModel):
+    method: str
+    se
+    aposmm_support: bool
+    local_support: bool
+    persis_in: list[str]
+    sim_specs: SimSpecs
 
 
 class ExitCriteria(pydantic.BaseModel):
