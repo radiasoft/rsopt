@@ -36,7 +36,7 @@ class ExitCriteria(pydantic.BaseModel):
     stop_val: typing.Optional[tuple[str, float]] = None
 
 
-class Options(pydantic.BaseModel, abc.ABC):
+class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
     software: str
     method: Method
     nworkers: int = 2
@@ -47,7 +47,7 @@ class Options(pydantic.BaseModel, abc.ABC):
     output_file: str = ''
     copy_final_logs: bool = True
     sym_links: list[typing.Union[pydantic.FilePath, pydantic.DirectoryPath]] = pydantic.Field(default_factory=list)
-    # objective_function: tuple[pydantic.FilePath, str] #= pydantic.Field(default=None)
+    objective_function: tuple[pydantic.FilePath, str] = pydantic.Field(default=None)
     seed: typing.Union[None, str, int] = ''
 
     # TODO: This could end up being its own model
@@ -60,6 +60,8 @@ class Options(pydantic.BaseModel, abc.ABC):
             self.method.sim_specs._initialized_dynamic_outputs.append(
                 output_type + (getattr(self, param),)
             )
+
+        return self
 
 
 class OptionsExit(Options):
