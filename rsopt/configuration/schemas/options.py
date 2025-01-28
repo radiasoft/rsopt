@@ -1,12 +1,12 @@
 import abc
 import pydantic
 import typing
+
+
 # TODO: This will completely replace the rsopt.configuration.options.Options
 #       Options schema will also be removed
 
 class Options(pydantic.BaseModel, abc.ABC):
-    # TODO: software can probably be an enum and will be a discriminator
-    software: str
     nworkers: int = 2
     run_dir: str = './ensemble/'
     record_interval: int = 1
@@ -20,42 +20,35 @@ class Options(pydantic.BaseModel, abc.ABC):
 
     # TODO: This could end up being its own model
     executor_options: dict = pydantic.Field(default_factory=dict)
-
     use_zero_resources: bool = pydantic.Field(default=True, frozen=True)
 
-    @property
-    @abc.abstractmethod
-    def type(self) -> str:
-        pass
+    # Class Variables
+    # TODO: software and/or methods as  an enum?
+    _software = typing.ClassVar[str]
+    _method = typing.ClassVar[Method]
+    _type = typing.ClassVar[str]
+    _methods = typing.ClassVar[list[str]]
 
-    @property
-    @abc.abstractmethod
-    def methods(self) -> list[str]:
-        pass
+    @pydantic.field_validator('method', mode='after')
+    def set_outputs_size(self, v):
+        """Some sim specs require a size set at initialization."""
+        for output in v:
+            if len(output) == 3:
+                if getattr(self, output[2]):
+                    setattr(self, output[2], getattr(self, output[2]))
 
-    # def get_sim_specs(self):
-    #     # This is the most common sim_spec setting. It is updated by libEnsembleOptimizer if a different value needed.
-    #     # TODO: It's not clear why this is defined here.
-    #     #  It is something that will vary by Option class but is otherwise static.
-    #     #  Maybe it should be put into the options schema?
-    #     sim_specs = {
-    #         'in': ['x'],
-    #         'out': [('f', float), ]
-    #     }
-    #
-    #     return sim_specs
 
 class SimSpecs(pydantic.BaseModel):
     inputs: list[str] = pydantic.Field(alias='in')
-    outputs: list[str]
+    outputs: list[list[str]]
 
-class Method(pydantic.BaseModel):
-    method: str
-    se
-    aposmm_support: bool
-    local_support: bool
-    persis_in: list[str]
-    sim_specs: SimSpecs
+
+class Method(pydantic.BaseModel, abc.ABC):
+    name: str
+    aposmm_support: typing.ClassVar[bool]
+    local_support: typing.ClassVar[bool]
+    persis_in: typing.ClassVar[list[str]]
+    sim_specs: typing.ClassVar[SimSpecs]
 
 
 class ExitCriteria(pydantic.BaseModel):
@@ -63,6 +56,7 @@ class ExitCriteria(pydantic.BaseModel):
     gen_max: typing.Optional[int]
     elapsed_wallclock_time: typing.Optional[float]
     stop_val: typing.Optional[tuple[str, float]]
+
 
 class OptionsExit(Options):
     exit_criteria: ExitCriteria
@@ -75,4 +69,3 @@ class OptionsExit(Options):
     typing:
       - str
     """
-
