@@ -17,7 +17,9 @@ pksetup.setup(
         'numpy',
         'nlopt',
         'mpmath',
-        'jinja2>=3.0.1'
+        'jinja2>=3.0.1',
+        'sortedcontainers',
+        'pydantic'
     ],
     extras_require={
         'nersc': ['rsbeams@git+https://github.com/radiasoft/rsbeams',
