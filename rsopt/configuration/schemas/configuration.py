@@ -5,11 +5,12 @@ import rsopt.configuration.options
 import pydantic_core
 
 _SUPPORTED_CODES = typing.Annotated[rsopt.codes.SUPPORTED_CODES, pydantic.Field(discriminator='code')]
-_SUPPORTED_OPTIONS = rsopt.configuration.options.SUPPORTED_OPTIONS
+_SUPPORTED_SCAN_OPTIONS = rsopt.configuration.options.SUPPORTED_SCAN_OPTIONS
+_SUPPORTED_OPTIMIZER_OPTIONS = rsopt.configuration.options.SUPPORTED_OPTIMIZER_OPTIONS
 
 class Configuration(pydantic.BaseModel, extra='forbid'):
     codes: list[_SUPPORTED_CODES] = pydantic.Field(discriminator='code')
-    options: _SUPPORTED_OPTIONS = pydantic.Field(discriminator='software')
+    options: _SUPPORTED_SCAN_OPTIONS = pydantic.Field(discriminator='software')
 
 
     @pydantic.field_validator('codes', mode='before')
@@ -21,6 +22,9 @@ class Configuration(pydantic.BaseModel, extra='forbid'):
         """
         return [{"code": key, **value} for item in parsed_data for key, value in item.items()]
 
+
+class ConfigurationOptimization(Configuration):
+    options: _SUPPORTED_OPTIMIZER_OPTIONS = pydantic.Field(discriminator='software')
     @pydantic.model_validator(mode='after')
     def check_objective_function_requirement(self):
         """If the last code listed is Python and runs on the worker then an objective function is not required."""
