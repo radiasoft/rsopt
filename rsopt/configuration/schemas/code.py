@@ -70,9 +70,8 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
         pass
 
     @property
-    @abc.abstractmethod
     def get_sym_link_targets(self) -> set:
-        pass
+        return set()
 
     @abc.abstractmethod
     def generate_input_file(self, kwarg_dict: dict, directory: str, is_parallel: bool) -> None:
