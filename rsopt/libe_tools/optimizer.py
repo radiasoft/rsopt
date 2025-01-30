@@ -3,7 +3,6 @@ from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
 from libensemble.tools import add_unique_random_streams
 from rsopt.libe_tools import tools
-from rsopt.optimizer import Optimizer
 from rsopt.libe_tools.interface import get_local_optimizer_method
 from rsopt.simulation import SimulationFunction
 from pykern import pkyaml
@@ -45,21 +44,24 @@ def _set_app_names(config):
     return app_names
 
 
-class libEnsembleOptimizer(Optimizer):
+class libEnsembleOptimizer:
     # Configurationf or Local Optimization through uniform_or_localopt
     # Just sets up a local optimizer for now
     _NAME = 'libEnsemble'
-    _SPECIFICATION_DICTS = ['gen_specs', 'libE_specs', 'sim_specs', 'alloc_specs']
     _OPT_SCHEMA = OPT_SCHEMA
 
-    def __init__(self):
-        super(libEnsembleOptimizer, self).__init__()
+    def __init__(self, config_model):
+        self._config = config_model
         self.options = []
         self.H0 = None
         self.executor = None  # Set by method
         self.nworkers = 2  # Always 2 for local optimizer (1 for sim worker and 1 for persis generator)
-        for spec in self._SPECIFICATION_DICTS:
-            self.__setattr__(spec, {})
+
+        self.gen_specs = {}
+        self.libE_specs = {}
+        self.sim_specs = {}
+        self.alloc_specs = {}
+        self.exit_criteria = self._config.options.exit_criteria.model_dump()
 
 
     def run(self, clean_work_dir=False):
@@ -73,18 +75,16 @@ class libEnsembleOptimizer(Optimizer):
 
     def _configure_optimizer(self):
         local_opt_method = get_local_optimizer_method(self._config.method, self._config.software)
-        gen_out = [tools.set_dtype_dimension(dtype, self.dimension) for dtype in persistent_local_opt_gen_out]
-        user_keys = {'lb': self.lb,
-                     'ub': self.ub,
+        gen_out = [tools.set_dtype_dimension(dtype, self._config.dimension) for dtype in persistent_local_opt_gen_out]
+        user_keys = {'lb': self._config.lower_bounds,
+                     'ub': self._config.upper_bounds,
                      'initial_sample_size': 1,
-                     'xstart': self.start,
+                     'xstart': self._config.start,
                      'localopt_method': local_opt_method,
                      **self._config.options.software_options}
 
-        for key, val in self._options.items():
-            user_keys[key] = val
         self.gen_specs.update({'gen_f': persistent_local_opt,
-                               'persis_in': self._set_persis_in(self._config.software, local_opt_method) +
+                               'persis_in': self._config.options.method.sim_specs.persis_in +
                                             [n[0] for n in gen_out],
                                'out': gen_out,
                                'user': user_keys})
@@ -125,10 +125,9 @@ class libEnsembleOptimizer(Optimizer):
         self.libE_specs['dedicated_mode'] = True  # This used to be called 'central_mode' and was set in Executor
         self.libE_specs['disable_resource_manager'] = False  # This used to be called 'auto_resources and was set in Executor
 
-        # TODO: Need to enable once 9.3 is supported
-        # self.libE_specs['stats_fmt'] = {'task_timing': True,
-        #                                 'task_datetime': True
-        #                                 }
+        self.libE_specs['stats_fmt'] = {'task_timing': True,
+                                        'task_datetime': True
+                                        }
 
         if self._config.rsmpi_executor:
             self.libE_specs['resource_info'] = {'cores_on_node':
@@ -163,7 +162,6 @@ class libEnsembleOptimizer(Optimizer):
         self.executor = self._config.create_exector()
 
     def _configure_libE(self):
-        self._set_dimension()
         self._configure_optimizer()
         self._configure_allocation()
         self._configure_specs()
@@ -172,41 +170,8 @@ class libEnsembleOptimizer(Optimizer):
         self._configure_sim()
         self._cleanup()
 
-        if self._config.options.exit_criteria:
-            self.set_exit_criteria(self._config.options.exit_criteria)
-
-        if not self.exit_criteria:
-            _def_max = 1e6
-            print(f'No libEnsemble exit criteria set. Optimizer will terminate at sim_max: {_def_max}.')
-            self.exit_criteria = {'sim_max': int(_def_max)}
-        else:
-            self._config.options.exit_criteria = self.exit_criteria
-
     def _cleanup(self):
         import shutil, os
 
         if self.clean_working_directory and os.path.isdir(self._config.options.run_dir):
             shutil.rmtree(self._config.options.run_dir)
-
-    def _set_persis_in(self, software, method):
-        # method name should be returned from get_local_optimizer_method
-        # only sets the unique (to the method) portion of the persis_in fiel
-        s = self._OPT_SCHEMA[software]
-        m = s['methods'][method]
-
-        return m['persis_in']
-
-    def set_exit_criteria(self, exit_criteria):
-        """
-        Controls libEnsemble manage stopping point. This will override the optimizer if you have
-        set tolerance or other stopping criteria for the optimization method.
-        :param exit_criteria:
-        :return:
-        """
-        options = ['sim_max', 'gen_max', 'elapsed_wallclock_time', 'stop_val']
-        self.exit_criteria = {}
-        for key, val in exit_criteria.items():
-            if key in options:
-                self.exit_criteria[key] = val
-            else:
-                raise KeyError(f'{key} is not a valid exit criteria option for libEnsemble')
