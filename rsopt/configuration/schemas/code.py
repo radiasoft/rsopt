@@ -3,6 +3,9 @@ import pydantic
 import typing
 from rsopt.configuration.schemas.parameters import NumericParameter, CategoryParameter, parameter_discriminator
 from rsopt.configuration.schemas.settings import Setting
+from rsopt.configuration.schemas.setup import Setup
+from rsopt.configuration.setup import EXECUTION_TYPES
+from rsopt import util
 from typing_extensions import Annotated
 
 # TODO: The extra=allow is necessary with the method of dynamic parameter/setting attribute addition. But does mean
@@ -23,6 +26,8 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
         ]
     ] = pydantic.Field(default_factory=list)
     settings: list[Setting] = pydantic.Field(default_factory=list)
+    setup: Setup
+
 
     @pydantic.field_validator('parameters', mode='before')
     @classmethod
@@ -56,10 +61,50 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
 
     @classmethod
     @abc.abstractmethod
-    def serial_run_command(cls):
+    def serial_run_command(cls) -> str or None:
         pass
 
     @classmethod
     @abc.abstractmethod
-    def parallel_run_command(cls):
+    def parallel_run_command(cls) -> str or None:
         pass
+
+    @property
+    @abc.abstractmethod
+    def get_sym_link_targets(self) -> set:
+        pass
+
+    @abc.abstractmethod
+    def generate_input_file(self, kwarg_dict: dict, directory: str, is_parallel: bool) -> None:
+        pass
+
+    @property
+    def use_executor(self) -> bool:
+        return True
+
+    @property
+    def use_mpi(self) -> bool:
+        return self.setup.execution_type != EXECUTION_TYPES.SERIAL
+
+    @pydantic.model_validator(mode='after')
+    def instantiate_process_functions(self):
+        for process in ('preprocess', 'postprocess'):
+            if getattr(self.setup, process) is not None:
+                module_path, function_name = getattr(self.setup, process)
+                module = util.run_path_as_module(module_path)
+                function = getattr(module, function_name)
+            else:
+                function = None
+            setattr(self, f'get_{process}_func', function)
+
+        return self
+
+    @property
+    def get_preprocess_function(self) -> callable or None:
+        # set by model validator
+        return None
+
+    @property
+    def get_postprocess_function(self) -> callable or None:
+        # set by model validator
+        return None

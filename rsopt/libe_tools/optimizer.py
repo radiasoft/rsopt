@@ -31,9 +31,9 @@ def _configure_executor(job, name, executor):
 def _set_app_names(config):
     codes = {}
     app_names = []
-    for job in config.jobs:
+    for code in config.codes:
         index = 1
-        code = job.code
+        code = code.code
         if codes.get(code):
             index += codes[code]
         app_name = f'{code}_{index}'
@@ -74,17 +74,19 @@ class libEnsembleOptimizer:
         return H, persis_info, flag
 
     def _configure_optimizer(self):
-        local_opt_method = get_local_optimizer_method(self._config.method, self._config.software)
+        local_opt_method = get_local_optimizer_method(self._config.options.method.name,
+                                                      self._config.options.software)
         gen_out = [tools.set_dtype_dimension(dtype, self._config.dimension) for dtype in persistent_local_opt_gen_out]
         user_keys = {'lb': self._config.lower_bounds,
                      'ub': self._config.upper_bounds,
                      'initial_sample_size': 1,
                      'xstart': self._config.start,
                      'localopt_method': local_opt_method,
-                     **self._config.options.software_options}
+                     **self._config.options.software_options.model_dump()
+                     }
 
         self.gen_specs.update({'gen_f': persistent_local_opt,
-                               'persis_in': self._config.options.method.sim_specs.persis_in +
+                               'persis_in': self._config.options.method.persis_in +
                                             [n[0] for n in gen_out],
                                'out': gen_out,
                                'user': user_keys})
@@ -101,16 +103,8 @@ class libEnsembleOptimizer:
         self.comms = 'local'
 
         # Directory structure setup
-        if self._config.sim_dirs_required():
-                self.libE_specs['sim_dirs_make'] = True
-                if self.libE_specs['sim_dirs_make'] != self._config.options.sim_dirs_make:
-                    logger.warning('Requested option '
-                                   '`sim_dirs_make: {}` cannot be used\n'.format(self._config.options.sim_dirs_make) +
-                                   'Setting `sim_dirs_make: True`\n')
-        else:
-            self.libE_specs['sim_dirs_make'] = self._config.options.sim_dirs_make
+        self.libE_specs['sim_dirs_make'] = True
         self.libE_specs['use_worker_dirs'] = self._config.options.use_worker_dirs
-
         self.libE_specs['ensemble_dir_path'] = self._config.options.run_dir
 
         # Files needed for each simulation
@@ -125,8 +119,13 @@ class libEnsembleOptimizer:
         self.libE_specs['dedicated_mode'] = True  # This used to be called 'central_mode' and was set in Executor
         self.libE_specs['disable_resource_manager'] = False  # This used to be called 'auto_resources and was set in Executor
 
-        self.libE_specs['stats_fmt'] = {'task_timing': True,
-                                        'task_datetime': True
+        # If no executor is used libEnsemble will raise an error for calculation of task_timing
+        if any([c.use_executor for c in self._config.codes]):
+            executor_timings = True
+        else:
+            executor_timings = False
+        self.libE_specs['stats_fmt'] = {'task_timing': executor_timings,
+                                        'task_datetime': executor_timings
                                         }
 
         if self._config.rsmpi_executor:
@@ -135,20 +134,25 @@ class libEnsembleOptimizer:
                                                      EXECUTOR_SCHEMA['rsmpi']['cores_on_node']['logical_cores']),
                                                 'node_file': EXECUTOR_SCHEMA['rsmpi']['node_file']}
 
-        if self._config.options.use_zero_resource:
+        if self._config.options.use_zero_resources:
             # Do not assign resources to the generator
             self.libE_specs['zero_resource_workers'] = [1]
 
     def _configure_sim(self):
-        sim_function = SimulationFunction(self._config.jobs, self._config.options.objective_function)
-        self.sim_specs.update({'sim_f': sim_function,
-                               **self._config.options.get_sim_specs()})
+        sim_function = SimulationFunction(self._config.codes, self._config.options.objective_function)
+        self.sim_specs.update(
+            {
+                'sim_f': sim_function,
+                'inputs': self._config.options.method.sim_specs.inputs,
+                'outputs': self._config.options.method.sim_specs.outputs,
+            }
+        )
 
     def _configure_executors(self):
         app_names = _set_app_names(self._config)
 
         # If the job has a run command then that job should use an executor
-        for app_name, job in zip(app_names, self._config.jobs):
+        for app_name, job in zip(app_names, self._config.codes):
             if not job.use_executor:
                 pass
             else:

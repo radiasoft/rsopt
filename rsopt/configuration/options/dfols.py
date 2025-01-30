@@ -3,7 +3,7 @@ import pydantic
 import typing
 
 class MethodDfols(options.Method):
-    name: typing.Literal['dfols']
+    name: typing.Literal['dfols'] = 'dfols'
     aposmm_support = True
     local_support = True
     persis_in = ['f', 'fvec']
@@ -20,7 +20,8 @@ class DfolsOptions(options.SoftwareOptions, extra='allow'):
 
 class Dfols(options.OptionsExit):
     software: typing.Literal['dfols']
-    method: typing.Union[MethodDfols] = pydantic.Field(default=MethodDfols, discriminator='name')
+    # TODO: using name as discriminator means user needs to pass method: {'name': dfols} not method: dfols
+    method: typing.Union[MethodDfols] = pydantic.Field(default=MethodDfols(), discriminator='name')
     software_options: DfolsOptions
 
 

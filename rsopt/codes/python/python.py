@@ -1,4 +1,6 @@
+import importlib.resources
 import jinja2
+import pathlib
 import pydantic
 import sys
 import typing
@@ -8,10 +10,12 @@ from rsopt import util
 
 _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
-_TEMPLATE_PATH = pkio.py_path(pkresource.filename(''))
+
+# TODO: This will need to be set once installation is updated
+_TEMPLATE_PATH = ''
 
 class Setup(setup_schema.Setup):
-    input_File: pydantic.FilePath
+    input_file: pydantic.FilePath
     serial_python_mode: typing.Literal["process", "thread", "worker"] = 'worker'
     function: str or callable
 
@@ -21,14 +25,20 @@ class Python(code.Code):
 
     _function: callable
 
-    @pydantic.field_validator('setup', mode='after')
+    @pydantic.model_validator(mode='after')
     def instantiate_function(self):
         # libEnsemble workers change active directory - sys.path will not record locally available modules
         sys.path.append('.')
 
         module = util.run_path_as_module(self.setup.input_file)
-        function = getattr(module, self.setup['function'])
+        function = getattr(module, self.setup.function)
         self._function = function
+
+        return self
+
+    @property
+    def get_function(self) -> typing.Callable:
+        return self._function
 
     @classmethod
     def serial_run_command(cls) -> str or None:
@@ -46,11 +56,18 @@ class Python(code.Code):
 
         return filename
 
+    @property
     def get_sym_link_targets(self) -> set:
         return {self.setup.input_file}
 
+    @property
+    def use_executor(self) -> bool:
+        if self.setup.force_executor:
+            return True
+        return False
+
     def generate_input_file(self, kwarg_dict, directory, is_parallel):
-        if not is_parallel and not self.setup.get('force_executor', False):
+        if not is_parallel and not self.setup.force_executor:
             return None
 
         template_loader = jinja2.FileSystemLoader(searchpath=_TEMPLATE_PATH)
@@ -65,10 +82,10 @@ class Python(code.Code):
             kwarg_dict.pop(k)
 
         output_template = template.render(dict_item=kwarg_dict, dict_item_str=dict_item_str,
-                                          full_input_file_path=self.setup['input_file'],
-                                          function=self.setup['function'])
+                                          full_input_file_path=self.setup.input_file,
+                                          function=self.setup.function)
 
-        file_path = os.path.join(directory, _PARALLEL_PYTHON_RUN_FILE)
+        file_path = pathlib.Path(directory).joinpath(_PARALLEL_PYTHON_RUN_FILE)
 
         with open(file_path, 'w') as ff:
             ff.write(output_template)

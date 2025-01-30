@@ -1,13 +1,31 @@
+import importlib.machinery
+import importlib.util
 import numpy as np
+import os
 import pathlib
 import pickle
-import os
 import re
 import shutil
 import sys
 import typing
-from pykern import pkrunpy
-import libensemble.tools
+
+
+def run_path_as_module(fname):
+    """Runs ``fname`` in a module.
+
+    Args:
+        fname (str or pathlib.Path): file to be exec'd
+
+    Returns:
+        module: imported file as a module
+    """
+    fname = str(fname)
+    mn = pathlib.Path(fname).name.replace(".", "_")
+    m = importlib.util.module_from_spec(importlib.machinery.ModuleSpec(mn, None))
+    with open(fname, "rt") as f:
+        code = compile(f.read(), fname, "exec")
+    exec(code, m.__dict__)
+    return m
 
 
 SLURM_PREFIX = 'nid'
@@ -109,16 +127,16 @@ def broadcast(data, root_rank=0):
     return MPI.COMM_WORLD.bcast(data, root=root_rank)
 
 
-def save_final_history(config, H, persis_info, message) -> (str, str):
-    if config.options.output_file:
-        filename = config.options.output_file
+def save_final_history(configuration, loaded_config_path, H, persis_info, message) -> (str, str):
+    if configuration.options.output_file:
+        filename = configuration.options.output_file
 
         return save_libE_output(H, persis_info, filename, message, custom_filename=True)
     else:
-        filename = pathlib.Path(config.configuration_file).stem
+        filename = pathlib.Path(loaded_config_path).stem
         history_file_name = "H_" + filename
 
-        return save_libE_output(H, persis_info, history_file_name, config.options.nworkers, mess=message)
+        return save_libE_output(H, persis_info, history_file_name, configuration.options.nworkers, mess=message)
 
 
 def save_libE_output(H, persis_info, calling_file, nworkers, mess="Run completed", custom_filename=False) -> (str, str):
@@ -157,26 +175,25 @@ def save_libE_output(H, persis_info, calling_file, nworkers, mess="Run completed
     return h_filename + ".npy", p_filename + ".pickle"
 
 
-def get_objective_function(import_list: typing.List[str]) -> callable:
+def get_objective_function(obj_definition: tuple[str, str] or None) -> callable:
     """Returns the function object from module.
 
     Args:
-        import_list: (list) [path to module (str), function name (str)]
+        obj_definition: (list or tuple) [path to module (str), function name (str)]
 
     Returns: (callable) function
 
     """
 
     # import the objective function if given
-    if len(import_list) == 2:
-        module_path, function = import_list
+    if obj_definition is not None:
+        module_path, function_name = obj_definition
         sys.path.append(os.getcwd())
-        module = pkrunpy.run_path_as_module(module_path)
-        function = getattr(module, function)
-    else:
-        function = None
+        module = run_path_as_module(module_path)
+        function = getattr(module, function_name)
+        return function
 
-    return function
+    return None
 
 
 def copy_final_logs(config_filename: str,

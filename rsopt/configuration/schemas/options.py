@@ -32,7 +32,7 @@ class Method(pydantic.BaseModel, abc.ABC):
 class ExitCriteria(pydantic.BaseModel):
     sim_max: typing.Optional[int] = None
     gen_max: typing.Optional[int] = None
-    elapsed_wallclock_time: typing.Optional[float] = None
+    wallclock_max: typing.Optional[float] = None
     stop_val: typing.Optional[tuple[str, float]] = None
 
 class SoftwareOptions(pydantic.BaseModel, abc.ABC):
@@ -43,6 +43,7 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
     method: Method
     nworkers: int = 2
     run_dir: str = './ensemble/'
+    record_interval: pydantic.PositiveInt = 0
     save_every_k_sims: int = pydantic.Field(default=1, alias='record_interval')
     use_worker_dirs: bool = True
     sim_dirs_make: bool = True
@@ -55,7 +56,7 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
 
     # TODO: This could end up being its own model
     executor_options: dict = pydantic.Field(default_factory=dict)
-    use_zero_resources: bool = pydantic.Field(default=True, frozen=True)
+    use_zero_resources: bool = pydantic.Field(default=True, frozen=True, exclude=True)
 
     @pydantic.model_validator(mode='after')
     def initialize_dynamic_outputs(self):

@@ -10,11 +10,11 @@ class Setup(pydantic.BaseModel, abc.ABC):
     preprocess: list[str] = pydantic.Field(default=None, min_length=2, max_length=2)
     postprocess: list[str] = pydantic.Field(default=None, min_length=2, max_length=2)
     execution_type: setup.EXECUTION_TYPES
-    input_file: str
+    input_file: str  # In general should be str because the input_file may be produced at run time
     input_distribution: str = None  # TODO: could be a delayed validation against previous code (might be too hard to be worth it)
     output_distribution: str = None
     cores: pydantic.PositiveInt = pydantic.Field(default=1)
-    timeout: pydantic.PositiveFloat = pydantic.Field(default=None)
+    timeout: pydantic.PositiveFloat = pydantic.Field(default=1324512000)
     force_executor: bool = False
     ignored_files: list[str] = None
     shifter_image: str = None

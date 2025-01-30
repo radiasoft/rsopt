@@ -15,7 +15,7 @@ def configuration(config: str):
     """
     _config_dict = parse.read_configuration_file(config)
     _config = parse.parse_optimize_configuration(_config_dict)
-    _config = run.startup_sequence(config)
+    _config = run.startup_sequence(_config)
 
 
     runner = run.run_modes[_config.options.software](_config)
