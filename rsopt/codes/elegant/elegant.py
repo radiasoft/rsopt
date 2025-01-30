@@ -8,3 +8,11 @@ class Setup(setup_schema.Setup):
 class Elegant(code.Code):
     code: typing.Literal['elegant']
     setup: Setup
+
+    @classmethod
+    def serial_run_command(cls) -> str or None:
+        return 'elegant'
+
+    @classmethod
+    def parallel_run_command(cls) -> str or None:
+        return 'Pelegant'

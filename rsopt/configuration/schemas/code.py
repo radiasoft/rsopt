@@ -1,3 +1,4 @@
+import abc
 import pydantic
 import typing
 from rsopt.configuration.schemas.parameters import NumericParameter, CategoryParameter, parameter_discriminator
@@ -6,7 +7,7 @@ from typing_extensions import Annotated
 
 # TODO: The extra=allow is necessary with the method of dynamic parameter/setting attribute addition. But does mean
 #       that extra fields a use might have put in the parameters/settings will be silently ignored here
-class Code(pydantic.BaseModel, extra='allow'):
+class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
     """Hold data from items in code list of the configuration.
 
     Specific implementations of defined for each code in rsopt.codes.
@@ -52,3 +53,13 @@ class Code(pydantic.BaseModel, extra='allow'):
         for setting in self.settings:
             setattr(self, setting.name, setting)
         return self
+
+    @classmethod
+    @abc.abstractmethod
+    def serial_run_command(cls):
+        pass
+
+    @classmethod
+    @abc.abstractmethod
+    def parallel_run_command(cls):
+        pass

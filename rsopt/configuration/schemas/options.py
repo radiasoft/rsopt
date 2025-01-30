@@ -35,13 +35,15 @@ class ExitCriteria(pydantic.BaseModel):
     elapsed_wallclock_time: typing.Optional[float] = None
     stop_val: typing.Optional[tuple[str, float]] = None
 
+class SoftwareOptions(pydantic.BaseModel, abc.ABC):
+    pass
 
 class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
     software: str
     method: Method
     nworkers: int = 2
     run_dir: str = './ensemble/'
-    record_interval: int = 1
+    save_every_k_sims: int = pydantic.Field(default=1, alias='record_interval')
     use_worker_dirs: bool = True
     sim_dirs_make: bool = True
     output_file: str = ''
@@ -49,6 +51,7 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
     sym_links: list[typing.Union[pydantic.FilePath, pydantic.DirectoryPath]] = pydantic.Field(default_factory=list)
     objective_function: tuple[pydantic.FilePath, str] = pydantic.Field(default=None)
     seed: typing.Union[None, str, int] = ''
+    software_options: SoftwareOptions
 
     # TODO: This could end up being its own model
     executor_options: dict = pydantic.Field(default_factory=dict)
@@ -57,8 +60,14 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
     @pydantic.model_validator(mode='after')
     def initialize_dynamic_outputs(self):
         for param, output_type in self.method.sim_specs.dynamic_outputs.items():
+            if hasattr(self, param):
+                size = getattr(self, param)
+            elif hasattr(self.software_options, param):
+                size = getattr(self.software_options, param)
+            else:
+                raise AttributeError(f"{param} not a member of {self}")
             self.method.sim_specs._initialized_dynamic_outputs.append(
-                output_type + (getattr(self, param),)
+                output_type + (size,)
             )
 
         return self

@@ -2,8 +2,8 @@ import typing
 from rsopt.configuration.options import dfols
 from rsopt.configuration.options import mesh
 
-SUPPORTED_SCAN_OPTIONS = typing.Union[mesh.Mesh]
-SUPPORTED_OPTIMIZER_OPTIONS = typing.Union[dfols.Dfols, mesh.Mesh]
+SUPPORTED_SAMPLE_OPTIONS = typing.Union[mesh.Mesh]
+SUPPORTED_OPTIMIZE_OPTIONS = typing.Union[dfols.Dfols, mesh.Mesh]
 
 # import pathlib
 # import typing

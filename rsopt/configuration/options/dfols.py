@@ -15,8 +15,14 @@ class MethodDfols(options.Method):
         }
     )
 
+class DfolsOptions(options.SoftwareOptions, extra='allow'):
+    components: int
 
 class Dfols(options.OptionsExit):
     software: typing.Literal['dfols']
     method: typing.Union[MethodDfols] = pydantic.Field(default=MethodDfols, discriminator='name')
-    components: int
+    software_options: DfolsOptions
+
+
+def get_required_fields(model):
+    return [field_name for field_name, field in model.__fields__.items() if field.required]

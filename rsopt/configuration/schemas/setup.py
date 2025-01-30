@@ -1,3 +1,4 @@
+import abc
 import pydantic
 from rsopt.configuration import setup
 
@@ -5,7 +6,7 @@ from rsopt.configuration import setup
 #       the plan is to hand this over to the existing rsopt.configuration.setup to be used as normal
 #       In the future it could be useful to consider folding rsopt.configuration.setup classes into the pydantic models
 
-class Setup(pydantic.BaseModel):
+class Setup(pydantic.BaseModel, abc.ABC):
     preprocess: list[str] = pydantic.Field(default=None, min_length=2, max_length=2)
     postprocess: list[str] = pydantic.Field(default=None, min_length=2, max_length=2)
     execution_type: setup.EXECUTION_TYPES
