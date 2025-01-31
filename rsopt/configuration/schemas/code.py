@@ -54,7 +54,6 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
     @classmethod
     def format_settings_list(cls, parsed_settings: dict):
         if parsed_settings:
-            print([{"name": k, "value": v} for k, v in parsed_settings.items()])
             return [{"name": k, "value": v} for k, v in parsed_settings.items()]
         else:
             return []

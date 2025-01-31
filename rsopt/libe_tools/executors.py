@@ -81,7 +81,7 @@ def format_task_string(job: "import rsopt.configuration.schemas.code") -> str:
 
     app_arguments = " ".join([f"{k} {v if v else ''}" for k, v in job.setup.code_arguments.items()])
 
-    filename = pathlib.Path(job.setup.input_file).stem
+    filename = pathlib.Path(job.setup.input_file).name
 
     task_string = task_string.format(shifter_setup=shifter_setup,
                                      shifter_app=shifter_app,

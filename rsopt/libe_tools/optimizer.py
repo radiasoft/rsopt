@@ -142,7 +142,7 @@ class libEnsembleOptimizer:
             self.libE_specs['zero_resource_workers'] = [1]
 
     def _configure_sim(self):
-        sim_function = SimulationFunction(self._config.codes, self._config.options.objective_function)
+        sim_function = SimulationFunction(self._config.codes, self._config.options.instantiated_objective_function)
         self.sim_specs.update(
             {
                 'sim_f': sim_function,

@@ -1,6 +1,8 @@
 import abc
 import pydantic
 import typing
+from functools import cached_property
+from rsopt import util
 
 
 # TODO: This will completely replace the rsopt.configuration.options.Options
@@ -72,6 +74,15 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
             )
 
         return self
+
+    @cached_property
+    def instantiated_objective_function(self) -> typing.Callable or None:
+        if self.objective_function is not None:
+            module_path, function_name = self.objective_function
+            module = util.run_path_as_module(module_path)
+            function = getattr(module, function_name)
+            return function
+        return None
 
 
 class OptionsExit(Options):

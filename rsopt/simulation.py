@@ -4,6 +4,7 @@ import numpy as np
 import os
 import rsopt.conversion
 import rsopt.util
+import typing
 from libensemble import message_numbers
 from libensemble.executors.executor import Executor
 from collections.abc import Iterable
@@ -90,7 +91,7 @@ def format_evaluation(sim_specs, container):
 
 
 class SimulationFunction:
-    def __init__(self, jobs: list[code.Code], objective_function: list):
+    def __init__(self, jobs: list[code.Code], objective_function: typing.Callable):
         # Received from libEnsemble during function evaluation
         self.H = None
         self.J = {}
@@ -183,13 +184,12 @@ class SimulationFunction:
 
         if self.J['sim_status'] == message_numbers.WORKER_DONE and not halt_job_sequence:
             # Use objective function if given
-            _obj_f = rsopt.util.get_objective_function(self.objective_function)
-            if _obj_f:
-                val = _obj_f(self.J)
+            if self.objective_function:
+                val = self.objective_function(self.J)
                 output = format_evaluation(self.sim_specs, val)
                 self.log.info('val: {}, output: {}'.format(val, output))
             else:
-                # If only serial python was run then then objective_function doesn't need to be defined
+                # If only serial python was run then objective_function doesn't need to be defined
                 try:
                     output = format_evaluation(self.sim_specs, f)
                 except NameError as e:
