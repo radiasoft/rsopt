@@ -1,9 +1,45 @@
 import typing
+from enum import Enum
 from rsopt.configuration.options import dfols
 from rsopt.configuration.options import mesh
 
-SUPPORTED_SAMPLE_OPTIONS = typing.Union[mesh.Mesh]
-SUPPORTED_OPTIMIZE_OPTIONS = typing.Union[dfols.Dfols, mesh.Mesh]
+# SUPPORTED_SAMPLE_OPTIONS = typing.Union[mesh.Mesh]
+# SUPPORTED_OPTIMIZE_OPTIONS = typing.Union[dfols.Dfols]
+
+class SUPPORTED_OPTIONS(Enum):
+    mesh = 'sample'
+    dfols = 'optimize'
+
+    def __init__(self, _):
+        self._map = {'mesh': mesh.Mesh,
+                     'dfols': dfols.Dfols,
+                     }
+
+    @property
+    def model(self):
+        return self._map[self.name]
+
+    @classmethod
+    def get_sample_names(cls) -> tuple[str, ...]:
+        """Returns a list of option names that can be used by sample command"""
+        return tuple([name for name, member in cls.__members__.items() if member.value == 'sample'])
+
+    @classmethod
+    def get_sample_models(cls) -> tuple:
+        """Returns a list of models for options that can be used by sample command"""
+        return tuple([name.model for name in cls if getattr(cls, name.name).value == 'sample'])
+
+    @classmethod
+    def get_optimize_name(cls) -> tuple[str, ...]:
+        """Returns a list of option names that can be used by optimize command"""
+        return tuple([name for name, member in cls.__members__.items() if member.value == 'optimize'])
+
+    @classmethod
+    def get_optimize_models(cls) -> tuple:
+        """Returns a list of models for options that can be used by optimize command"""
+        return tuple([name.model for name in cls if getattr(cls, name.name).value == 'optimize'])
+
+# TODO: Remove if not needed at end of pydantic refactor
 
 # import pathlib
 # import typing

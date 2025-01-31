@@ -6,15 +6,20 @@ import pydantic_core
 
 import numpy as np
 
-_SUPPORTED_CODES = typing.Annotated[rsopt.codes.SUPPORTED_CODES, pydantic.Field(discriminator='code')]
-_SUPPORTED_SCAN_OPTIONS = rsopt.configuration.options.SUPPORTED_SAMPLE_OPTIONS
-_SUPPORTED_OPTIMIZER_OPTIONS = rsopt.configuration.options.SUPPORTED_OPTIMIZE_OPTIONS
+from rsopt.configuration.options import SUPPORTED_OPTIONS
 
-class Configuration(pydantic.BaseModel, extra='forbid'):
+_SUPPORTED_CODES = typing.Annotated[rsopt.codes.SUPPORTED_CODES, pydantic.Field(discriminator='code')]
+_SUPPORTED_SAMPLE_OPTIONS = typing.Annotated[typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_sample_models()], pydantic.Field(discriminator='software')]
+_SUPPORTED_OPTIMIZER_OPTIONS = typing.Annotated[typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_optimize_models()], pydantic.Field(discriminator='software')]
+
+
+
+class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
     codes: list[_SUPPORTED_CODES] = pydantic.Field(discriminator='code')
-    options: _SUPPORTED_SCAN_OPTIONS = pydantic.Field(discriminator='software')
+    options: _SUPPORTED_SAMPLE_OPTIONS = pydantic.Field(discriminator='software')
 
     # MPI Communicator fields
+    # For libEnsemble use - should not be used to determine individual code parallel/serial operation
     comms: typing.Literal['mpi', 'local'] = pydantic.Field(default='local', exclude=True)
     mpi_size: int = pydantic.Field(default=0, exclude=True)
     is_manager: bool = pydantic.Field(default=True, exclude=True)
@@ -85,7 +90,7 @@ class Configuration(pydantic.BaseModel, extra='forbid'):
 
         return list(sym_link_files)
 
-class ConfigurationOptimize(Configuration):
+class ConfigurationOptimize(ConfigurationSample):
     options: _SUPPORTED_OPTIMIZER_OPTIONS = pydantic.Field(discriminator='software')
     @pydantic.model_validator(mode='after')
     def check_objective_function_requirement(self):
@@ -101,4 +106,21 @@ class ConfigurationOptimize(Configuration):
                                                 'an objective_function must be set in options: {options}.',
                                                 {'code': self.codes[-1].code, 'options': self.options}
                                                 )
-    
+
+
+def _config_discriminator(v: dict) -> str:
+    if v['options']['software'] in SUPPORTED_OPTIONS.get_sample_names():
+        return 'sample'
+    elif v['options']['software'] in SUPPORTED_OPTIONS.get_optimize_name():
+        return 'optimize'
+
+# This is thin wrapper to get the proper Configuration class based on run mode
+# So far this is really only necessary for the 'start' command which overrides the behavior of the selected software
+#  and can thus accept either sample or optimize configs
+class Configuration(pydantic.BaseModel):
+    configuration: typing.Annotated[
+            typing.Union[typing.Annotated[ConfigurationSample, pydantic.Tag('sample')],
+                         typing.Annotated[ConfigurationOptimize, pydantic.Tag('optimize')]
+            ],
+            pydantic.Discriminator(_config_discriminator)
+        ]
