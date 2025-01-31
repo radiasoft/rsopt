@@ -34,6 +34,27 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         """
         return [{"code": key, **value} for item in parsed_data for key, value in item.items()]
 
+    @pydantic.field_validator('codes', mode='after')
+    @classmethod
+    def check_executors(cls, codes):
+        # libEnsemble does not support multiple types of executors
+        # Serial python can be run with executors because it will be run by the worker directly
+        # if 'force_executor' is not given
+
+        executors = [c.setup.execution_type for c in codes if c.use_executor]
+        assert all([executors[0] == e for e in executors]), \
+            f"All Executors must be the same type. Executor list is: {executors}"
+
+        return codes
+
+    @property
+    def executor_type(self) -> 'rsopt.libe_tools.executors.EXECUTOR_TYPES':
+        """libEnsemble Executor to use for any codes not run directly by workers."""
+        executors = [c.setup.execution_type for c in self.codes if c.use_executor]
+        if len(executors) > 0:
+            return executors[0]
+        return None
+
     @property
     def lower_bounds(self) -> np.ndarray:
         # TODO: This is going to need handling when we have non-numeric data or require discriminating between float and int
