@@ -23,7 +23,7 @@ class Python(code.Code):
     code: typing.Literal["python"]
     setup: Setup
 
-    _function: callable
+    _function: typing.Callable
 
     @pydantic.model_validator(mode='after')
     def instantiate_function(self):
