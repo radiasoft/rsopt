@@ -12,12 +12,16 @@ class MethodMeshScan(options.Method):
         static_outputs=[('f', float),],
     )
 
+class SoftwareOptionsMesh(options.SoftwareOptions):
+    sampler_repeats: pydantic.PositiveInt = pydantic.Field(default=1, gt=0)
+    mesh_file: pydantic.FilePath = ''
+
 class Mesh(options.Options, validate_assignment=True):
     # validate_assigment is used because the outputs field may be updated after initial instantiation
     software: typing.Literal['mesh_scan']
     method: typing.Union[MethodMeshScan] = pydantic.Field(default=MethodMeshScan(name='mesh_scan'), discriminator='name')
+    software_options: SoftwareOptionsMesh = SoftwareOptionsMesh()
     nworkers: int = 1
-    mesh_file: pydantic.FilePath = ''
     outputs: list[tuple[str, type, int]] = pydantic.Field(default_factory=list)
 
     use_zero_resources: bool = pydantic.Field(default=False, frozen=True)
