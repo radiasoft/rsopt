@@ -1,17 +1,22 @@
 import abc
 import pydantic
 import typing
+from functools import cached_property
 from rsopt.configuration.schemas.parameters import NumericParameter, CategoryParameter, parameter_discriminator
 from rsopt.configuration.schemas.settings import Setting
 from rsopt.configuration.schemas.setup import Setup
-from rsopt.configuration.setup import EXECUTION_TYPES
+from rsopt.libe_tools.executors import EXECUTION_TYPES
 from rsopt import util
+from rsopt import parse
 from typing_extensions import Annotated
 
 # TODO: The extra=allow is necessary with the method of dynamic parameter/setting attribute addition. But does mean
 #       that extra fields a use might have put in the parameters/settings will be silently ignored here
 class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
     """Hold data from items in code list of the configuration.
+
+    Internally rsopt refers to items in the code list as "Jobs" since each code will be a separate simulation
+    or calculation that must be performed.
 
     Specific implementations of defined for each code in rsopt.codes.
     Instances of Code have parameters and settings dynamically set as attributes.
@@ -28,6 +33,10 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
     settings: list[Setting] = pydantic.Field(default_factory=list)
     setup: Setup
 
+    # TODO: Make _executor_arguments a computed_field?
+    # Executor arguments are passed to libEnsemble's Executor submit command
+    # Will not be set directly by user - set by the libEnsemble setup class from the info in Code
+    _executor_arguments: dict
 
     @pydantic.field_validator('parameters', mode='before')
     @classmethod
@@ -59,6 +68,19 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
             setattr(self, setting.name, setting)
         return self
 
+    @pydantic.model_validator(mode='after')
+    def instantiate_process_functions(self):
+        for process in ('preprocess', 'postprocess'):
+            if getattr(self.setup, process) is not None:
+                module_path, function_name = getattr(self.setup, process)
+                module = util.run_path_as_module(module_path)
+                function = getattr(module, function_name)
+            else:
+                function = None
+            setattr(self, f'get_{process}_function', function)
+
+        return self
+
     @classmethod
     @abc.abstractmethod
     def serial_run_command(cls) -> str or None:
@@ -85,25 +107,25 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
     def use_mpi(self) -> bool:
         return self.setup.execution_type != EXECUTION_TYPES.SERIAL
 
-    @pydantic.model_validator(mode='after')
-    def instantiate_process_functions(self):
-        for process in ('preprocess', 'postprocess'):
-            if getattr(self.setup, process) is not None:
-                module_path, function_name = getattr(self.setup, process)
-                module = util.run_path_as_module(module_path)
-                function = getattr(module, function_name)
-            else:
-                function = None
-            setattr(self, f'get_{process}_func', function)
-
-        return self
-
     @property
-    def get_preprocess_function(self) -> callable or None:
-        # set by model validator
-        return None
+    def run_command(self):
+        if self.use_mpi:
+            return self.parallel_run_command()
+        return self.serial_run_command()
 
-    @property
-    def get_postprocess_function(self) -> callable or None:
-        # set by model validator
-        return None
+    @pydantic.computed_field
+    # @cached_property
+    def input_file_model(self) -> dict or None:
+        input_file_model = parse.parse_simulation_input_file(self.setup.input_file, self.code,
+                                                             self.setup.ignored_files,
+                                                             self.setup.execution_type == EXECUTION_TYPES.SHIFTER)
+        return input_file_model
+    # @property
+    # def get_preprocess_function(self) -> callable or None:
+    #     # set by model validator
+    #     return None
+    #
+    # @property
+    # def get_postprocess_function(self) -> callable or None:
+    #     # set by model validator
+    #     return None

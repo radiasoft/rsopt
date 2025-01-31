@@ -1,5 +1,6 @@
 import jinja2
 import pathlib
+import shutil
 
 _ENV_TEMPLATE = 'env_setup.jinja'
 ENV_RUN_FILE = 'env_setup'
@@ -21,3 +22,24 @@ def generate_env_setup(environment_variables) -> str:
         return ENV_RUN_FILE
 
     return ''
+
+
+def _get_application_path(application_name: str) -> str:
+    # Check if applications exists in the run directory
+    full_path = shutil.which(pathlib.Path('.').joinpath(application_name).absolute())
+    # shutil.which will check in PATH and also passes if the full path to an executable was given
+    if not full_path:
+        full_path = shutil.which(application_name)
+
+    assert full_path, f"Could not find a path for application: {application_name}"
+    return str(full_path)
+
+
+def get_run_command_with_path(job: "import rsopt.configuration.schemas.code") -> str:
+    from rsopt.libe_tools.executors import EXECUTION_TYPES
+    # TODO: Shifter will need handling (if still being used?)
+    if job.setup.execution_type == EXECUTION_TYPES.SHIFTER:
+        run_command = 'shifter'
+        return _get_application_path(run_command)
+
+    return _get_application_path(job.run_command)

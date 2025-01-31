@@ -1,4 +1,4 @@
-import rsopt.configuration.configuration
+from rsopt import parse
 from rsopt import run
 
 
@@ -6,15 +6,21 @@ from rsopt import run
 def configuration(config: str) -> ("numpy.ndarray", dict, "rsopt.configuration.configuration.Configuration") :
     """Runs a sampling job.
 
-    A sampling job will be started based on the content of the configuration file.
-    The configuration file should have the software field in options set to one of:
-      mesh_scan, lh_scan
+       A sampling job will be started based on the content of the configuration file.
+       The configuration file should have the software field in options set to one of:
+          mesh_scan, lh_scan
 
-    :param config: (str) Name of configuration file to use
-    :return: None
+    Args:
+        config: (str) Path to configuration file to use
+
+    Returns:
+
     """
-    _config = run.startup_sequence(config)
-    sampler_type = _config.options.NAME
+    _config_dict = parse.read_configuration_file(config)
+    _config = parse.parse_sample_configuration(_config_dict)
+    _config = run.startup_sequence(_config)
+
+    sampler_type = _config.options.software
     runner = run.sample_modes[sampler_type](_config)
 
     H, persis_info, _ = runner.run()
@@ -38,7 +44,11 @@ def start(config, n=1):
     Returns:
 
     """
-    _config = run.startup_sequence(config)
+
+    _config_dict = parse.read_configuration_file(config)
+    _config = parse.parse_unknown_configuration(_config_dict)
+    _config = run.startup_sequence(_config)
+
     n = int(n)
 
     # nworkers may be set for a full scan - only use the minimum needed workers
@@ -50,7 +60,10 @@ def start(config, n=1):
 
 @run.cleaup
 def restart(config, history, rerun_failed=''):
-    _config = run.startup_sequence(config)
+    _config_dict = parse.read_configuration_file(config)
+    _config = parse.parse_sample_configuration(_config_dict)
+    _config = run.startup_sequence(_config)
+
     runner = run.restart_sampler(_config, history)
     H, persis_info, _ = runner.run()
 

@@ -102,72 +102,63 @@ def local_optimizer(config: configuration.ConfigurationOptimize):
 
 def grid_sampler(config: configuration.Configuration):
     from rsopt.libe_tools import sampler
-    sample = sampler.GridSampler()
-    sample.load_configuration(config)
+    sample = sampler.GridSampler(config)
 
     return sample
 
 
 def single_sampler(config: configuration.Configuration, n:int = 1):
     from rsopt.libe_tools import sampler
-    sample = sampler.SingleSample(sampler_repeats=n)
-    sample.load_configuration(config)
+    sample = sampler.SingleSample(config, sampler_repeats=n)
 
     return sample
 
 
 def lh_sampler(config: configuration.Configuration):
     from rsopt.libe_tools import sampler
-    sample = sampler.LHSampler()
-    sample.load_configuration(config)
+    sample = sampler.LHSampler(config)
 
     return sample
 
 
 def restart_sampler(config: configuration.Configuration, history: str):
     from rsopt.libe_tools import sampler
-    sample = sampler.RestartSampler(restart_from=history)
-    sample.load_configuration(config)
+    sample = sampler.RestartSampler(config, restart_from=history)
 
     return sample
 
 
 def aposmm_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer_aposmm import AposmmOptimizer
-    opt = AposmmOptimizer()
-    opt.load_configuration(config)
+    opt = AposmmOptimizer(config)
 
     return opt
 
 
 def nsga2_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer_nsga2 import EvolutionaryOptimizer
-    opt = EvolutionaryOptimizer()
-    opt.load_configuration(config)
+    opt = EvolutionaryOptimizer(config)
 
     return opt
 
 
 def pysot_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer_pysot import PysotOptimizer
-    opt = PysotOptimizer()
-    opt.load_configuration(config)
+    opt = PysotOptimizer(config)
 
     return opt
 
 
 def dlib_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer_dlib import DlibOptimizer
-    opt = DlibOptimizer()
-    opt.load_configuration(config)
+    opt = DlibOptimizer(config)
 
     return opt
 
 
 def mobo_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer_mobo import MoboOptimizer
-    opt = MoboOptimizer()
-    opt.load_configuration(config)
+    opt = MoboOptimizer(config)
 
     return opt
 

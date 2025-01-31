@@ -3,6 +3,14 @@ from typing import Any, Optional, Union, List
 import pydantic
 
 def parameter_discriminator(v: dict) -> str:
+    """Identifies which subclass of Parameter v belongs to.
+
+    Args:
+        v: (dict)
+
+    Returns: (str) Tag value for discriminator
+
+    """
     if v.get('min'):
         return 'numeric'
     elif v.get('values'):

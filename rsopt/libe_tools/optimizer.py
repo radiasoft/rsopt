@@ -1,4 +1,6 @@
 from libensemble.libE import libE
+from rsopt.environment import get_run_command_with_path
+from rsopt.libe_tools.executors import create_executor_arguments
 from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_local_opt
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
 from libensemble.tools import add_unique_random_streams
@@ -25,7 +27,8 @@ LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims',
                       'working_directory': 'ensemble_dir_path'}
 
 def _configure_executor(job, name, executor):
-    executor.register_app(full_path=job.full_path, app_name=name, calc_type='sim')
+    full_path = get_run_command_with_path(job)
+    executor.register_app(full_path=full_path, app_name=name, calc_type='sim')
 
 
 def _set_app_names(config):
@@ -159,11 +162,15 @@ class libEnsembleOptimizer:
                 if not self.executor:
                     self._create_executor()
                 _configure_executor(job, app_name, self.executor)
-                job.executor = app_name
-                job.executor_args['app_name'] = app_name
+                job._executor_arguments = {
+                    **create_executor_arguments(job),
+                    'app_name': app_name
+                }
 
     def _create_executor(self):
-        self.executor = self._config.create_exector()
+        self.executor = self._config.executor_type.exec_obj(
+            **self._config.options.executor_options
+        )
 
     def _configure_libE(self):
         self._configure_optimizer()

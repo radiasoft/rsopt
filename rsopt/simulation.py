@@ -143,7 +143,7 @@ class SimulationFunction:
             elif job.use_executor:
                 # MPI Job or non-Python executable
                 exctr = Executor.executor
-                task = exctr.submit(env_script=env_setup_name if env_setup_name else None, **job.executor_args)
+                task = exctr.submit(env_script=env_setup_name if env_setup_name else None, **job._executor_arguments)
                 while True:
                     time.sleep(_POLL_TIME)
                     task.poll()
