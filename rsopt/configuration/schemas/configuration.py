@@ -1,3 +1,5 @@
+from typing import Any
+
 import pydantic
 import typing
 import rsopt.codes
@@ -24,6 +26,14 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
     mpi_size: int = pydantic.Field(default=0, exclude=True)
     is_manager: bool = pydantic.Field(default=True, exclude=True)
     mpi_comm: typing.Any = pydantic.Field(default=None, exclude=True)
+
+    def model_post_init(self, __context: Any) -> None:
+        """Load simulation models before libEnsemble starts up"""
+
+        # input_file_model is a cached_property so it will be stored
+        if self.options.load_models_at_startup:
+            for c in self.codes:
+                _ = c.input_file_model
 
     @pydantic.field_validator('codes', mode='before')
     @classmethod

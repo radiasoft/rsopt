@@ -112,8 +112,7 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
             return self.parallel_run_command()
         return self.serial_run_command()
 
-    @pydantic.computed_field
-    # @cached_property
+    @cached_property
     def input_file_model(self) -> dict or None:
         input_file_model = parse.parse_simulation_input_file(self.setup.input_file, self.code,
                                                              self.setup.ignored_files,
