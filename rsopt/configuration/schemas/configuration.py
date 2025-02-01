@@ -84,13 +84,22 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         return np.array(upper_bounds)
 
     @property
-    def start(self) -> list[float or int]:
+    def start(self) -> np.ndarray:
         # TODO: This is going to need handling when we have non-numeric data or require discriminating between float and int
         start = []
         for code in self.codes:
             for param in code.parameters:
                 start.append(param.start)
         return np.array(start)
+
+    @property
+    def samples(self) -> np.ndarray:
+        # TODO: This is going to need handling when we have non-numeric data or require discriminating between float and int
+        samples = []
+        for code in self.codes:
+            for param in code.parameters:
+                samples.append(param.samples)
+        return np.array(samples)
 
     @property
     def dimension(self) -> int:

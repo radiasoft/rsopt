@@ -18,7 +18,7 @@ class GridSampler(libEnsembleOptimizer):
 
     def _configure_optimizer(self):
         self.nworkers = self._config.options.nworkers
-        self.exact_mesh = self._config.options.mesh_file
+        self.exact_mesh = self._config.options.software_options.mesh_file
         sampler_repeats = int(self._config.options.software_options.sampler_repeats)
 
         if self.exact_mesh:
@@ -57,7 +57,7 @@ class GridSampler(libEnsembleOptimizer):
         mesh_parameters = []
         size = 1
         for lb, ub, st, s in zip(self._config.lower_bounds, self._config.upper_bounds, self._config.start,
-                                 self._config.get_parameters_list('get_samples')):
+                                 self._config.samples):
             if s == 1:
                 mp = [st, st, s]
             else:
