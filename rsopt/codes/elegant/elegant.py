@@ -62,7 +62,7 @@ class Elegant(code.Code):
     def _get_ignored_fields(cls) -> dict:
         return IGNORED_FIELDS.get(cls.code, {})
 
-    def _edit_input_file_schema(self, kwarg_dict):
+    def _edit_input_file_schema(self, kwarg_dict: dict):
         # Name cases in the Sirepo model:
         # eLeMENt NAmeS
         # ELEMENT TYPES
