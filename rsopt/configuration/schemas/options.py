@@ -55,6 +55,7 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
     objective_function: tuple[pydantic.FilePath, str] = pydantic.Field(default=None)
     seed: typing.Union[None, str, int] = ''
     software_options: SoftwareOptions
+    load_models_at_startup: bool = False
 
     # TODO: This could end up being its own model
     executor_options: dict = pydantic.Field(default_factory=dict)

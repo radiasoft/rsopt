@@ -64,7 +64,12 @@ class libEnsembleOptimizer:
         self.libE_specs = {}
         self.sim_specs = {}
         self.alloc_specs = {}
-        self.exit_criteria = self._config.options.exit_criteria.model_dump()
+
+        # Sampling jobs may not need to give an exit criteria - in that case it will be calculated by the sampling class
+        if hasattr(self._config.options, 'exit_criteria'):
+            self.exit_criteria = self._config.options.exit_criteria.model_dump()
+        else:
+            self.exit_criteria = None
 
 
     def run(self, clean_work_dir=False):

@@ -7,11 +7,11 @@ from rsopt.configuration.options import mesh
 # SUPPORTED_OPTIMIZE_OPTIONS = typing.Union[dfols.Dfols]
 
 class SUPPORTED_OPTIONS(Enum):
-    mesh = 'sample'
+    mesh_scan = 'sample'
     dfols = 'optimize'
 
     def __init__(self, _):
-        self._map = {'mesh': mesh.Mesh,
+        self._map = {'mesh_scan': mesh.Mesh,
                      'dfols': dfols.Dfols,
                      }
 

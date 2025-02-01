@@ -44,8 +44,6 @@ class GridSampler(libEnsembleOptimizer):
                                'out': gen_out,
                                'user': user_keys})
 
-        # Overwrite any use specified exit criteria and set based on scan
-        self._config.options.exit_criteria = None
         self.exit_criteria = {'sim_max': sim_max * sampler_repeats}
 
     def _configure_allocation(self):
@@ -117,8 +115,6 @@ class SingleSample(GridSampler):
                                'out': gen_out,
                                'user': user_keys})
 
-        # Overwrite any use specified exit criteria and set based on scan
-        self._config.options.exit_criteria = None
         self.exit_criteria = {'sim_max': sim_max}
 
     def _configure_specs(self):
@@ -149,8 +145,6 @@ class LHSampler(libEnsembleOptimizer):
                                'out': gen_out,
                                'user': user_keys})
 
-        # Overwrite any use specified exit criteria and set based on scan
-        self._config.options.exit_criteria = None
         self.exit_criteria = {'sim_max': self._config.options.batch_size}
 
     def _configure_allocation(self):
@@ -175,8 +169,6 @@ class RestartSampler(libEnsembleOptimizer):
     def _configure_optimizer(self):
         self.nworkers = self._config.options.nworkers
 
-        # Overwrite any use specified exit criteria and set based on scan
-        self._config.options.exit_criteria = None
         self.exit_criteria = {'sim_max': self.H0.size}
 
     def _configure_allocation(self):
