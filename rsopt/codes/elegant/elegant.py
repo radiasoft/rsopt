@@ -42,8 +42,6 @@ class Elegant(code.Code):
     setup: Setup
 
     @classmethod
-
-    @classmethod
     def serial_run_command(cls) -> str or None:
         return 'elegant'
 
