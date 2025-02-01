@@ -11,9 +11,9 @@ def parameter_discriminator(v: dict) -> str:
     Returns: (str) Tag value for discriminator
 
     """
-    if v.get('min'):
+    if 'min' in v.keys():
         return 'numeric'
-    elif v.get('values'):
+    elif 'values' in v.keys():
         return 'category'
 
 class Parameter(pydantic.BaseModel):
