@@ -119,7 +119,7 @@ def create_executor_arguments(job: "import rsopt.configuration.schemas.code") ->
 
     return args
 
-class EXECUTION_TYPES(Enum):
+class EXECUTION_TYPES(str, Enum):
     SERIAL = 'serial'
     PARALLEL = 'parallel'
     RSMPI = 'rsmpi'
