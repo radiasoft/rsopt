@@ -18,7 +18,8 @@ pksetup.setup(
         'nlopt',
         'mpmath',
         'jinja2>=3.0.1',
-        'sortedcontainers'
+        'sortedcontainers',
+        'lark'
     ],
     extras_require={
         'nersc': ['rsbeams@git+https://github.com/radiasoft/rsbeams',
