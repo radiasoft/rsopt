@@ -1,0 +1,78 @@
+// Preprocessing:
+//   elegant allows "&\n" to be inserted almost anywhere.
+//   Lark cannot easily handle this when inserted mid-RULE (or I haven't found a way).
+//   For this reason lattice files should be pre-processed to remove "&\n" before using Lark.
+
+// Known differences with elegant internal parsing:
+//   - In elegant parameter lists that continue on to a new line without "&" are ignored. This grammar will read them.
+//   - elegant allows unpaired quotation marks in some cases. It's not clear under what circumstances.
+//     This can be found in the "ltp375MeV.lte" example lattice ' "LTP:V4": VKICK,L=0.06" '. Trying to make a
+//     general rule to handle this does not seem worth the effort.
+
+start: statements+
+
+?statements: element
+    | line
+    | stored_value
+    | NEWLINE
+    | RETURN
+    | USE
+
+?value: NUMBER -> numbers
+    | string_value -> string
+    | ESC_STR -> string
+
+?line_elements: single_line_element
+    | line_element_list
+
+////
+// Stored values
+////
+stored_value: "%" (NUMBER | NAME | OPERATOR)* "sto"i NAME
+
+////
+// Element definitions
+////
+?element: ELEMENT_NAME ":" ELEMENT_TYPE [("," parameter)] parameter_list*
+?parameter_list: parameter? CONT_LINE* (parameter | CONT_LINE)* NEWLINE*
+?parameter: NAME "=" value ","?
+
+////
+// Line definitions
+////
+?line: ELEMENT_NAME ":" "line"i "=" "(" line_elements ("," line_elements)* ")"
+?line_element_list: (INT "*" | "-") "(" line_elements ("," line_elements)* ")"
+// elegant does not have a problem with repeated commas in line definitions
+?single_line_element: ["&"] ","* (INT "*" | "-")? LINE_ELEMENT_NAME
+
+?string_value: /[a-zA-Z~\/\_\-.][a-zA-Z0-9\/\_\-.]*/
+
+ELEMENT_TYPE: NAME | ELEMENT_NAME
+OPERATOR: "+"  | "-"  | "*" | "/"
+ELEMENT_NAME: NAME | ESC_STR
+
+// Line element names do not need to be enclosed in quotes when ":" is used so we have to handle them separately
+LCASE_LETTER: "a".."z"
+UCASE_LETTER: "A".."Z"
+LETTER: UCASE_LETTER | LCASE_LETTER
+WORD: LETTER+
+ECHARACTER:  "~" | "@" | "$" | "%" | "^" | "&" | "-" | "_" | "+" | "=" | "{" | "}" | "[" | "]" | "\\" | "|" | "/" | "?" | "<" | ">" | "." | ":" | "|"
+LINE_ELEMENT_NAME: (LETTER (ECHARACTER|LETTER|DIGIT)*) | ESC_STR
+
+// There is no explanation I can find for the return statement but it shows up examples
+RETURN: "return"i
+USE: "use"i "," ELEMENT_NAME
+CONT_LINE: "&" NEWLINE
+COMMENT: /!.*/
+
+%import common.SIGNED_NUMBER    -> NUMBER
+%import common.DIGIT
+%import common.SIGNED_INT       -> INT
+%import common.ESCAPED_STRING   -> ESC_STR
+%import common.WS_INLINE
+%import common.NEWLINE
+%import common.CNAME -> NAME
+
+%ignore WS_INLINE
+%ignore COMMENT
+%ignore NEWLINE
