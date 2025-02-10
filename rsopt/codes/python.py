@@ -28,7 +28,7 @@ class Python(code.Code):
     @pydantic.model_validator(mode='after')
     def instantiate_function(self):
         # libEnsemble workers change active directory - sys.path will not record locally available modules
-        sys.path.append('.')
+        sys.path.append('python')
 
         module = util.run_path_as_module(self.setup.input_file)
         function = getattr(module, self.setup.function)

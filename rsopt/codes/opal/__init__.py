@@ -1,1 +1,0 @@
-from .opal import Opal

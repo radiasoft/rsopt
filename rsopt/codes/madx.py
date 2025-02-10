@@ -1,5 +1,5 @@
 import typing
-from rsopt.codes.elegant import elegant
+from rsopt.codes import elegant
 from rsopt.configuration.schemas import setup as setup_schema
 from rsopt.libe_tools.executors import EXECUTION_TYPES
 
