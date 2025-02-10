@@ -5,7 +5,7 @@ from rsopt.configuration.parameters import PARAMETER_READERS, Parameters
 from rsopt.configuration.settings import SETTING_READERS, Settings
 from rsopt.configuration.setup import SETUP_READERS
 from rsopt.configuration.setup.setup import Setup
-from rsopt.codes import serial_python
+from rsopt.libe_tools import serial_python
 import jinja2
 import pathlib
 import typing

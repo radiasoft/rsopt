@@ -8,7 +8,7 @@ import typing
 from libensemble import message_numbers
 from libensemble.executors.executor import Executor
 from collections.abc import Iterable
-from rsopt.codes import serial_python
+from rsopt.libe_tools import serial_python
 from rsopt.configuration.schemas import code
 from rsopt import environment
 # TODO: This should probably be in libe_tools right?
