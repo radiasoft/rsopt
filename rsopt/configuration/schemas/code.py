@@ -7,7 +7,7 @@ from rsopt.configuration.schemas.settings import Setting
 from rsopt.configuration.schemas.setup import Setup
 from rsopt.libe_tools.executors import EXECUTION_TYPES
 from rsopt import util
-from rsopt import parse
+from rsopt import parsers
 from typing_extensions import Annotated
 
 # TODO: The extra=allow is necessary with the method of dynamic parameter/setting attribute addition. But does mean
@@ -112,9 +112,10 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
             return self.parallel_run_command()
         return self.serial_run_command()
 
+    # TODO: if parse_simulation_input_file raises an error it is not terminal and instead input_file_model is not defined
     @cached_property
     def input_file_model(self) -> dict or None:
-        input_file_model = parse.parse_simulation_input_file(self.setup.input_file, self.code,
+        input_file_model = parsers.parse_simulation_input_file(self.setup.input_file, self.code,
                                                              self.setup.ignored_files,
                                                              self.setup.execution_type == EXECUTION_TYPES.SHIFTER)
         return input_file_model

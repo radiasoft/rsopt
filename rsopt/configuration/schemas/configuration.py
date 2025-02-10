@@ -2,7 +2,10 @@ from typing import Any
 
 import pydantic
 import typing
-import rsopt.codes
+
+# import rsopt.codes
+from rsopt import codes
+
 import rsopt.configuration.options
 import pydantic_core
 
@@ -10,7 +13,7 @@ import numpy as np
 
 from rsopt.configuration.options import SUPPORTED_OPTIONS
 
-_SUPPORTED_CODES = typing.Annotated[rsopt.codes.SUPPORTED_CODES, pydantic.Field(discriminator='code')]
+_SUPPORTED_CODES = typing.Annotated[codes.SUPPORTED_CODES, pydantic.Field(discriminator='code')]
 _SUPPORTED_SAMPLE_OPTIONS = typing.Annotated[typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_sample_models()], pydantic.Field(discriminator='software')]
 _SUPPORTED_OPTIMIZER_OPTIONS = typing.Annotated[typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_optimize_models()], pydantic.Field(discriminator='software')]
 

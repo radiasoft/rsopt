@@ -6,8 +6,6 @@ parser = lark.Lark.open('../package_data/grammars/genesis.lark', g_regex_flags=r
 
 class Transformer(lark.Transformer):
     def file(self, params):
-        for p in params:
-            print(p, len(p))
         return {p[0]: p[1] for p in params}
     def NAME(self, v):
         return str(v)
