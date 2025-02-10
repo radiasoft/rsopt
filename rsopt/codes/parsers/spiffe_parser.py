@@ -46,9 +46,6 @@ class Transformer(lark.Transformer):
         command_list = [cmd for cmd in cmds if cmd]
 
         command_data = {}
-        for cmd in command_list:
-            kv = command_data.setdefault(cmd['command_name'], [])
-            kv.append(cmd)
 
         command_data['commands'] = command_list
         return command_data # [cmd for cmd in cmds if cmd]
