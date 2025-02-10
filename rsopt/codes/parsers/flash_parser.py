@@ -1,5 +1,8 @@
 import re
 
+# TODO: flash does not use lark yet and does not share a common interface with other codes in parsers.
+#  Should be updated to use lark.
+
 def parse_file(par_path: str) -> dict:
     """Read in a FLASH .par file and return a dictionary of parameters and values."""
 

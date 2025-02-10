@@ -3,7 +3,7 @@ import os
 import pydantic
 import typing
 from functools import cached_property
-from rsopt.parsers.flash import parse_file
+from rsopt.codes.parsers.flash_parser import parse_file
 from rsopt.configuration.schemas import code
 from rsopt.configuration.schemas import setup as setup_schema
 

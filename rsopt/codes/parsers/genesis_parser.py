@@ -2,7 +2,7 @@ import lark
 import re
 
 # TODO: Set path to resource
-parser = lark.Lark.open('../package_data/grammars/genesis.lark', g_regex_flags=re.I, rel_to=__file__)
+parser = lark.Lark.open('../../package_data/grammars/genesis.lark', g_regex_flags=re.I, rel_to=__file__)
 
 class Transformer(lark.Transformer):
     def file(self, params):
