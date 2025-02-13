@@ -7,17 +7,6 @@ from rsopt.configuration.setup import IGNORED_FIELDS
 
 LOG = logging.getLogger('libensemble')
 
-def _parse_name(name):
-    components = name.split('.')
-    if len(components) == 3:
-        field, index, name = components
-    elif len(components) == 2:
-        field, index, name = components[0], None, components[1]
-    else:
-        raise ValueError(f'Could not understand parameter/setting name {name}')
-
-    return field, index, name
-
 
 def _get_model_fields(model):
     commands = {}
@@ -77,7 +66,9 @@ class Elegant(code.Code):
         model = deepcopy(self.input_file_model)
 
         for n, v in kwarg_dict.items():
-            field, index, name = _parse_name(n)
+            item_model = self.get_parameter_or_setting(n)
+            field, index, name = item_model.item_name, item_model.item_index, item_model.item_attribute
+
             # If this is a command
             if field.lower() in commands.keys():
                 # Make sure that if it is a repeated command we know which one to edit
