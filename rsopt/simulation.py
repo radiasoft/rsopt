@@ -7,11 +7,9 @@ import rsopt.util
 import typing
 from libensemble import message_numbers
 from libensemble.executors.executor import Executor
-from collections.abc import Iterable
 from rsopt.libe_tools import serial_python
 from rsopt.configuration.schemas import code
 from rsopt import environment
-# TODO: This should probably be in libe_tools right?
 
 _POLL_TIME = 1  # seconds
 _PENALTY = 1e9
@@ -25,52 +23,6 @@ def get_x_from_H(H: np.ndarray, sim_specs: dict) -> list:
     x = H[x_name][0]
 
     return x.tolist()
-
-# TODO: May be removed
-def get_signature(parameters, settings):
-    # TODO: signature just means dict with settings and params. This should be renamed if it is kept.
-    # No lambda functions are allowed in settings and parameter names may not be referenced
-    # Just needs to insert parameter keys into the settings dict, but they won't have usable values yet
-
-    signature = settings.copy()
-
-    for key in parameters.keys():
-        signature[key] = None
-
-    return signature
-
-
-def _parse_x(x, parameters):
-    x_struct = {}
-    if not isinstance(x, Iterable):
-        x = [x, ]
-    for val, name in zip(x, [param.name for param in parameters]):
-        x_struct[name] = val
-
-    # TODO: From inspection I don't see how this is needed
-    # # Remove used parameters
-    # for _ in parameters.keys():
-    #     x.pop(0)
-
-    return x_struct
-
-
-def compose_args(x: list, parameters: list, settings: list):
-    # Generate the list of args and dict of kwargs from the configuration's parameters and settings
-    # Matches the values from the 'x' list to the corresponding names from the parameters
-    args = None  # Not used for now
-    parameters_dict = _parse_x(x, parameters)
-    settings_dict = {s.name: s.value for s in settings}
-    kwargs = {**parameters_dict, **settings_dict}
-
-    # TODO: Remove if new method above works
-    # signature = get_signature(parameters, settings)
-    # kwargs = signature.copy()
-    # for key in kwargs.keys():
-    #     if key in x_struct:
-    #         kwargs[key] = x_struct[key]
-
-    return args, kwargs
 
 
 def format_evaluation(sim_specs, container):
@@ -114,17 +66,17 @@ class SimulationFunction:
         halt_job_sequence = False
 
         for job in self.jobs:
-            # Generate input values
-            _, kwargs = compose_args(x, job.parameters, job.settings)
+            # Pair values in vector x with named settings/parameters
+            kwargs = job.get_kwargs(x)
             self.J['inputs'] = kwargs
 
-            # Call preprocessor
+            # Call preprocess functions from user - if any
             if job.setup.preprocess:
                 job.get_preprocess_function(self.J)
 
-            # Generate input files for simulation
+            # Values in kwargs may be changed by the user during pre-process so they must be passed back to the job
             job.generate_input_file(kwargs, '.', job.use_mpi)
-            # Create env setup script if required
+            # Create env setup script if the user passed any environ variables to set
             env_setup_name = environment.generate_env_setup(job.setup.environment_variables)
 
             # Translate distributions

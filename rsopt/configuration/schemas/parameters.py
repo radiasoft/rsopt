@@ -16,10 +16,6 @@ def parameter_discriminator(v: dict) -> str:
     elif 'values' in v.keys():
         return 'category'
 
-class Name(pydantic.BaseModel):
-    item_name: str
-    item_property: str = ''
-    item_index: int = 0
 
 class Parameter(pydantic.BaseModel):
     name: str = pydantic.Field(description='User specified name or the parameter. May include formatting to give attribute and index.')

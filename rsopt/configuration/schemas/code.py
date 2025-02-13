@@ -1,8 +1,10 @@
 import abc
+from collections.abc import Iterable
+
 import pydantic
 import typing
 from functools import cached_property
-from rsopt.configuration.schemas.parameters import NumericParameter, CategoryParameter, parameter_discriminator
+from rsopt.configuration.schemas.parameters import Parameter, NumericParameter, CategoryParameter, parameter_discriminator
 from rsopt.configuration.schemas.settings import Setting
 from rsopt.configuration.schemas.setup import Setup
 from rsopt.libe_tools.executors import EXECUTION_TYPES
@@ -94,37 +96,78 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
     def get_sym_link_targets(self) -> set:
         return set()
 
+    @classmethod
+    def _parse_name(cls, name: str) -> dict:
+        """Parse parameter/setting name for use in model editing.
+
+        Parses rsopt's string formatting for specifying model command/element names and attributes
+        `command-or-element-name.[command-or-element-attribute].[command-index]`
+
+        Args:
+            name: str
+
+        Returns: dict
+
+        """
+        return Parameter.parse_name({'name': name})
+
     @abc.abstractmethod
     def generate_input_file(self, kwarg_dict: dict, directory: str, is_parallel: bool) -> None:
         pass
 
     @property
     def use_executor(self) -> bool:
+        """Use a libEnsemble Executor for this job."""
         return True
 
     @property
     def use_mpi(self) -> bool:
+        """Should the executor use MPI."""
         return self.setup.execution_type != EXECUTION_TYPES.SERIAL
 
     @property
     def run_command(self):
+        """Generate the run command string to be given to the libEnsemble Executor."""
         if self.use_mpi:
             return self.parallel_run_command()
         return self.serial_run_command()
 
     # TODO: if parse_simulation_input_file raises an error it is not terminal and instead input_file_model is not defined
+    # TODO: clean up typing as part of the Lark implementation (right now this could be dict / sirepo SimData / or maybe None)
     @cached_property
     def input_file_model(self) -> dict or None:
         input_file_model = parsers.parse_simulation_input_file(self.setup.input_file, self.code,
                                                                self.setup.ignored_files,
                                                                self.setup.execution_type == EXECUTION_TYPES.SHIFTER)
         return input_file_model
-    # @property
-    # def get_preprocess_function(self) -> callable or None:
-    #     # set by model validator
-    #     return None
-    #
-    # @property
-    # def get_postprocess_function(self) -> callable or None:
-    #     # set by model validator
-    #     return None
+
+    def get_kwargs(self, x: typing.Any) -> dict:
+        """Create a dictionary with parameter/setting names paired to values in iterable x.
+
+        Pair settings and parameters in the job with concrete values that will be used in a simulation.
+        Serves a mapping between the vector objects needed for most optimization / samping routines and
+        structured data the user sees.
+
+        Args:
+            x: Usually an iterable (will be made Iterable if single valued). Should be equal in length
+            to len(parameters) + len(settings).
+
+        Returns: (dict)
+
+        """
+        parameters_dict = {}
+        if not isinstance(x, Iterable):
+            x = [x, ]
+        for val, name in zip(x, [param.name for param in self.parameters]):
+            parameters_dict[name] = val
+
+        settings_dict = {s.name: s.value for s in self.settings}
+
+        return {**parameters_dict, **settings_dict}
+
+    def get_parameter_or_setting(self, name: str) -> Parameter or Setting:
+        for item in [*self.parameters, *self.settings]:
+            if item.name == name:
+                return item
+
+        raise NameError(f"{name} could not be found in Parameter or Setting lists for Code {self.code}")
