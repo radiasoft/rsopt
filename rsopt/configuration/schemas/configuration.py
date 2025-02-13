@@ -33,6 +33,11 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
     def model_post_init(self, __context: Any) -> None:
         """Load simulation models before libEnsemble starts up"""
 
+        # TODO: Errors in code.input_file_model do not seem to get raised, you will see instead get something like:
+        #  "AttributeError: 'Genesis' object has no attribute 'input_file_model'"
+        #  here as the error. All attempts to create a simple of example of this happening outside of rsopt have
+        #  failed to reproduce the issue so far.
+
         # input_file_model is a cached_property so it will be stored
         if self.options.load_models_at_startup:
             for c in self.codes:
