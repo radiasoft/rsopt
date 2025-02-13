@@ -4,6 +4,26 @@ import re
 # TODO: Set path to resource
 parser = lark.Lark.open('../../package_data/grammars/spiffe.lark', g_regex_flags=re.I, rel_to=__file__)
 
+# TODO: This follows parse function in init for now. Should unify the definitions once parsers are all converted.
+def parse_simulation_input_file(input_file: str, code_name='spiffe', ignored_files: list[str] or None = None,
+                                shifter: bool = False) -> list[dict]:
+    """Parse a spiffe simulation input file.
+
+    Args:
+        input_file: (str) the path to the input file
+        code_name:  (str) the name of the code. Included for compatibility.
+        ignored_files: list[str] Not used. Included for compatibility.
+        shifter: (bool) Not used. Included for compatibility.
+
+    Returns:
+
+    """
+    with open(input_file, 'r') as f:
+        spiffe_file = f.read()
+    spiffe_input = parser.parse(spiffe_file)
+
+    return Transformer().transform(spiffe_input)
+
 class Transformer(lark.Transformer):
     def __init__(self):
         self._macros = {}
