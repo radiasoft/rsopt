@@ -30,7 +30,7 @@ class Spiffe(code.Code):
             spiffe_model_instance.edit_command(command_name=item_model.item_name,
                                                parameter_name=item_model.item_attribute,
                                                parameter_value=value,
-                                               command_index=item_model.item_instance
+                                               command_index=item_model.item_index
                                                )
         # TODO: Right now we don't handle linking of resources like the geometry file. User will need to do that in rsopt config
         write.write_to_file(

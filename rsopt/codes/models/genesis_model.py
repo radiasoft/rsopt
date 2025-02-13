@@ -254,7 +254,7 @@ class TimeDependence(BaseModel):
     curlen: float = Field(0.001, description="CURLEN: Bunch length of the current profile. If CURLEN is positive a Gaussian distribution is generated with an RMS length given by CURLEN. A negative or zero value yield a constant profile.")
     isntyp: bool = Field(0, description="ISNTYP: For VERSION below 1.0 only the Pennman algorithm is used for the shot noise, which is only correct for the fundamental wavelength, but for a higher version the default is the Fawley algorithm which applies also the correct shotnoise to all higher harmonics. If the user wants to use the Pennman algorithm at a higher version number (which is not recommended), the value of ISNTYP has to be set to a non-zero value.")
     itdp: bool = Field(0, description="ITDP: A non-zero value enables time-dependent simulation. Time-dependence is not allowed if the scan-feature is enabled. ")
-    nslice: float = Field(408.0, description="NSLICE: Total number of simulated slices. It defines the time window of the simulation with NSLICE * ZSEP * XLAMDS/c. Note that the output does not start with the first slice unless the parameter IOTAIL is set. If NSLICE set to zero it automatically adjust NSLICE and NTAIL to the time-window given by the external input files (BEAMFILE or DISTFILE). It assumes 6 standard deviation for a Gaussian distribution or the absolute value of CURLEN for a step profile.")
+    nslice: int = Field(408, description="NSLICE: Total number of simulated slices. It defines the time window of the simulation with NSLICE * ZSEP * XLAMDS/c. Note that the output does not start with the first slice unless the parameter IOTAIL is set. If NSLICE set to zero it automatically adjust NSLICE and NTAIL to the time-window given by the external input files (BEAMFILE or DISTFILE). It assumes 6 standard deviation for a Gaussian distribution or the absolute value of CURLEN for a step profile.")
     ntail: int = Field(-253, description="NTAIL: Position of the first simulated slice in measures of ZSEP*XLAMDS. GENESIS 1.3 starts with the tail side of the time window, progressing towards the head.  Thus a negative or positive value shifts the slices towards the tail or head region of the beam, respectively. For a constant profile (CURLEN  <  0) NTAIL has no impact.")
     shotnoise: float = Field(1.0, description="SHOTNOISE: GENESIS 1.3 applies a random offset to each macro particle phase to generate the correct statistic for the bunching factor. Each offset is scaled prior by SHOTNOISE, thus SHOTNOISE can be set to zero to disable shot noise. ")
     zsep: float = Field(1.0, description="ZSEP: Separation of beam slices in measures of the radiation wavelength. ZSEP must be a multiple of DELZ.")
@@ -290,6 +290,18 @@ class Undulator(BaseModel):
 class Genesis(ElectronBeam, Focusing, Io, ParticleLoading, Mesh, Radiation,
               Scan, SimulationControl, TimeDependence, Undulator):
     command_name: typing.Literal[GENESIS_COMMAND_NAME] = Field(GENESIS_COMMAND_NAME, exclude=True)
+
+    def model_dump(self, **kwargs):
+        data = super().model_dump(**kwargs)
+        formatted_data = {}
+        for k, v in data.items():
+            if isinstance(v, bool):
+                formatted_data[k] = int(v)
+            elif isinstance(v, str):
+                formatted_data[k] = "\"{}\"".format(v)
+            else:
+                formatted_data[k] = v
+        return formatted_data
 
 # Defined for consistency with other models that have many commands - Union of a single type just returns the type though
 GENESIS = typing.Union[Genesis]

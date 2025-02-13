@@ -14,7 +14,7 @@ class Spiffe(enum.Enum):
     END = "&end\n\n"
 class Genesis(enum.Enum):
     CMD = '$newrun\n'
-    PARAM = "\t{field} = {value}\n"
+    PARAM = "{field} = {value}\n"
     END = '$end\n'
 
 def write_command(command: pydantic.BaseModel, structure: enum.Enum) -> str:
