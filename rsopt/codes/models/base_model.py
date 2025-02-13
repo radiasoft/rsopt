@@ -1,6 +1,18 @@
 import pydantic
 import typing
 
+def _is_union(tp) -> bool:
+    # Handling of Unions seems very inconsistent with other Python objects in 3.9
+    # Union[int] -> int and top suggestions:
+    #  - https://stackoverflow.com/questions/45957615/how-to-check-a-variable-against-union-type-during-runtime
+    #  - https://stackoverflow.com/questions/75219678/check-if-a-type-is-union-type-in-python
+    #  - https://github.com/python/typing/issues/528 (!)
+    # Assume you will get only a type back or are just broken now
+
+    if hasattr(typing, 'get_origin'):  # Python 3.8+
+        return typing.get_origin(tp) is typing.Union
+    return isinstance(tp, typing._GenericAlias) and tp.__origin__ is typing.Union  # Python <3.8
+
 DISCRIMINATOR_NAME = 'command_name'
 T = typing.TypeVar('T')
 class CommandModel(pydantic.BaseModel, typing.Generic[T]):
@@ -53,9 +65,15 @@ def generate_model(model_T, code_name):
     model_name = f"{code_name}Model"
 
     dynamic_fields = {}
-    for m in typing.get_args(model_T):
+    if _is_union(model_T):
+        # Received Union[Models]
+        for m in typing.get_args(model_T):
+            _field = pydantic.Field(default_factory=list, discriminator=DISCRIMINATOR_NAME)
+            dynamic_fields[m.model_fields[DISCRIMINATOR_NAME].default] = (list[m], _field)
+    else:
+        # Just a single Model
         _field = pydantic.Field(default_factory=list, discriminator=DISCRIMINATOR_NAME)
-        dynamic_fields[m.model_fields[DISCRIMINATOR_NAME].default] = (list[m], _field)
+        dynamic_fields[model_T.model_fields[DISCRIMINATOR_NAME].default] = (list[model_T], _field)
 
     dynamic_model = pydantic.create_model(model_name, __base__=base_model, **dynamic_fields)
 

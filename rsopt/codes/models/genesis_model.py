@@ -10,6 +10,9 @@ import typing
 from enum import Enum
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+# Genesisv2 does not have separate commands so we define a name for consistency
+GENESIS_COMMAND_NAME = 'newrun'
+
 class _DefaultInteger19StringArray(Enum):
     RADIATION_POWER = 1
     LOG_DERIV_POWER_GROWTH = 1
@@ -286,4 +289,7 @@ class Undulator(BaseModel):
 
 class Genesis(ElectronBeam, Focusing, Io, ParticleLoading, Mesh, Radiation,
               Scan, SimulationControl, TimeDependence, Undulator):
-    pass
+    command_name: typing.Literal[GENESIS_COMMAND_NAME] = Field(GENESIS_COMMAND_NAME, exclude=True)
+
+# Defined for consistency with other models that have many commands - Union of a single type just returns the type though
+GENESIS = typing.Union[Genesis]
