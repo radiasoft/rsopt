@@ -1,0 +1,11 @@
+codes:
+  - spiffe:
+      settings:
+      parameters:
+      setup:
+        input_file: gun.spiffe
+        execution_type: serial
+options:
+  software: mesh_scan
+  sym_links:
+    - dc.geo

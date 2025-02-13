@@ -21,3 +21,5 @@ spiffe_model_instance.edit_command(command_name='define_geometry',
                                    )
 
 print('updated spiffe model', spiffe_model_instance)
+
+print(write.write_model(spiffe_model_instance, write.Spiffe))
