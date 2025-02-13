@@ -13,7 +13,7 @@ def add_double_quotes(v: str) -> str:
     return f"\"{v}\""
 
 class DefineGeometryParams(BaseModel):
-    command_name: Literal['define_geometry'] = "define_geometry"
+    command_name: Literal['define_geometry'] = Field("define_geometry", exclude=True)
 
     nz: Optional[int] = Field(0, description="Number of grid lines in the z dimension.")
     nr: Optional[int] = Field(0, description="Number of grid lines in the r dimension.")
@@ -57,7 +57,7 @@ class DefineGeometryParams(BaseModel):
 
 
 class GeometryPoint(BaseModel):
-    command_name: Literal['geometry'] = "geometry"
+    command_name: Literal['geometry'] = Field("geometry", exclude=True)
 
     nt: Optional[int] = 1
     x: float = 0.0
@@ -70,7 +70,7 @@ class GeometryPoint(BaseModel):
 
 
 class DefineAntennaParams(BaseModel):
-    command_name: Literal['define_antenna'] = "define_antenna"
+    command_name: Literal['define_antenna'] = Field("define_antenna", exclude=True)
 
     start: Optional[float] = Field(0.0, description="Starting position of the antenna in the defined direction.")
     end: Optional[float] = Field(0.0, description="Ending position of the antenna in the defined direction.")
@@ -87,7 +87,7 @@ class DefineAntennaParams(BaseModel):
 
 
 class LoadFieldsParams(BaseModel):
-    command_name: Literal['load_fields'] = "load_fields"
+    command_name: Literal['load_fields'] = Field("load_fields", exclude=True)
 
     filename: Optional[Annotated[str, AfterValidator(add_double_quotes)]] = None
     Ez_peak: Optional[float] = 0.0
@@ -97,7 +97,7 @@ class LoadFieldsParams(BaseModel):
 
 
 class SetConstantFieldsParams(BaseModel):
-    command_name: Literal['set_constant_fields'] = "set_constant_fields"
+    command_name: Literal['set_constant_fields'] = Field("set_constant_fields", exclude=True)
 
     Ez: Optional[float] = 0.0
     Er: Optional[float] = 0.0
@@ -108,7 +108,7 @@ class SetConstantFieldsParams(BaseModel):
 
 
 class AddOnAxisFieldsParams(BaseModel):
-    command_name: Literal['add_on_axis_fields'] = "add_on_axis_fields"
+    command_name: Literal['add_on_axis_fields'] = Field("add_on_axis_fields", exclude=True)
 
     filename: str
     z_name: str
@@ -121,7 +121,7 @@ class AddOnAxisFieldsParams(BaseModel):
 
 
 class DefineSolenoidParams(BaseModel):
-    command_name: Literal['define_solenoid'] = "define_solenoid"
+    command_name: Literal['define_solenoid'] = Field("define_solenoid", exclude=True)
 
     radius: Optional[float] = Field(0.0, description="The radius of the coils in meters.")
     evaluation_radius_limit: Optional[float] = Field(0.0,
@@ -142,7 +142,7 @@ class DefineSolenoidParams(BaseModel):
 
 
 class DefineCathodeParams(BaseModel):
-    command_name: Literal['define_cathode'] = "define_cathode"
+    command_name: Literal['define_cathode'] = Field("define_cathode", exclude=True)
 
     z_position: Optional[float] = Field(0.0, description="Longitudinal position of the cathode in meters.")
     inner_radius: Optional[float] = Field(0.0, description="Inner radius of the cathode in meters.")
@@ -185,7 +185,7 @@ class DefineCathodeParams(BaseModel):
 
 
 class LoadParticlesParams(BaseModel):
-    command_name: Literal['load_particles'] = "load_particles"
+    command_name: Literal['load_particles'] = Field("load_particles", exclude=True)
 
     filename: str
     sample_interval: Optional[int] = 1
@@ -193,7 +193,7 @@ class LoadParticlesParams(BaseModel):
 
 
 class PoissonCorrectionParams(BaseModel):
-    command_name: Literal['poisson_correction'] = "poisson_correction"
+    command_name: Literal['poisson_correction'] = Field("poisson_correction", exclude=True)
 
     start_time: Optional[float] = 0.0
     step_interval: Optional[int] = 0
@@ -208,7 +208,7 @@ class PoissonCorrectionParams(BaseModel):
 
 
 class DefineScreenParams(BaseModel):
-    command_name: Literal['define_screen'] = "define_screen"
+    command_name: Literal['define_screen'] = Field("define_screen", exclude=True)
 
     filename: Optional[Annotated[str, AfterValidator(add_double_quotes)]] = None
     template: Optional[Annotated[str, AfterValidator(add_double_quotes)]] = None
@@ -220,7 +220,7 @@ class DefineScreenParams(BaseModel):
 
 
 class DefineSecondaryEmissionParams(BaseModel):
-    command_name: Literal['define_secondary_emission'] = "define_secondary_emission"
+    command_name: Literal['define_secondary_emission'] = Field("define_secondary_emission", exclude=True)
 
     input_file: Optional[Annotated[str, AfterValidator(add_double_quotes)]] = None
     kinetic_energy_column: Optional[Annotated[str, AfterValidator(add_double_quotes)]] = None
@@ -231,7 +231,7 @@ class DefineSecondaryEmissionParams(BaseModel):
 
 
 class DefineSnapshotsParams(BaseModel):
-    command_name: Literal['define_snapshots'] = "define_snapshots"
+    command_name: Literal['define_snapshots'] = Field("define_snapshots", exclude=True)
 
     filename: Optional[Annotated[str, AfterValidator(add_double_quotes)]] = None
     time_interval: Optional[float] = 0.0
@@ -239,7 +239,7 @@ class DefineSnapshotsParams(BaseModel):
 
 
 class DefineFieldOutputParams(BaseModel):
-    command_name: Literal['define_field_output'] = "define_field_output"
+    command_name: Literal['define_field_output'] = Field("define_field_output", exclude=True)
 
     filename: str
     time_interval: Optional[float] = 0.0
@@ -251,7 +251,7 @@ class DefineFieldOutputParams(BaseModel):
 
 
 class DefineFieldSavingParams(BaseModel):
-    command_name: Literal['define_field_saving'] = "define_field_saving"
+    command_name: Literal['define_field_saving'] = Field("define_field_saving", exclude=True)
 
     filename: str
     time_interval: Optional[float] = 0.0
@@ -260,7 +260,7 @@ class DefineFieldSavingParams(BaseModel):
 
 
 class DefineFieldSamplingParams(BaseModel):
-    command_name: Literal['define_field_sampling'] = "define_field_sampling"
+    command_name: Literal['define_field_sampling'] = Field("define_field_sampling", exclude=True)
 
     filename: str
     component: Annotated[
@@ -275,7 +275,7 @@ class DefineFieldSamplingParams(BaseModel):
 
 
 class IntegrateParams(BaseModel):
-    command_name: Literal['integrate'] = "integrate"
+    command_name: Literal['integrate'] = Field("integrate", exclude=True)
 
     dt_integration: Optional[float] = Field(0.0, description="Simulation step size in seconds.")
     start_time: Optional[float] = Field(0.0,
