@@ -68,7 +68,7 @@ class Transformer(lark.Transformer):
         command_data = {}
 
         command_data['commands'] = command_list
-        return command_data # [cmd for cmd in cmds if cmd]
+        return command_data
 
     def valid_command(self, cmd):
         cmd_name = cmd[0]

@@ -1,4 +1,3 @@
-import pathlib
 import typing
 from functools import cached_property
 from rsopt.codes.models import base_model, spiffe_model
@@ -44,6 +43,6 @@ class Spiffe(code.Code):
     def input_file_model(self) -> base_model.CommandModel:
         input_file_model = spiffe_parser.parse_simulation_input_file(self.setup.input_file, self.code,None,False)
 
-        model_schema = base_model.generate_model(spiffe_model.SPIFFE, 'spiffe')
+        model_schema = base_model.generate_model(spiffe_model.SPIFFE, self.code)
 
         return model_schema.model_validate(input_file_model)
