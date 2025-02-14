@@ -1,4 +1,5 @@
 from libensemble.libE import libE
+from rsopt.configuration.schemas import configuration
 from rsopt.environment import get_run_command_with_path
 from rsopt.libe_tools.executors import create_executor_arguments
 from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_local_opt
@@ -53,7 +54,7 @@ class libEnsembleOptimizer:
     _NAME = 'libEnsemble'
     _OPT_SCHEMA = OPT_SCHEMA
 
-    def __init__(self, config_model):
+    def __init__(self, config_model: configuration.ConfigurationOptimize):
         self._config = config_model
         self.options = []
         self.H0 = None

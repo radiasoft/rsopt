@@ -14,14 +14,14 @@ class DlibOptimizer(optimizer.libEnsembleOptimizer):
 
     def _configure_optimizer(self):
         gen_out = [tools.set_dtype_dimension(dtype, self.dimension) for dtype in pysot_gen_out]
-        user_keys = {'lb': self.lb,
-                     'ub': self.ub,
-                     'dim': self._config.get_dimension(),
+        user_keys = {'lb': self._config.lower_bounds,
+                     'ub': self._config.upper_bounds,
+                     'dim': self._config.dimension,
                      'workers': self._config.options.nworkers - 1,
                      **self._config.options.software_options}
 
         self.gen_specs.update({'gen_f': persistent_dlib,
-                               'persis_in': self._set_persis_in(self._config.software, self._config.method) +
+                               'persis_in': self._config.options.method.persis_in +
                                             [n[0] for n in gen_out],
                                'out': gen_out,
                                'user': user_keys})
