@@ -131,7 +131,7 @@ class LHSampler(libEnsembleOptimizer):
     def _configure_optimizer(self):
         self.nworkers = self._config.options.nworkers
 
-        user_keys = {'gen_batch_size': self._config.options.batch_size,
+        user_keys = {'gen_batch_size': self._config.options.software_options.batch_size,
                      'lb': self._config.lower_bounds,
                      'ub': self._config.upper_bounds}
 
@@ -145,14 +145,15 @@ class LHSampler(libEnsembleOptimizer):
                                'out': gen_out,
                                'user': user_keys})
 
-        self.exit_criteria = {'sim_max': self._config.options.batch_size}
+        self.exit_criteria = {'sim_max': self._config.options.software_options.batch_size}
 
     def _configure_allocation(self):
         self.alloc_specs = {}
 
     def _configure_persistant_info(self):
         # _configure_specs must have been already called
-        self.persis_info = add_unique_random_streams({}, self.nworkers + 1, seed=self._config.options.seed)
+        self.persis_info = add_unique_random_streams({}, self.nworkers + 1,
+                                                     seed=self._config.options.software_options.seed)
 
 
 restart_alloc_out = [('x', float, None), ]

@@ -3,7 +3,7 @@ import pydantic
 import typing
 
 class MethodMeshScan(options.Method):
-    name: typing.Literal['mesh_scan']
+    name: typing.Literal['mesh_scan'] = 'mesh_scan'
     aposmm_support = False
     local_support = False
     persis_in = None
