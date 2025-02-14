@@ -33,7 +33,7 @@ class Transformer(lark.Transformer):
         cmd['command_name'] = 'newrun'
         return {'commands': [cmd,]}
     def NAME(self, v):
-        return str(v)
+        return str(v).lower()
     def NUMBER(self, v):
         return float(v)
     def INT(self, v):
