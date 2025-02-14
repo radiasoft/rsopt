@@ -1,4 +1,3 @@
-import numpy as np
 from rsopt.libe_tools import tools
 from rsopt.libe_tools import optimizer
 from rsopt.libe_tools.generator_functions.persistent_pysot import persistent_pysot
@@ -6,7 +5,7 @@ from libensemble.alloc_funcs.start_only_persistent import only_persistent_gens
 
 
 pysot_gen_out = [('x', float, None), ]
-
+DEFAULT_MAX_EVALS = 1e6
 
 class PysotOptimizer(optimizer.libEnsembleOptimizer):
 
@@ -15,14 +14,16 @@ class PysotOptimizer(optimizer.libEnsembleOptimizer):
 
     def _configure_optimizer(self):
         gen_out = [tools.set_dtype_dimension(dtype, self.dimension) for dtype in pysot_gen_out]
-        user_keys = {'lb': self.lb,
-                     'ub': self.ub,
-                     'dim': self._config.get_dimension(),
-                     'max_evals': np.max([val for val in self._config.options.exit_criteria.values()]).astype(int).astype(object),
+        user_keys = {'lb': self._config.lower_bounds,
+                     'ub': self._config.upper_bounds,
+                     'dim': self._config.dimension,
+                     # libEnsemble is controlling when to stop running so give the exact max if libEnsemble has it
+                     # otherwise set max_evals very high so that pySOT should run until stopped externally
+                     'max_evals': self._config.options.exit_criteria.sim_max or DEFAULT_MAX_EVALS,
                      **self._config.options.software_options}
 
         self.gen_specs.update({'gen_f': persistent_pysot,
-                               'persis_in': self._set_persis_in(self._config.software, self._config.method) +
+                               'persis_in': self._config.options.method.persis_in +
                                             [n[0] for n in gen_out],
                                'out': gen_out,
                                'user': user_keys})

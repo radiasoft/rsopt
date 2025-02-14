@@ -1,5 +1,5 @@
 from enum import Enum
-from rsopt.configuration.options import dfols, dlib
+from rsopt.configuration.options import dfols, dlib, pysot
 from rsopt.configuration.options import mesh
 
 
@@ -7,6 +7,7 @@ class SUPPORTED_OPTIONS(Enum):
     mesh_scan = ('sample', mesh.Mesh)
     dfols = ('optimize', dfols.Dfols)
     dlib = ('optimize', dlib.Dlib)
+    pysot = ('optimize', pysot.Pysot)
 
     def __init__(self, typing, model):
         self.typing = typing
