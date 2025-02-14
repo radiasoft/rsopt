@@ -40,6 +40,7 @@ class ExitCriteria(pydantic.BaseModel):
 class SoftwareOptions(pydantic.BaseModel, abc.ABC):
     pass
 
+# TODO: Could make Options a generic to slot in supported optimizer method types for each version
 class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
     software: str
     method: Method
@@ -60,6 +61,12 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
     # TODO: This could end up being its own model
     executor_options: dict = pydantic.Field(default_factory=dict)
     use_zero_resources: bool = pydantic.Field(default=True, frozen=True, exclude=True)
+
+    @pydantic.field_validator('method', mode='before')
+    @classmethod
+    def set_method_name(cls, v):
+        return {'name': v}
+
 
     @pydantic.model_validator(mode='after')
     def initialize_dynamic_outputs(self):

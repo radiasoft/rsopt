@@ -20,8 +20,6 @@ class DfolsOptions(options.SoftwareOptions, extra='allow'):
 
 class Dfols(options.OptionsExit):
     software: typing.Literal['dfols']
-    # TODO: using name as discriminator means user needs to pass method: {'name': dfols} not method: dfols
-    # to see this just uncomment "method: dfols" line in parser_run example
     method: typing.Union[MethodDfols] = pydantic.Field(default=MethodDfols(), discriminator='name')
     software_options: DfolsOptions
 
