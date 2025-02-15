@@ -1,6 +1,12 @@
-import typing
-from typing import Any, Optional, Union, List
+import enum
+from typing import Literal, Optional, Union, List
 import pydantic
+import numpy as np
+
+class ParameterClasses(str, enum.Enum):
+    REPEATED = "repeated"
+    NUMERICAL = "numeric"
+    CATEGORICAL = "category"
 
 def parameter_discriminator(v: dict) -> str:
     """Identifies which subclass of Parameter v belongs to.
@@ -11,10 +17,12 @@ def parameter_discriminator(v: dict) -> str:
     Returns: (str) Tag value for discriminator
 
     """
+    if 'dimension' in v.keys():
+        return ParameterClasses.REPEATED
     if 'min' in v.keys():
-        return 'numeric'
+        return ParameterClasses.NUMERICAL
     elif 'values' in v.keys():
-        return 'category'
+        return ParameterClasses.CATEGORICAL
 
 
 class Parameter(pydantic.BaseModel):
@@ -54,8 +62,33 @@ class NumericParameter(Parameter):
     max: Union[int, float]
     start: Union[int, float]
     # TODO: Checking requirement means looking at Options
-    samples: Optional[int] = 1
-    scale: Union[typing.Literal['linear'], typing.Literal['log']] = 'linear'
+    samples: int = 1
+    scale: Union[Literal['linear'], Literal['log']] = 'linear'
+
+# Cannot subclass NumericParameter or RepeatedNumericParameter will use the min/max/start fields and not the property
+# versions defined in RepeatedNumericParameter
+class RepeatedNumericParameter(Parameter):
+    dimension: int
+    min_setting: Union[int, float] = pydantic.Field(..., alias='min')
+    max_setting: Union[int, float] = pydantic.Field(..., alias='max')
+    start_setting: Union[int, float] = pydantic.Field(..., alias='start')
+    # TODO: Making all these have the same number of samples, could make an option to do in or list[int] to provide
+    # varying numbers of samples by dimension
+    samples_setting: int = pydantic.Field(1, alias='samples')
+    scale: Union[Literal['linear'], Literal['log']] = 'linear'
+    @property
+    def min(self):
+        return np.array([self.min_setting,] * self.dimension)
+    @property
+    def max(self):
+        return np.array([self.max_setting,] * self.dimension)
+    @property
+    def start(self):
+        return np.array([self.start_setting,] * self.dimension)
+    @property
+    def samples(self):
+        return np.array([self.samples_setting,] * self.dimension)
+
 
 class CategoryParameter(Parameter):
     values: List[Union[int, float, str]]

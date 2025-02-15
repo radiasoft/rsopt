@@ -1,16 +1,22 @@
 import abc
 from collections.abc import Iterable
-
+import enum
 import pydantic
 import typing
 from functools import cached_property
-from rsopt.configuration.schemas.parameters import Parameter, NumericParameter, CategoryParameter, parameter_discriminator
+from itertools import chain
+from rsopt.configuration.schemas.parameters import Parameter, NumericParameter, CategoryParameter, \
+    parameter_discriminator, RepeatedNumericParameter, ParameterClasses
 from rsopt.configuration.schemas.settings import Setting
 from rsopt.configuration.schemas.setup import Setup
 from rsopt.libe_tools.executors import EXECUTION_TYPES
 from rsopt import util
 from rsopt.codes import parsers
 from typing_extensions import Annotated
+
+class ArgumentModes(str, enum.Enum):
+    KWARGS = 'kwargs'
+    ARGS = 'args'
 
 # TODO: The extra=allow is necessary with the method of dynamic parameter/setting attribute addition. But does mean
 #       that extra fields a use might have put in the parameters/settings will be silently ignored here
@@ -26,8 +32,9 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
 
     parameters: list[
         Annotated[
-            typing.Union[Annotated[NumericParameter, pydantic.Tag('numeric')],
-                         Annotated[CategoryParameter, pydantic.Tag('category')]
+            typing.Union[Annotated[NumericParameter, pydantic.Tag(ParameterClasses.NUMERICAL)],
+                         Annotated[CategoryParameter, pydantic.Tag(ParameterClasses.CATEGORICAL)],
+                         Annotated[RepeatedNumericParameter, pydantic.Tag(ParameterClasses.REPEATED)]
             ],
             pydantic.Discriminator(parameter_discriminator)
         ]
@@ -141,7 +148,7 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
                                                                self.setup.execution_type == EXECUTION_TYPES.SHIFTER)
         return input_file_model
 
-    def get_kwargs(self, x: typing.Any) -> dict:
+    def get_kwargs(self, x: typing.Any) -> (Iterable, dict):
         """Create a dictionary with parameter/setting names paired to values in iterable x.
 
         Pair settings and parameters in the job with concrete values that will be used in a simulation.
@@ -163,7 +170,10 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
 
         settings_dict = {s.name: s.value for s in self.settings}
 
-        return {**parameters_dict, **settings_dict}
+        # Vector parameters are flattened into args but retained as a vector, associated with a single key, in kwargs
+        args = list(chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in x))
+
+        return args, {**parameters_dict, **settings_dict}
 
     def get_parameter_or_setting(self, name: str) -> Parameter or Setting:
         for item in [*self.parameters, *self.settings]:

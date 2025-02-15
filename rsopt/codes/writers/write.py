@@ -18,7 +18,7 @@ class Genesis(enum.Enum):
     END = '$end\n'
 
 def write_command(command: pydantic.BaseModel, structure: enum.Enum) -> str:
-    model_dump_dict = command.model_dump(exclude_defaults=True)
+    model_dump_dict = command.model_dump(exclude_defaults=True, by_alias=True)
     cmd_string = structure.CMD.value.format(**{'command_name': command.command_name, **model_dump_dict})
     for key, value in model_dump_dict.items():
         cmd_string += structure.PARAM.value.format(field=key, value=value)

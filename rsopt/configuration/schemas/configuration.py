@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+from itertools import chain
 from typing import Any
 
 import pydantic
@@ -80,6 +82,7 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         for code in self.codes:
             for param in code.parameters:
                 lower_bounds.append(param.min)
+        lower_bounds = list(chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in lower_bounds))
         return np.array(lower_bounds)
 
     @property
@@ -89,6 +92,7 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         for code in self.codes:
             for param in code.parameters:
                 upper_bounds.append(param.max)
+        upper_bounds = list(chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in upper_bounds))
         return np.array(upper_bounds)
 
     @property
@@ -98,6 +102,7 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         for code in self.codes:
             for param in code.parameters:
                 start.append(param.start)
+        start = list(chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in start))
         return np.array(start)
 
     @property
@@ -107,13 +112,18 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         for code in self.codes:
             for param in code.parameters:
                 samples.append(param.samples)
+        samples = list(chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in samples))
         return np.array(samples)
 
     @property
     def dimension(self) -> int:
         dimension = 0
         for code in self.codes:
-            dimension += len(code.parameters)
+            for param in code.parameters:
+                if hasattr(param, 'dimension'):
+                    dimension += param.dimension
+                else:
+                    dimension += 1
 
         return dimension
 
