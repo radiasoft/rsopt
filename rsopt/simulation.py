@@ -67,7 +67,7 @@ class SimulationFunction:
 
         for job in self.jobs:
             # Pair values in vector x with named settings/parameters
-            kwargs = job.get_kwargs(x)
+            args, kwargs = job.get_kwargs(x)
             self.J['inputs'] = kwargs
 
             # Call preprocess functions from user - if any
@@ -88,7 +88,10 @@ class SimulationFunction:
             if job.code == 'python':
                 # Serial Python Job
                 python_exec = serial_python.SERIAL_MODES[job.setup.serial_python_mode]
-                result_dict = python_exec(job.get_function, **kwargs)
+                if job.setup.argument_passing == code.ArgumentModes.KWARGS:
+                    result_dict = python_exec(job.get_function, **kwargs)
+                else:
+                    result_dict = python_exec(job.get_function, args)
                 f = result_dict[serial_python.RESULT]
                 self.J['sim_status'] = result_dict[serial_python.CODE]
                 # NOTE: Right now f is not passed to the objective function. Would need to go inside J. Or pass J into

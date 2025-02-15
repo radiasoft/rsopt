@@ -1,4 +1,3 @@
-import importlib.resources
 import jinja2
 import pathlib
 import pydantic
@@ -18,6 +17,7 @@ class Setup(setup_schema.Setup):
     input_file: pydantic.FilePath
     serial_python_mode: typing.Literal["process", "thread", "worker"] = 'worker'
     function: str or callable
+    argument_passing: code.ArgumentModes = pydantic.Field(code.ArgumentModes.KWARGS)
 
 class Python(code.Code):
     code: typing.Literal["python"]
