@@ -10,7 +10,7 @@ from rsopt import util
 
 class SimSpecs(pydantic.BaseModel):
     inputs: list[str]  #  = pydantic.Field(alias='in')
-    static_outputs: list[typing.Union[tuple[str, type], tuple[str, type, int]]]
+    static_outputs: list[typing.Union[tuple[str, type], tuple[str, type, int]]] = pydantic.Field(default_factory=list)
     dynamic_outputs: dict[str, tuple[str, type]] = pydantic.Field(default_factory=dict)
 
     # _intialized_dynamic_outputs are set at run time by the Options class
