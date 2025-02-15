@@ -1,23 +1,31 @@
-from rsopt.configuration.options import Options
+from rsopt.configuration.schemas import options
+import pydantic
+import typing
 
+class MethodNsga2(options.Method):
+    name: typing.Literal['pysot'] = 'nsga2'
+    aposmm_support = False
+    local_support = False
+    persis_in = ['fitness_values', 'sim_id']
+    sim_specs=options.SimSpecs(
+        inputs=['individual'],
+        static_outputs=[],
+        dynamic_outputs={'n_objectives': ('fitness_values', float)},
+    )
 
-class Nsga2(Options):
-    NAME = 'nsga2'
-    REQUIRED_OPTIONS = ('n_objectives', 'exit_criteria',)
-    SOFTWARE_OPTIONS = {}
+class Nsga2Options(pydantic.BaseModel, extra='forbid'):
+    pop_size: int = pydantic.Field(..., description='Number of individuals in the population.')
+    n_objectives: int = pydantic.Field(..., description="Number of objectives.")
 
-    def __init__(self):
-        super().__init__()
-        self.n_objectives = 0
-        self.nworkers = 2
-        self.pop_size = 100
-        # for key, val in self.SOFTWARE_OPTIONS.items():
-        #     self.__setattr__(key, val)
+    cxpb: float = pydantic.Field(0.8, description="Crossover probability.")
+    eta: float = pydantic.Field(10.0, description="Scales the mutation rate.")
+    # Default scaling of indpb is handled in EvolutionaryOptimizer since we need the problem dimensionality
+    # which is checked by the Configuration object
+    indpb: float = pydantic.Field(0.8, description="Probability that a gene changes. Default value will be "
+                                                   "scaled by the individual dimension. If the user sets then "
+                                                   "the exact value is used")
 
-    def get_sim_specs(self):
-        sim_specs = {
-            'in': ['individual'],
-            'out': [('fitness_values', float, self.n_objectives)]
-        }
-
-        return sim_specs
+class Nsga2(options.OptionsExit):
+    software: typing.Literal['nsga2'] = 'nsga2'
+    method: typing.Union[MethodNsga2] = pydantic.Field(MethodNsga2(), discriminator='name')
+    software_options: Nsga2Options

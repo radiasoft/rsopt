@@ -16,19 +16,24 @@ class EvolutionaryOptimizer(optimizer.libEnsembleOptimizer):
 
     def _configure_optimizer(self):
 
-        gen_out = [tools.set_dtype_dimension(dtype, self.dimension) for dtype in nsga2_gen_out]
+        gen_out = [tools.set_dtype_dimension(dtype, self._config.dimension) for dtype in nsga2_gen_out]
 
-        user_keys = {'lb': list(self.lb),  # DEAP requires lists
-                     'ub': list(self.ub),
-                     'pop_size': self._config.options.pop_size,
-                     **self._config.options.software_options}
+        if 'indpb' not in self._config.options.software_options.model_fields_set:
+            self._config.options.software_options.indpb /= self._config.dimension
+
+        user_keys = {'lb': list(self._config.lower_bounds),  # DEAP requires lists
+                     'ub': list(self._config.upper_bounds),
+                     'pop_size': self._config.options.software_options.pop_size,
+                     'cxpb': self._config.options.software_options.cxpb,
+                     'eta': self._config.options.software_options.eta,
+                     'indpb': self._config.options.software_options.indpb}
 
         # NSGA2 parameters
         assert self._config.options.n_objectives > 0, "n_objectives must be set in options to a number > 0"
 
         self._generator_defaults = {
             # Set to DEAP implementation defaults
-            'weights': _DEFAULT_WEIGHT * self._config.options.n_objectives,
+            'weights': _DEFAULT_WEIGHT * self._config.options.software_options.n_objectives,
             'cxpb': 0.9,  # probability two individuals are crossed
             'eta': 20.0,  # large eta = low variation in children
             'indpb': 1.0 / self._config.options.n_objectives  # Mutation probability
