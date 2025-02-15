@@ -19,5 +19,5 @@ class PysotOptions(pydantic.BaseModel, extra='forbid'):
 
 class Pysot(options.OptionsExit):
     software: typing.Literal['pysot'] = 'pysot'
-    method: typing.Union[MethodPysot] = pydantic.Field(MethodPysot(), description='name')
+    method: typing.Union[MethodPysot] = pydantic.Field(MethodPysot(), discriminator='name')
     software_options: PysotOptions = PysotOptions()
