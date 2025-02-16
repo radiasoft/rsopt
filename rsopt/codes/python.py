@@ -58,16 +58,18 @@ class Python(code.Code):
 
     @property
     def get_sym_link_targets(self) -> set:
-        return {self.setup.input_file}
+        if self.use_executor:
+            return {self.setup.input_file}
+        return set()
 
     @property
     def use_executor(self) -> bool:
-        if self.setup.force_executor:
+        if self.setup.force_executor or self.use_mpi:
             return True
         return False
 
     def generate_input_file(self, kwarg_dict, directory, is_parallel):
-        if not is_parallel and not self.setup.force_executor:
+        if not self.use_executor:
             return None
 
         template_loader = jinja2.FileSystemLoader(searchpath=_TEMPLATE_PATH)
