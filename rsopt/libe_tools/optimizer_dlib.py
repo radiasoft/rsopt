@@ -9,11 +9,11 @@ pysot_gen_out = [('x', float, None), ]
 
 class DlibOptimizer(optimizer.libEnsembleOptimizer):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, config_model):
+        super().__init__(config_model)
 
     def _configure_optimizer(self):
-        gen_out = [tools.set_dtype_dimension(dtype, self.dimension) for dtype in pysot_gen_out]
+        gen_out = [tools.set_dtype_dimension(dtype, self._config.dimension) for dtype in pysot_gen_out]
         user_keys = {'lb': self._config.lower_bounds,
                      'ub': self._config.upper_bounds,
                      'dim': self._config.dimension,
