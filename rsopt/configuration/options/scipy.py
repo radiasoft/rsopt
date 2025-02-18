@@ -57,11 +57,6 @@ class Scipy(options.OptionsExit):
     method: _METHODS = pydantic.Field(..., discriminator='name')
     software_options: typing.Union[ScipyOptionsBase, ScipyOptionsBfgs] = ScipyOptionsBase()
 
-    # TODO: Check where return code is used and decide how to pass in
-    # _opt_return_codes = {'Nelder-Mead': [0],
-    #                      'COBYLA': [1],
-    #                      'BFGS': [0]}
-
     @pydantic.model_validator(mode="before")
     @classmethod
     def validate_software_options(cls, values):
