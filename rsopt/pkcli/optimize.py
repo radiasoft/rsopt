@@ -43,6 +43,7 @@ def _final_global_result(H):
 
 _final_result = {
     'nlopt': _final_local_result,
+    'scipy': _final_local_result,
     'aposmm': _final_global_result,
     'pysot': _final_local_result,
     'dlib': _final_local_result
