@@ -105,6 +105,12 @@ def local_optimizer_scipy(config: configuration.ConfigurationOptimize):
 
     return opt
 
+def local_optimizer_nlopt(config: configuration.ConfigurationOptimize):
+    from rsopt.libe_tools.optimizer_nlopt import NloptOptimizer
+    opt = NloptOptimizer(config)
+
+    return opt
+
 def grid_sampler(config: configuration.Configuration):
     from rsopt.libe_tools import sampler
     sample = sampler.GridSampler(config)
@@ -171,7 +177,7 @@ def mobo_optimizer(config: configuration.ConfigurationOptimize):
 # These names have to line up with accepted values for setup.execution_type
 # Another place where shared names are imported from common source
 run_modes = {
-    'nlopt': local_optimizer,
+    'nlopt': local_optimizer_nlopt,
     'dfols': local_optimizer,
     'scipy': local_optimizer_scipy,
     'aposmm': aposmm_optimizer,
