@@ -99,6 +99,11 @@ def local_optimizer(config: configuration.ConfigurationOptimize):
 
     return opt
 
+def local_optimizer_scipy(config: configuration.ConfigurationOptimize):
+    from rsopt.libe_tools.optimizer_scipy import SciPyOptimizer
+    opt = SciPyOptimizer(config)
+
+    return opt
 
 def grid_sampler(config: configuration.Configuration):
     from rsopt.libe_tools import sampler
@@ -168,7 +173,7 @@ def mobo_optimizer(config: configuration.ConfigurationOptimize):
 run_modes = {
     'nlopt': local_optimizer,
     'dfols': local_optimizer,
-    'scipy': local_optimizer,
+    'scipy': local_optimizer_scipy,
     'aposmm': aposmm_optimizer,
     'nsga2': nsga2_optimizer,
     'pysot': pysot_optimizer,
