@@ -1,5 +1,5 @@
 from enum import Enum
-from rsopt.configuration.options import dfols, dlib, pysot, lh, nsga2, scipy, nlopt
+from rsopt.configuration.options import dfols, dlib, pysot, lh, nsga2, scipy, nlopt, mobo
 from rsopt.configuration.options import mesh
 
 
@@ -12,6 +12,7 @@ class SUPPORTED_OPTIONS(Enum):
     nsga2 = ('optimize', nsga2.Nsga2)
     scipy = ('optimize', scipy.Scipy)
     nlopt = ('optimize', nlopt.Nlopt)
+    mobo = ('optimize', mobo.Mobo)
 
     def __init__(self, typing, model):
         self.typing = typing
