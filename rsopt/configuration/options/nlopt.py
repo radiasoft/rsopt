@@ -17,6 +17,7 @@ class NloptOptionsMma(NloptOptionsBase):
 # Naming for nlopt algorithms should follow the NLopt usage
 class MethodBobyqa(options.Method):
     name: typing.Literal['LN_BOBYQA'] = 'LN_BOBYQA'
+    parent_software = 'nlopt'
     aposmm_support = True
     local_support = True
     persis_in = ['f', ]
@@ -25,10 +26,11 @@ class MethodBobyqa(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = NloptOptionsBase
+    option_spec: typing.ClassVar = NloptOptionsBase
 
 class MethodCobyla(options.Method):
     name: typing.Literal['LN_COBYLA'] = 'LN_COBYLA'
+    parent_software = 'nlopt'
     aposmm_support = True
     local_support = True
     persis_in = ['f', ]
@@ -37,10 +39,11 @@ class MethodCobyla(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = NloptOptionsBase
+    option_spec: typing.ClassVar = NloptOptionsBase
 
 class MethodNewuoa(options.Method):
     name: typing.Literal['LN_NEWUOA'] = 'LN_NEWUOA'
+    parent_software = 'nlopt'
     aposmm_support = True
     local_support = True
     persis_in = ['f', ]
@@ -49,10 +52,11 @@ class MethodNewuoa(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = NloptOptionsBase
+    option_spec: typing.ClassVar = NloptOptionsBase
 
 class MethodNelderMead(options.Method):
     name: typing.Literal['LN_NELDERMEAD'] = 'LN_NELDERMEAD'
+    parent_software = 'nlopt'
     aposmm_support = True
     local_support = True
     persis_in = ['f', ]
@@ -61,10 +65,11 @@ class MethodNelderMead(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = NloptOptionsBase
+    option_spec: typing.ClassVar = NloptOptionsBase
 
 class MethodSubplex(options.Method):
     name: typing.Literal['LN_SBPLX'] = 'LN_SBPLX'
+    parent_software = 'nlopt'
     aposmm_support = True
     local_support = True
     persis_in = ['f', ]
@@ -73,10 +78,11 @@ class MethodSubplex(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = NloptOptionsBase
+    option_spec: typing.ClassVar = NloptOptionsBase
 
 class MethodMma(options.Method):
     name: typing.Literal['LD_MMA'] = 'LD_MMA'
+    parent_software = 'nlopt'
     aposmm_support = True
     local_support = True
     persis_in = ['f', 'grad']
@@ -85,7 +91,7 @@ class MethodMma(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={'grad_dimensions': ('grad', float)}
     )
-    _option_spec: typing.ClassVar = NloptOptionsMma
+    option_spec: typing.ClassVar = NloptOptionsMma
     _opt_return_code = [0]
 
 _METHODS = typing.Union[MethodNelderMead, MethodCobyla, MethodBobyqa, MethodNewuoa, MethodSubplex, MethodMma]
@@ -101,7 +107,7 @@ class Nlopt(options.OptionsExit):
         """Ensure software_options matches the selected method and convert it to the correct model."""
         method = values.get('method')
         software_options = values.get('software_options')
-        valid_options = {v.model_fields['name'].default: v._option_spec for v in typing.get_args(_METHODS)}
+        valid_options = {v.model_fields['name'].default: v.option_spec for v in typing.get_args(_METHODS)}
 
         if method and software_options:
             expected_class = valid_options.get(method)

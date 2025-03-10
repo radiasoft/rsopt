@@ -1,42 +1,85 @@
-from rsopt.configuration.options import Options
-from rsopt.configuration import options
+from rsopt.configuration.schemas import options
+import pydantic
+import types
+import typing
+import importlib
+import inspect
+import pkgutil
+
+# TODO: `package` here needs to have a __path__ defined so it can't just be a module. But there appears to only
+#  be type hinting for a module. Unless this a boneless wings type situation...
+def find_subclasses_of_method(package: types.ModuleType):
+    # Search modules in  `package` and return all classes that subclass `_target_method` but are not `_target_method`
+    _target_method = options.Method
+    matching_subclasses = []
+
+    for _, module_name, _ in pkgutil.iter_modules(package.__path__, package.__name__ + "."):
+        module = importlib.import_module(module_name)
+
+        for name, obj in inspect.getmembers(module, inspect.isclass):
+            if issubclass(obj, _target_method) and obj is not _target_method:
+                matching_subclasses.append(obj)
+
+    return matching_subclasses
+
+def get_local_opt_methods():
+    from rsopt.configuration import options as pkg_options
+    opt_methods = find_subclasses_of_method(pkg_options)
+    supported_local_opt_methods = typing.Union[tuple([m for m in opt_methods if m.aposmm_support])]
+
+    return supported_local_opt_methods
 
 
-class Aposmm(Options):
-    NAME = 'aposmm'
-    REQUIRED_OPTIONS = ('method', 'exit_criteria', 'initial_sample_size')
-    # Only can allow what aposmm_localopt_support handles right now
-    ALLOWED_METHODS = ('LN_BOBYQA', 'LN_SBPLX', 'LN_COBYLA', 'LN_NEWUOA',
-                         'LN_NELDERMEAD', 'LD_MMA')
-    SOFTWARE_OPTIONS = {
-        'high_priority_to_best_localopt_runs': True,
-        'max_active_runs': 1,
-        'initial_sample_size': 0
-    }
+class AposmmOptions(pydantic.BaseModel, extra='forbid'):
+    initial_sample_size: int
+    max_active_runs: int = None
+    local_opt_options: options.SoftwareOptions
+    load_start_sample: pydantic.FilePath = None
+    # dist_to_bound_multiple: float =
+    # lhs_divisions
+    # mu
+    # nu
+    # rk_const
+    # stop_after_k_minima
+    # stop_after_k_runs
 
-    def __init__(self):
-        super().__init__()
+    @pydantic.model_validator(mode='after')
+    def set_default_max_active_runs(self, _):
+        if self.max_active_runs is None:
+            self.max_active_runs = self.parent.nworkers - 1
 
-        self.load_start_sample = ''
+    @pydantic.model_validator(mode='before')
+    @classmethod
+    def validate_local_opt_options(cls, v, validation_info):
+        # NOTE: receives (dict, ValidationInfo)
+        print('self', v, validation_info)
+        model = validation_info.data['method'].option_spec
+        v['local_opt_options'] = model.model_validate(v['local_opt_options'])
 
-        for key, val in self.SOFTWARE_OPTIONS.items():
-            self.__setattr__(key, val)
+        return v
 
-    def get_sim_specs(self):
-        # Imported locally to prevent circular dependency
-        from rsopt.configuration.options.options import option_classes
 
-        def split_method(method_name):
-            software, method = method_name.split('.')
-            return software, method
-        software, method = split_method(self.method)
-        sim_specs = self._OPT_SCHEMA[software]['methods'][method]['sim_specs']
-        opt_method = option_classes[software]()
-        for key in opt_method.REQUIRED_OPTIONS:
-            if key == 'exit_criteria' or key == 'method':
-                continue
-            assert self.software_options.get(key), f'Use of {software}.{method} with APOSMM requires that {key} be ' \
-                                                   f'set in software_options '
-            opt_method.parse(key, self.software_options.pop(key))
-        sim_specs['out'] = [tuple(t) if len(t) == 2 else (*t[:2], opt_method.__getattribute__(t[2])) for t in sim_specs['out']]
-        return sim_specs
+class Aposmm(options.OptionsExit):
+    software: typing.Literal['aposmm'] = 'aposmm'
+    method: get_local_opt_methods() = pydantic.Field(discriminator='name')
+    software_options: AposmmOptions
+
+    @pydantic.model_validator(mode='after')
+    def set_software_options_parent(self):
+        self.software_options.parent = self
+        return self
+
+    @pydantic.model_validator(mode='after')
+    def initialize_dynamic_outputs(self):
+        for param, output_type in self.method.sim_specs.dynamic_outputs.items():
+            if hasattr(self, param):
+                size = getattr(self, param)
+            elif hasattr(self.software_options.local_opt_options, param):
+                size = getattr(self.software_options, param)
+            else:
+                raise AttributeError(f"{param} not a member of {self}")
+            self.method.sim_specs._initialized_dynamic_outputs.append(
+                output_type + (size,)
+            )
+
+        return self

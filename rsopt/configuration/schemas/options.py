@@ -21,16 +21,6 @@ class SimSpecs(pydantic.BaseModel):
     def outputs(self) -> list:
         return list(self.static_outputs + self._initialized_dynamic_outputs)
 
-
-
-class Method(pydantic.BaseModel, abc.ABC):
-    name: str
-    aposmm_support: typing.ClassVar[bool]
-    local_support: typing.ClassVar[bool]
-    persis_in: typing.ClassVar[list[str]]
-    sim_specs: typing.ClassVar[SimSpecs]
-
-
 class ExitCriteria(pydantic.BaseModel):
     sim_max: typing.Optional[int] = None
     gen_max: typing.Optional[int] = None
@@ -39,6 +29,15 @@ class ExitCriteria(pydantic.BaseModel):
 
 class SoftwareOptions(pydantic.BaseModel, abc.ABC):
     pass
+
+class Method(pydantic.BaseModel, abc.ABC):
+    name: str
+    parent_software: typing.ClassVar[str]
+    aposmm_support: typing.ClassVar[bool]
+    local_support: typing.ClassVar[bool]
+    persis_in: typing.ClassVar[list[str]]
+    sim_specs: typing.ClassVar[SimSpecs]
+    option_spec: typing.ClassVar[SoftwareOptions]
 
 # TODO: Could make Options a generic to slot in supported optimizer method types for each version
 class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):

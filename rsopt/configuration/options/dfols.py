@@ -2,8 +2,12 @@ from rsopt.configuration.schemas import options
 import pydantic
 import typing
 
+class DfolsOptions(options.SoftwareOptions, extra='allow'):
+    components: int
+
 class MethodDfols(options.Method):
     name: typing.Literal['dfols'] = 'dfols'
+    parent_software = 'dfols'
     aposmm_support = True
     local_support = True
     persis_in = ['f', 'fvec']
@@ -14,9 +18,7 @@ class MethodDfols(options.Method):
             'components': ('fvec', float)
         }
     )
-
-class DfolsOptions(options.SoftwareOptions, extra='allow'):
-    components: int
+    option_spec = DfolsOptions
 
 class Dfols(options.OptionsExit):
     software: typing.Literal['dfols']

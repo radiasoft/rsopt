@@ -12,6 +12,7 @@ class ScipyOptionsBfgs(options.SoftwareOptions, extra='allow'):
 # Naming for SciPy algorithms should follow the scipy.optimize usage
 class MethodNelderMead(options.Method):
     name: typing.Literal['Nelder-Mead'] = 'Nelder-Mead'
+    parent_software = 'scipy'
     aposmm_support = True
     local_support = True
     persis_in = ['f', ]
@@ -20,11 +21,12 @@ class MethodNelderMead(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = ScipyOptionsBase
+    option_spec: typing.ClassVar = ScipyOptionsBase
     _opt_return_code = [0]
 
 class MethodCobyla(options.Method):
     name: typing.Literal['COBYLA'] = 'COBYLA'
+    parent_software = 'scipy'
     aposmm_support = True
     local_support = True
     persis_in = ['f', ]
@@ -33,11 +35,12 @@ class MethodCobyla(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = ScipyOptionsBase
+    option_spec: typing.ClassVar = ScipyOptionsBase
     _opt_return_code = [1]
 
 class MethodBfgs(options.Method):
     name: typing.Literal['BFGS'] = 'BFGS'
+    parent_software = 'scipy'
     aposmm_support = True
     local_support = True
     persis_in = ['f', 'grad']
@@ -46,7 +49,7 @@ class MethodBfgs(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={'grad_dimensions': ('grad', float)}
     )
-    _option_spec: typing.ClassVar = ScipyOptionsBfgs
+    option_spec: typing.ClassVar = ScipyOptionsBfgs
     _opt_return_code = [0]
 
 
@@ -63,7 +66,7 @@ class Scipy(options.OptionsExit):
         """Ensure software_options matches the selected method and convert it to the correct model."""
         method = values.get('method')
         software_options = values.get('software_options')
-        valid_options = {v.model_fields['name'].default: v._option_spec for v in typing.get_args(_METHODS)}
+        valid_options = {v.model_fields['name'].default: v.option_spec for v in typing.get_args(_METHODS)}
 
         if method and software_options:
             expected_class = valid_options.get(method)

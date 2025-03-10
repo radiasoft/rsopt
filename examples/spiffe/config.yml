@@ -1,6 +1,8 @@
 codes:
   - spiffe:
       settings:
+          define_geometry.zmin: -0.001
+          define_geometry.nz: 515
       parameters:
       setup:
         input_file: gun.spiffe
