@@ -2,6 +2,12 @@ from rsopt.configuration.schemas import options
 import pydantic
 import typing
 
+
+class SoftwareOptionsLH(options.SoftwareOptions):
+    batch_size: int
+    seed: typing.Union[int, None, typing.Literal['']] = ''
+
+
 class MethodLatinHypercube(options.Method):
     name: typing.Literal['lh_scan'] = 'lh_scan'
     aposmm_support = False
@@ -11,10 +17,8 @@ class MethodLatinHypercube(options.Method):
         inputs=['x'],
         static_outputs=[('f', float),],
     )
+    option_spec = SoftwareOptionsLH
 
-class SoftwareOptionsLH(options.SoftwareOptions):
-    batch_size: int
-    seed: typing.Union[int, None, typing.Literal['']] = ''
 
 # validate_assigment is used because the outputs field may be updated after initial instantiation
 class LH(options.Options, validate_assignment=True):

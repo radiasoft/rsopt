@@ -2,6 +2,11 @@ from rsopt.configuration.schemas import options
 import pydantic
 import typing
 
+
+class DlibOptions(options.SoftwareOptions, extra='forbid'):
+    pass
+
+
 class MethodDlib(options.Method):
     name: typing.Literal['dlib'] = 'dlib'
     aposmm_support = False
@@ -12,9 +17,8 @@ class MethodDlib(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
+    option_spec = DlibOptions
 
-class DlibOptions(options.SoftwareOptions, extra='forbid'):
-    pass
 
 class Dlib(options.OptionsExit):
     software: typing.Literal['dlib'] = 'dlib'

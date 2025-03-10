@@ -2,6 +2,12 @@ from rsopt.configuration.schemas import options
 import pydantic
 import typing
 
+
+class SoftwareOptionsMesh(options.SoftwareOptions):
+    sampler_repeats: pydantic.PositiveInt = pydantic.Field(default=1, gt=0)
+    mesh_file: pydantic.FilePath = ''
+
+
 class MethodMeshScan(options.Method):
     name: typing.Literal['mesh_scan'] = 'mesh_scan'
     aposmm_support = False
@@ -11,10 +17,8 @@ class MethodMeshScan(options.Method):
         inputs=['x'],
         static_outputs=[('f', float),],
     )
+    option_spec = SoftwareOptionsMesh
 
-class SoftwareOptionsMesh(options.SoftwareOptions):
-    sampler_repeats: pydantic.PositiveInt = pydantic.Field(default=1, gt=0)
-    mesh_file: pydantic.FilePath = ''
 
 class Mesh(options.Options, validate_assignment=True):
     # validate_assigment is used because the outputs field may be updated after initial instantiation

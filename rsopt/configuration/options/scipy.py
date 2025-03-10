@@ -59,20 +59,3 @@ class Scipy(options.OptionsExit):
     software: typing.Literal['scipy']
     method: _METHODS = pydantic.Field(..., discriminator='name')
     software_options: typing.Union[ScipyOptionsBase, ScipyOptionsBfgs] = ScipyOptionsBase()
-
-    @pydantic.model_validator(mode="before")
-    @classmethod
-    def validate_software_options(cls, values):
-        """Ensure software_options matches the selected method and convert it to the correct model."""
-        method = values.get('method')
-        software_options = values.get('software_options')
-        valid_options = {v.model_fields['name'].default: v.option_spec for v in typing.get_args(_METHODS)}
-
-        if method and software_options:
-            expected_class = valid_options.get(method)
-            if expected_class:
-                if not isinstance(software_options, dict):
-                    raise ValueError("software_options must be provided as a dictionary")
-                values['software_options'] = expected_class(**software_options)
-
-        return values
