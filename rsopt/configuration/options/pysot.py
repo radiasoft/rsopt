@@ -2,6 +2,11 @@ from rsopt.configuration.schemas import options
 import pydantic
 import typing
 
+
+class PysotOptions(pydantic.BaseModel, extra='forbid'):
+    num_pts: int = pydantic.Field(None, description='Sets the number of points that will be evaluated as part of the experimental planning phase before optimization begins. Defaults to 2 * (DIM + 1) if not set.')
+
+
 class MethodPysot(options.Method):
     name: typing.Literal['pysot'] = 'pysot'
     aposmm_support = False
@@ -12,9 +17,6 @@ class MethodPysot(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-
-class PysotOptions(pydantic.BaseModel, extra='forbid'):
-    num_pts: int = pydantic.Field(None, description='Sets the number of points that will be evaluated as part of the experimental planning phase before optimization begins. Defaults to 2 * (DIM + 1) if not set.')
 
 
 class Pysot(options.OptionsExit):

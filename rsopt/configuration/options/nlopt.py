@@ -25,7 +25,7 @@ class MethodBobyqa(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = NloptOptionsBase
+    option_spec: typing.ClassVar = NloptOptionsBase
 
 class MethodCobyla(options.Method):
     name: typing.Literal['LN_COBYLA'] = 'LN_COBYLA'
@@ -37,7 +37,7 @@ class MethodCobyla(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = NloptOptionsBase
+    option_spec: typing.ClassVar = NloptOptionsBase
 
 class MethodNewuoa(options.Method):
     name: typing.Literal['LN_NEWUOA'] = 'LN_NEWUOA'
@@ -49,7 +49,7 @@ class MethodNewuoa(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = NloptOptionsBase
+    option_spec: typing.ClassVar = NloptOptionsBase
 
 class MethodNelderMead(options.Method):
     name: typing.Literal['LN_NELDERMEAD'] = 'LN_NELDERMEAD'
@@ -61,7 +61,7 @@ class MethodNelderMead(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = NloptOptionsBase
+    option_spec: typing.ClassVar = NloptOptionsBase
 
 class MethodSubplex(options.Method):
     name: typing.Literal['LN_SBPLX'] = 'LN_SBPLX'
@@ -73,7 +73,7 @@ class MethodSubplex(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={}
     )
-    _option_spec: typing.ClassVar = NloptOptionsBase
+    option_spec: typing.ClassVar = NloptOptionsBase
 
 class MethodMma(options.Method):
     name: typing.Literal['LD_MMA'] = 'LD_MMA'
@@ -85,7 +85,7 @@ class MethodMma(options.Method):
         static_outputs=[('f', float)],
         dynamic_outputs={'grad_dimensions': ('grad', float)}
     )
-    _option_spec: typing.ClassVar = NloptOptionsMma
+    option_spec: typing.ClassVar = NloptOptionsMma
     _opt_return_code = [0]
 
 _METHODS = typing.Union[MethodNelderMead, MethodCobyla, MethodBobyqa, MethodNewuoa, MethodSubplex, MethodMma]
@@ -94,20 +94,3 @@ class Nlopt(options.OptionsExit):
     software: typing.Literal['nlopt']
     method: _METHODS = pydantic.Field(..., discriminator='name')
     software_options: typing.Union[NloptOptionsBase, NloptOptionsMma] = NloptOptionsBase()
-
-    @pydantic.model_validator(mode="before")
-    @classmethod
-    def validate_software_options(cls, values):
-        """Ensure software_options matches the selected method and convert it to the correct model."""
-        method = values.get('method')
-        software_options = values.get('software_options')
-        valid_options = {v.model_fields['name'].default: v._option_spec for v in typing.get_args(_METHODS)}
-
-        if method and software_options:
-            expected_class = valid_options.get(method)
-            if expected_class:
-                if not isinstance(software_options, dict):
-                    raise ValueError("software_options must be provided as a dictionary")
-                values['software_options'] = expected_class(**software_options)
-
-        return values

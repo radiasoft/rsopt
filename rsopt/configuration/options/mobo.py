@@ -2,6 +2,19 @@ from rsopt.configuration.schemas import options
 import pydantic
 import typing
 
+
+class MoboOptions(pydantic.BaseModel, extra='forbid'):
+    # TODO: Ideally we would check that this dict has keys matching parameters
+    reference_point: dict[str, float]
+    constraints: dict = pydantic.Field(default_factory=dict)
+    num_of_objectives: int
+    min_calc_to_remodel: int = 1
+
+    @property
+    def num_of_constraints(self):
+        return len(self.constraints)
+
+
 class MethodMobo(options.Method):
     name: typing.Literal['mobo'] = 'mobo'
     aposmm_support = False
@@ -15,17 +28,7 @@ class MethodMobo(options.Method):
             'num_of_constraints': ('c', float),
         }
     )
-
-class MoboOptions(pydantic.BaseModel, extra='forbid'):
-    # TODO: Ideally we would check that this dict has keys matching parameters
-    reference_point: dict[str, float]
-    constraints: dict = pydantic.Field(default_factory=dict)
-    num_of_objectives: int
-    min_calc_to_remodel: int = 1
-
-    @property
-    def num_of_constraints(self):
-        return len(self.constraints)
+    option_spec = MoboOptions
 
 class Mobo(options.OptionsExit):
     software: typing.Literal['mobo'] = 'mobo'

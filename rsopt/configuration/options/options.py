@@ -1,3 +1,4 @@
+# TODO: I think this is only used in aposmm. Would be nice to remove.
 from rsopt.configuration.options import dfols
 from rsopt.configuration.options import dlib
 from rsopt.configuration.options import lh

@@ -22,15 +22,6 @@ class SimSpecs(pydantic.BaseModel):
         return list(self.static_outputs + self._initialized_dynamic_outputs)
 
 
-
-class Method(pydantic.BaseModel, abc.ABC):
-    name: str
-    aposmm_support: typing.ClassVar[bool]
-    local_support: typing.ClassVar[bool]
-    persis_in: typing.ClassVar[list[str]]
-    sim_specs: typing.ClassVar[SimSpecs]
-
-
 class ExitCriteria(pydantic.BaseModel):
     sim_max: typing.Optional[int] = None
     gen_max: typing.Optional[int] = None
@@ -39,6 +30,15 @@ class ExitCriteria(pydantic.BaseModel):
 
 class SoftwareOptions(pydantic.BaseModel, abc.ABC):
     pass
+
+class Method(pydantic.BaseModel, abc.ABC):
+    name: str
+    aposmm_support: typing.ClassVar[bool] = pydantic.Field(..., description='Method can be used by APOSMM')
+    local_support: typing.ClassVar[bool] = pydantic.Field(..., description='Method is a local optimization algorithm')
+    persis_in: typing.ClassVar[list[str]] = pydantic.Field(..., description='Typing for libEnsemble persis_in')
+    sim_specs: typing.ClassVar[SimSpecs] = pydantic.Field(..., description='Description of sim_specs for libEnsemble')
+    option_spec: typing.ClassVar[SoftwareOptions] = pydantic.Field(..., description='Software options corresponding to this method. Used by Options validator to know what to validate against.')
+
 
 # TODO: Could make Options a generic to slot in supported optimizer method types for each version
 class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
@@ -91,6 +91,25 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
             function = getattr(module, function_name)
             return function
         return None
+
+    @pydantic.model_validator(mode="before")
+    @classmethod
+    def validate_software_options(cls, values):
+        """Use method to find the expected model that defines the corresponding software_options and then validate
+        user input to software_options."""
+        method = values.get('method')
+        software_options = values.get('software_options')
+        allowed_options = cls.model_fields['method'].annotation
+        valid_options = {v.model_fields['name'].default: v.option_spec for v in typing.get_args(allowed_options)}
+
+        if method and software_options:
+            expected_class = valid_options.get(method)
+            if expected_class:
+                if not isinstance(software_options, dict):
+                    raise ValueError("software_options must be provided as a dictionary")
+                values['software_options'] = expected_class(**software_options)
+
+        return values
 
 
 class OptionsExit(Options):
