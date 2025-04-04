@@ -3,7 +3,8 @@ import pathlib
 import pydantic
 from rsopt.libe_tools.executors import EXECUTION_TYPES
 
-class Setup(pydantic.BaseModel, abc.ABC):
+
+class Setup(pydantic.BaseModel, abc.ABC, extra='forbid'):
     preprocess: list[str] = pydantic.Field(default=None, min_length=2, max_length=2)
     postprocess: list[str] = pydantic.Field(default=None, min_length=2, max_length=2)
     execution_type: EXECUTION_TYPES
