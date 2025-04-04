@@ -85,7 +85,7 @@ class SimulationFunction:
                     os.remove(job.input_distribution)
                 self.switchyard.write(job.input_distribution, job.code)
 
-            if job.code == 'python':
+            if job.code == 'python' and not job.use_mpi:
                 # Serial Python Job
                 python_exec = serial_python.SERIAL_MODES[job.setup.serial_python_mode]
                 if job.setup.argument_passing == code.ArgumentModes.KWARGS:
