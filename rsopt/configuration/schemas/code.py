@@ -68,6 +68,17 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
             return []
 
     @pydantic.model_validator(mode='after')
+    def validate_unique_parameters(self):
+        # If a name exists in settings and parameters the setting will overwrite
+        # the new value from parameter at run time
+        setting_names = [setting.name for setting in self.settings]
+        for param in self.parameters:
+            if param.name in setting_names:
+                raise NameError(f"Parameter `{param.name}` is already defined in settings. "
+                                f"Must be defined in only one location.")
+        return self
+
+    @pydantic.model_validator(mode='after')
     def set_dynamic_attributes(self):
         for param in self.parameters:
             setattr(self, param.name, param)
