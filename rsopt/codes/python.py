@@ -11,7 +11,7 @@ _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
 
 # TODO: This will need to be set once installation is updated
-_TEMPLATE_PATH = ''
+_TEMPLATE_PATH = '/Users/chall/research/github/rsopt/rsopt/package_data'
 
 class Setup(setup_schema.Setup):
     input_file: pydantic.FilePath
@@ -55,6 +55,16 @@ class Python(code.Code):
         filename = _PARALLEL_PYTHON_RUN_FILE
 
         return filename
+
+    @property
+    def run_file_name(self) -> str:
+        """File name used to construct task string for the Executor."""
+        # Usually there is no reason not to use the input file name
+        # Parallel Python jobs require a different name because a run file is constructed that imports the run function
+        #  from the input file
+
+        # Serial python is run on worker so this is never used unless is_parallel==True
+        return _PARALLEL_PYTHON_RUN_FILE
 
     @property
     def get_sym_link_targets(self) -> set:

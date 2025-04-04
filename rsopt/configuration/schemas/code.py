@@ -133,6 +133,15 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
         return self.setup.execution_type != EXECUTION_TYPES.SERIAL
 
     @property
+    def run_file_name(self) -> str:
+        """File name used to construct task string for the Executor."""
+        # Usually there is no reason not to use the input file name
+        # Parallel Python jobs require a different name because a run file is constructed that imports the run function
+        #  from the input file
+
+        return self.setup.input_file.name
+
+    @property
     def run_command(self):
         """Generate the run command string to be given to the libEnsemble Executor."""
         if self.use_mpi:
