@@ -32,8 +32,9 @@ def get_local_opt_methods():
 
 class AposmmOptions(pydantic.BaseModel, extra='forbid'):
     initial_sample_size: int
+    # max_active_runs is not required but a value will be set by Aposmm.set_default_active_runs if user does not give one
     max_active_runs: int = None
-    local_opt_options: options.SoftwareOptions
+    local_opt_options: dict = None
     load_start_sample: pydantic.FilePath = None
     # dist_to_bound_multiple: float =
     # lhs_divisions
@@ -44,17 +45,13 @@ class AposmmOptions(pydantic.BaseModel, extra='forbid'):
     # stop_after_k_runs
 
     @pydantic.model_validator(mode='after')
-    def set_default_max_active_runs(self, _):
-        if self.max_active_runs is None:
-            self.max_active_runs = self.parent.nworkers - 1
-
-    @pydantic.model_validator(mode='before')
     @classmethod
     def validate_local_opt_options(cls, v, validation_info):
-        # NOTE: receives (dict, ValidationInfo)
-        print('self', v, validation_info)
+        # Needs to be run after because the method info will not be validated
+        # and thus will not be in validation_info if run in mode=before
+
         model = validation_info.data['method'].option_spec
-        v['local_opt_options'] = model.model_validate(v['local_opt_options'])
+        v.local_opt_options = model.model_validate(v.local_opt_options)
 
         return v
 
@@ -83,3 +80,12 @@ class Aposmm(options.OptionsExit):
             )
 
         return self
+
+    @pydantic.model_validator(mode="before")
+    @classmethod
+    def validate_software_options(cls, values):
+        """This validator normally handles picking the software_options model based on the method field.
+           However, the method cannot easily be generalized to account for aposmm. Since we only have one software_options
+           model for aposmm it is easiest just ot skip this validator in this case."""
+
+        return values
