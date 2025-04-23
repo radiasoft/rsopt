@@ -29,6 +29,20 @@ def process_start_sample(numpy_file):
 
     return H0[H0['returned'] & H0['given_back']]
 
+def format_user_specs(rsopt_options: "rsopt.configuration.schemas.options.OptionsExit"):
+    # aposmm has different conventions on where local optimizer arguments go in the user_specs dictionary
+    # some are placed directly in the top level. Other's get a sub-dictionary named after the local optimizer.
+
+    user_options = {**rsopt_options.software_options.dict(exclude='local_opt_options`')}
+    if rsopt_options.method.parent_software == 'nlopt':
+        # nlopt does not handle values of None if a number was expected, so unset fields should not be passed
+        user_options = {**user_options, **rsopt_options.software_options.local_opt_options.dict(exclude_unset=True)}
+    elif rsopt_options.method.parent_software in ('scipy', 'dfols'):
+        k = '{}_kwargs'.format(rsopt_options.method.parent_software)
+        user_options[k] = rsopt_options.software_options.local_opt_options.dict()
+
+    return user_options
+
 class AposmmOptimizer(optimizer.libEnsembleOptimizer):
 
     def __init__(self, config_model):
@@ -38,15 +52,15 @@ class AposmmOptimizer(optimizer.libEnsembleOptimizer):
         gen_out = [tools.set_dtype_dimension(dtype, self._config.dimension) for dtype in aposmm_gen_out]
         if self._config.options.software_options.load_start_sample:
             self.H0 = process_start_sample(self._config.options.software_options.load_start_sample)
+
+        user_specs = format_user_specs(self._config.options)
         user_keys = {'lb': self._config.lower_bounds,
                      'ub': self._config.upper_bounds,
                      'localopt_method': get_local_optimizer_method(self._config.options.method.name,
                                                                    self._config.options.method.parent_software
                                                                    ),
-                     **self._config.options.software_options}
+                     **user_specs}
 
-        for key, val in self._options.items():
-            user_keys[key] = val
         self.gen_specs.update({'gen_f': aposmm,
                                'persis_in': self._config.options.method.persis_in +
                                             [n[0] for n in gen_out],

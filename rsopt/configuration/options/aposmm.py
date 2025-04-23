@@ -62,8 +62,21 @@ class Aposmm(options.OptionsExit):
     software_options: AposmmOptions
 
     @pydantic.model_validator(mode='after')
-    def set_software_options_parent(self):
-        self.software_options.parent = self
+    def set_default_active_runs(self) -> 'Base':
+        # This validator needs to run after 'nworkers' and 'software_options' fields
+        # are validated because it checks their values
+
+        if self.software_options.max_active_runs is None:
+            calculated_runs = self.nworkers - 1
+
+            if calculated_runs <= 0:
+                raise ValueError(
+                    f"Default 'max_active_runs' ({calculated_runs}) calculated from "
+                    f"'workers' ({self.workers}) must be non-negative (>= 0)."
+                )
+            self.software_options.max_active_runs = calculated_runs
+
+        # Important: Always return the validated model instance (self) from the validator
         return self
 
     @pydantic.model_validator(mode='after')

@@ -65,6 +65,7 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
     @pydantic.field_validator('method', mode='before')
     @classmethod
     def set_method_name(cls, v):
+        # Set the name field for the Method model from the user input for method
         return {'name': v}
 
 
@@ -96,7 +97,10 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
     @classmethod
     def validate_software_options(cls, values):
         """Use method to find the expected model that defines the corresponding software_options and then validate
-        user input to software_options."""
+        user input to software_options. This method is necessary because the model to validate software_options
+        against is dependent on the value of method.
+        Pydantic does not currently give a way to set co-dependencies like this (that I can find)."""
+
         method = values.get('method')
         software_options = values.get('software_options')
         allowed_options = cls.model_fields['method'].annotation
