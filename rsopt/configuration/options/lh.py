@@ -20,8 +20,7 @@ class MethodLatinHypercube(options.Method):
     option_spec = SoftwareOptionsLH
 
 
-# validate_assigment is used because the outputs field may be updated after initial instantiation
-class LH(options.Options, validate_assignment=True):
+class LH(options.Options):
     software: typing.Literal['lh_scan']
     method: typing.Union[MethodLatinHypercube] = pydantic.Field(default=MethodLatinHypercube(), discriminator='name')
     software_options: SoftwareOptionsLH

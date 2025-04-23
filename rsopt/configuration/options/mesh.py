@@ -20,8 +20,7 @@ class MethodMeshScan(options.Method):
     option_spec = SoftwareOptionsMesh
 
 
-class Mesh(options.Options, validate_assignment=True):
-    # validate_assigment is used because the outputs field may be updated after initial instantiation
+class Mesh(options.Options):
     software: typing.Literal['mesh_scan']
     method: typing.Union[MethodMeshScan] = pydantic.Field(default=MethodMeshScan(name='mesh_scan'), discriminator='name')
     software_options: SoftwareOptionsMesh = SoftwareOptionsMesh()
