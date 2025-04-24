@@ -1,4 +1,3 @@
-
 def six_hump_camel_func(x, y):
     """
     Definition of the six-hump camel
