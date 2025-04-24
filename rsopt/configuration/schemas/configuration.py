@@ -166,19 +166,11 @@ class ConfigurationOptimize(ConfigurationSample):
                                                 )
 
 
-def _config_discriminator(v: dict) -> str:
-    if v['options']['software'] in SUPPORTED_OPTIONS.get_sample_names():
-        return 'sample'
-    elif v['options']['software'] in SUPPORTED_OPTIONS.get_optimize_name():
-        return 'optimize'
-
-# This is thin wrapper to get the proper Configuration class based on run mode
+# This thin wrapper just validates the software field with pydantic so that the mode for the full model validation can
+# be determined.
 # So far this is really only necessary for the 'start' command which overrides the behavior of the selected software
-#  and can thus accept either sample or optimize configs
-class Configuration(pydantic.BaseModel):
-    configuration: typing.Annotated[
-            typing.Union[typing.Annotated[ConfigurationSample, pydantic.Tag('sample')],
-                         typing.Annotated[ConfigurationOptimize, pydantic.Tag('optimize')]
-            ],
-            pydantic.Discriminator(_config_discriminator)
-        ]
+# and can thus accept either sample or optimize configs and needs to check what to do.
+# This could be used to entirely remove the optimize/sample command, but it would be more brittle than just having
+# the user provide instructions on what to do.
+class _ThinConfiguration(pydantic.BaseModel):
+    software: str = pydantic.Field(validation_alias=pydantic.AliasPath('options', 'software'))
