@@ -105,10 +105,10 @@ def load_results(directory: str,
 
 
 if __name__ == '__main__':
-    test_H = '../examples/python_chwirut_example/H_run_scan_history_length-500_evals-500_workers-1.npy'
+    test_H = '../examples/python_dfols_example/H_run_scan_history_length-500_evals-500_workers-1.npy'
     H = np.load(test_H)
 
-    test_config = pathlib.Path('../examples/python_chwirut_example/config_chwirut.yaml')
+    test_config = pathlib.Path('../examples/python_dfols_example/config_chwirut.yaml')
     config = YAML(typ='safe').load(test_config)
 
     res = gather_config_params(config)
