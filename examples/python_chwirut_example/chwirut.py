@@ -20,7 +20,3 @@ def eval_chwirut_sum(x1, x2, x3):
     fsum = func(f)
 
     return fsum
-
-
-def dummy_obj(*args, **kwargs):
-    return (214., np.ones(214))
