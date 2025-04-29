@@ -20,8 +20,8 @@ if os.uname().sysname == 'Darwin':
     set_start_method('fork', force=True)
 
 
-def startup_sequence(config: configuration.ConfigurationOptimize or configuration.Configuration) -> (
-        configuration.ConfigurationOptimize or configuration.Configuration):
+def startup_sequence(config: configuration.ConfigurationOptimize or configuration.ConfigurationSample) -> (
+        configuration.ConfigurationOptimize or configuration.ConfigurationSample):
     """Safely initialize rsopt accounting for the local MPI configuration (if any).
 
     Args:
@@ -111,28 +111,28 @@ def local_optimizer_nlopt(config: configuration.ConfigurationOptimize):
 
     return opt
 
-def grid_sampler(config: configuration.Configuration):
+def grid_sampler(config: configuration.ConfigurationSample):
     from rsopt.libe_tools import sampler
     sample = sampler.GridSampler(config)
 
     return sample
 
 
-def single_sampler(config: configuration.Configuration, n:int = 1):
+def single_sampler(config: configuration.ConfigurationSample, n:int = 1):
     from rsopt.libe_tools import sampler
     sample = sampler.SingleSample(config, sampler_repeats=n)
 
     return sample
 
 
-def lh_sampler(config: configuration.Configuration):
+def lh_sampler(config: configuration.ConfigurationSample):
     from rsopt.libe_tools import sampler
     sample = sampler.LHSampler(config)
 
     return sample
 
 
-def restart_sampler(config: configuration.Configuration, history: str):
+def restart_sampler(config: configuration.ConfigurationSample, history: str):
     from rsopt.libe_tools import sampler
     sample = sampler.RestartSampler(config, restart_from=history)
 

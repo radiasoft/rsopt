@@ -54,7 +54,7 @@ class libEnsembleOptimizer:
     _NAME = 'libEnsemble'
     _OPT_SCHEMA = OPT_SCHEMA
 
-    def __init__(self, config_model: configuration.ConfigurationOptimize):
+    def __init__(self, config_model: configuration.ConfigurationOptimize or configuration.ConfigurationSample):
         self._config = config_model
         self.options = []
         self.H0 = None
