@@ -12,11 +12,11 @@ description = "Flexible configuration and execution of large, black-box optimiza
 requires-python = ">=3.9"
 
 dependencies = [
-#    "pykern",
     "libEnsemble",
     "numpy",
     "pydantic==2.8.2",
     "sortedcontainers",
+    "typer",
     "lark",
 ]
 
@@ -33,9 +33,14 @@ full = [
     'deap'  # Used for NSGA-II algorithm implementation
 ]
 
+[project.scripts]
+rsopt = "rsopt.rsopt_console:main"
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["rsopt*"]
 
 [tool.setuptools.package-data]
 "rsopt" = ["package_data/**"]
+
+

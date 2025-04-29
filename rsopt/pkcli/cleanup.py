@@ -1,5 +1,8 @@
 import os
 import re
+import typer
+
+app = typer.Typer()
 
 _LIBE_CLEANUP_FILES = ['ensemble.log', 'libE_stats.txt']
 _LIBE_CLEANUP_PATTERNS = [['libE_history', '.npy'], ['libE_persis_info', '.pickle']]
@@ -24,6 +27,7 @@ def _matches(name, patterns):
     return False
 
 
+@app.command()
 def libensemble(directory=None):
     """Clean a directory of libEnsemble output files.
 

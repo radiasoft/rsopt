@@ -1,8 +1,13 @@
+import atexit
 from rsopt import parse
 from rsopt import run
+import typer
+
+app = typer.Typer()
 
 
-@run.cleaup
+# @run.cleaup
+@app.command()
 def configuration(config: str) -> ("numpy.ndarray", dict, "rsopt.configuration.configuration.Configuration") :
     """Runs a sampling job.
 
@@ -25,10 +30,13 @@ def configuration(config: str) -> ("numpy.ndarray", dict, "rsopt.configuration.c
 
     H, persis_info, _ = runner.run()
 
+    atexit.register(run.cleanup, config, H, persis_info, _config)
+
     return H, persis_info, _config
 
-@run.cleaup
-def start(config, n=1):
+
+@app.command()
+def start(config: str, n=1):
     """Run a single pass through the run chain in the configuration file.
 
     All settings are applied. Any parameters in the configuration are set to the value in `start`.
@@ -56,15 +64,20 @@ def start(config, n=1):
     runner = run.single_sampler(_config, n=n)
     H, persis_info, _ = runner.run()
 
+    atexit.register(run.cleanup, config, H, persis_info, _config)
+
     return H, persis_info, _config
 
-@run.cleaup
-def restart(config, history, rerun_failed=''):
+
+@app.command()
+def restart(config: str, history: str, rerun_failed: bool = False):
     _config_dict = parse.read_configuration_file(config)
     _config = parse.parse_sample_configuration(_config_dict)
     _config = run.startup_sequence(_config)
 
     runner = run.restart_sampler(_config, history)
     H, persis_info, _ = runner.run()
+
+    atexit.register(run.cleanup, config, H, persis_info, _config)
 
     return H, persis_info, _config
