@@ -18,6 +18,7 @@ pksetup.setup(
         'nlopt',
         'mpmath',
         'jinja2>=3.0.1',
+        'pydantic==2.8.2',
         'sortedcontainers',
         'lark'
     ],
