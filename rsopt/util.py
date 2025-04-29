@@ -1,4 +1,5 @@
 import importlib.machinery
+import importlib.resources
 import importlib.util
 import numpy as np
 import os
@@ -7,7 +8,6 @@ import pickle
 import re
 import shutil
 import sys
-import typing
 
 
 def run_path_as_module(fname):
@@ -26,6 +26,13 @@ def run_path_as_module(fname):
         code = compile(f.read(), fname, "exec")
     exec(code, m.__dict__)
     return m
+
+
+def package_data_path() -> pathlib.Path:
+    package_data_directory = 'package_data'
+    rsopt_package_data = importlib.resources.files('rsopt') / package_data_directory
+
+    return rsopt_package_data
 
 
 SLURM_PREFIX = 'nid'

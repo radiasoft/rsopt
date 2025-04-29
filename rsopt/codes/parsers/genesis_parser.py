@@ -1,8 +1,12 @@
 import lark
 import re
+import rsopt.util
 
 # TODO: Set path to resource
-parser = lark.Lark.open('../../package_data/grammars/genesis.lark', g_regex_flags=re.I, rel_to=__file__)
+parser = lark.Lark.open(
+    str(rsopt.util.package_data_path() / 'grammars/genesis.lark'),
+    g_regex_flags=re.I
+)
 
 
 # TODO: This follows parse function in init for now. Should unify the definitions once parsers are all converted.
@@ -31,15 +35,20 @@ class Transformer(lark.Transformer):
         # return list of single command to follow structure for base_model
         cmd = {p[0]: p[1] for p in params}
         cmd['command_name'] = 'newrun'
-        return {'commands': [cmd,]}
+        return {'commands': [cmd, ]}
+
     def NAME(self, v):
         return str(v).lower()
+
     def NUMBER(self, v):
         return float(v)
+
     def INT(self, v):
         return int(v)
+
     def STRING(self, v):
         return str(v).strip("\"")
+
     def parameter(self, param):
         k = param[0]
         if len(param[1:]) > 1:
