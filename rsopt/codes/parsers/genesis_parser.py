@@ -2,7 +2,7 @@ import lark
 import re
 import rsopt.util
 
-# TODO: Set path to resource
+
 parser = lark.Lark.open(
     str(rsopt.util.package_data_path() / 'grammars/genesis.lark'),
     g_regex_flags=re.I

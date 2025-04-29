@@ -3,11 +3,12 @@ import re
 import rsopt.util
 
 
-# TODO: Set path to resource
 parser = lark.Lark.open(
     str(rsopt.util.package_data_path() / 'grammars/spiffe.lark'),
     g_regex_flags=re.I
 )
+
+
 # TODO: This follows parse function in init for now. Should unify the definitions once parsers are all converted.
 def parse_simulation_input_file(input_file: str, code_name='spiffe', ignored_files: list[str] or None = None,
                                 shifter: bool = False) -> list[dict]:
