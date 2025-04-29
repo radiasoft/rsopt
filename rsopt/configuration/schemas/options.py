@@ -32,7 +32,7 @@ class SoftwareOptions(pydantic.BaseModel, abc.ABC):
 
 class Method(pydantic.BaseModel, abc.ABC):
     name: str
-    parent_software: typing.ClassVar[str]
+    parent_software: typing.ClassVar[str] = pydantic.Field(..., description='Applicable to methods used by APOSMM. Informs what package to load the method from.')
     aposmm_support: typing.ClassVar[bool] = pydantic.Field(..., description='Method can be used by APOSMM')
     local_support: typing.ClassVar[bool] = pydantic.Field(..., description='Method is a local optimization algorithm')
     persis_in: typing.ClassVar[list[str]] = pydantic.Field(..., description='Typing for libEnsemble persis_in')
