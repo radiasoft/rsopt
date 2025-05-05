@@ -1,0 +1,46 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=66"]
+
+[project]
+authors = [
+    { name = "Chris Hall", email = "chall@radiasoft.net" },
+]
+name = "rsopt"
+dynamic = ["version"]
+description = "Flexible configuration and execution of large, black-box optimization problems"
+requires-python = ">=3.9"
+
+dependencies = [
+    "libEnsemble",
+    "numpy",
+    "pydantic==2.8.2",
+    "sortedcontainers",
+    "typer",
+    "lark",
+]
+
+[project.optional-dependencies]
+full = [
+    'rsbeams@git+https://github.com/radiasoft/rsbeams',
+    'sirepo@git+https://github.com/radiasoft/sirepo',
+    'DFO-LS',  # If using dfols optimizer
+    'scipy',
+    'nlopt',
+    'pandas',  # Needed for some post-processing utilities
+    'xopt',  # If using MOBO algorithm for optimization
+    'pymoo',  # Used by some MOBO examples
+    'deap'  # Used for NSGA-II algorithm implementation
+]
+
+[project.scripts]
+rsopt = "rsopt.rsopt_console:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["rsopt*"]
+
+[tool.setuptools.package-data]
+"rsopt" = ["package_data/**"]
+
+

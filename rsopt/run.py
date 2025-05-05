@@ -53,16 +53,11 @@ def startup_sequence(config: configuration.ConfigurationOptimize or configuratio
     return config
 
 
-def cleaup(action):
-    # Make inner's metadata look like action. Allows it to be registered with pkcli.
-    @functools.wraps(action)
-    def inner(config_path, *args, **kwargs):
-        H, persis_info, config = action(config_path, *args, **kwargs)
-        if config.is_manager:
-            history, _ = rsopt.util.save_final_history(config, config_path, H, persis_info, message='Run finished')
-            if config.options.copy_final_logs:
-                rsopt.util.copy_final_logs(config_path, config.options, history)
-    return inner
+def cleanup(config_path, H, persis_info, config):
+    if config.is_manager:
+        history, _ = rsopt.util.save_final_history(config, config_path, H, persis_info, message='Run finished')
+        if config.options.copy_final_logs:
+            rsopt.util.copy_final_logs(config_path, config.options, history)
 
 
 def _local_opt_startup() -> None:

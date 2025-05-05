@@ -1,8 +1,13 @@
+import atexit
 import numpy as np
 from rsopt import parse
 from rsopt import run
+import typer
 
-@run.cleaup
+app = typer.Typer()
+
+
+@app.command()
 def configuration(config: str):
     """Runs an optimization job.
 
@@ -24,6 +29,8 @@ def configuration(config: str):
     if _config.is_manager:
         if _config.options.software in _final_result:
             _final_result[_config.options.software](H)
+
+    atexit.register(run.cleanup, config, H, persis_info, _config)
 
     return H, persis_info, _config
 

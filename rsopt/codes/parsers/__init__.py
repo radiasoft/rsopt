@@ -1,9 +1,7 @@
-import enum
 import pickle
 import typing
 from rsopt import util
-class PARSERS(str, enum.Enum):
-    GENESIS = 'genesis'
+
 
 def parse_simulation_input_file(input_file: str, code_name, ignored_files: typing.List[str] or None = None,
                                 shifter: bool = False) -> typing.Type['sirepo.lib.SimData'] or None:
@@ -23,11 +21,9 @@ def _shifter_parse_model(name: str, input_file: str, ignored_files: list) -> typ
     import shlex
     from subprocess import Popen, PIPE
 
-    # TODO: These will need to be set up (_DEFAULT_SHIFTER_IMAGE is also used elsewhere)
-    _SHIFTER_BASH_FILE = pkio.py_path(pkresource.filename('shifter_exec.sh'))
-    _SHIFTER_SIREPO_SCRIPT = pkio.py_path(pkresource.filename('shifter_sirepo.py'))
+    _SHIFTER_BASH_FILE = util.package_data_path() / 'shifter_exec.sh'
+    _SHIFTER_SIREPO_SCRIPT = util.package_data_path() / 'shifter_sirepo.py'
     _DEFAULT_SHIFTER_IMAGE = 'radiasoft/sirepo:prod'
-
 
     node_to_use = util.return_unused_node()
     if node_to_use:

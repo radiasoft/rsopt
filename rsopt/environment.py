@@ -1,12 +1,12 @@
 import jinja2
 import pathlib
+import rsopt.util
 import shutil
 
 _ENV_TEMPLATE = 'env_setup.jinja'
 ENV_RUN_FILE = 'env_setup'
+_TEMPLATE_PATH = rsopt.util.package_data_path()
 
-# TODO: This needs to be set to use importlib resources
-_TEMPLATE_PATH = '.'  #pkio.py_path(pkresource.filename(''))
 
 def generate_env_setup(environment_variables) -> str:
     if environment_variables:

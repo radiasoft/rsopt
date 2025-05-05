@@ -9,15 +9,15 @@ from rsopt import util
 
 _PARALLEL_PYTHON_TEMPLATE = 'run_parallel_python.py.jinja'
 _PARALLEL_PYTHON_RUN_FILE = 'run_parallel_python.py'
+_TEMPLATE_PATH = util.package_data_path()
 
-# TODO: This will need to be set once installation is updated
-_TEMPLATE_PATH = '/Users/chall/research/github/rsopt/rsopt/package_data'
 
 class Setup(setup_schema.Setup):
     input_file: pydantic.FilePath
     serial_python_mode: typing.Literal["process", "thread", "worker"] = 'worker'
     function: str or callable
     argument_passing: code.ArgumentModes = pydantic.Field(code.ArgumentModes.KWARGS)
+
 
 class Python(code.Code):
     code: typing.Literal["python"]
