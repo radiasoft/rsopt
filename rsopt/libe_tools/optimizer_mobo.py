@@ -17,9 +17,7 @@ class MoboOptimizer(optimizer.libEnsembleOptimizer):
                      'ub': self._config.upper_bounds,
                      'dim': self._config.dimension,
                      'processes': self._config.options.nworkers - 1,
-                     'constraints': self._config.options.software_options.constraints,
-                     'ref': self._config.options.software_options.reference_point,
-                     'min_calc_to_remodel': self._config.options.software_options.min_calc_to_remodel,
+                     **self._config.options.software_options.model_dump()
                      }
 
         self.gen_specs.update({'gen_f': persistent_mobo,

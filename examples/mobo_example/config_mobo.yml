@@ -17,6 +17,7 @@ options:
   nworkers: 2
   software: mobo
   software_options:
+    use_cuda: False
     num_of_objectives: 2
     min_calc_to_remodel: 3  # if min_calc_to_remodel == nworkers - 1 then model update is synchronous
     constraints:
