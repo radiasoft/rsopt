@@ -9,6 +9,7 @@ class MoboOptions(pydantic.BaseModel, extra='forbid'):
     constraints: dict = pydantic.Field(default_factory=dict)
     num_of_objectives: int
     min_calc_to_remodel: int = 1
+    use_cuda: bool = False
 
     @property
     def num_of_constraints(self):
