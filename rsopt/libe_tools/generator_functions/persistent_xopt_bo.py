@@ -8,7 +8,7 @@ from libensemble.tools.persistent_support import PersistentSupport
 
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('libensemble')
 gen_log = logging.getLogger('gen-log')
 
@@ -26,6 +26,7 @@ def candidates_to_array(candidates: list[dict], vocs: VOCS) -> np.ndarray:
 
     return new_array
 
+
 def array_to_candidates(array: np.ndarray, vocs: VOCS) -> list[dict]:
     """Take structured array containing x, f, and possibly c; and move to list of dicts for Xopt."""
     candidates = []
@@ -37,6 +38,7 @@ def array_to_candidates(array: np.ndarray, vocs: VOCS) -> list[dict]:
 
     return candidates
 
+
 def add_candidates_to_local_H(local_H: np.ndarray, candidates: np.ndarray) -> None:
     """Process data from sim_f workers and add to local history"""
     len_local_H = len(local_H)
@@ -45,63 +47,6 @@ def add_candidates_to_local_H(local_H: np.ndarray, candidates: np.ndarray) -> No
     local_H.resize(len(local_H) + num_pts, refcheck=False)  # Adds num_pts rows of zeros to O
     local_H['x'][-num_pts:] = candidates
     local_H['sim_id'][-num_pts:] = np.arange(len_local_H, len_local_H + num_pts)
-
-# TODO: May be removed
-# def add_to_local_H(local_H: np.ndarray, points: torch.Tensor, use_cuda: bool = False) -> None:
-#     """Process data from sim_f workers and add to local history"""
-#     x = process_x(points, use_cuda)
-#     len_local_H = len(local_H)
-#     num_pts = len(points)
-#
-#     local_H.resize(len(local_H) + num_pts, refcheck=False)  # Adds num_pts rows of zeros to O
-#     local_H['x'][-num_pts:] = x
-#     local_H['sim_id'][-num_pts:] = np.arange(len_local_H, len_local_H + num_pts)
-
-
-# def generate_new_candidates(x: torch.Tensor, y: torch.Tensor, c: torch.Tensor,
-#                             vocs: dict, candidate_generator: generators.mobo.MOBOGenerator,
-#                             candidates: int, custom_model=None, cuda: bool = False) -> torch.Tensor:
-#     """Return new candidates that will be sent to workers"""
-#     if cuda:
-#         # Model is on GPU - move data from generator over
-#         x = x.to(torch.device('cuda'))
-#         y = y.to(torch.device('cuda'))
-#         c = c.to(torch.device('cuda'))
-#
-#     new_candidates = get_candidates(
-#         x, y,
-#         vocs,
-#         candidate_generator,
-#         train_c=c,
-#         custom_model=custom_model,
-#         q=candidates)
-#
-#     return new_candidates
-#
-# def budgeting(x: torch.Tensor, base_cost: float, total_cost: float,
-#               budget: float, fixed_cost: bool = True) -> (float, torch.Tensor):
-#     """Tracks evaluation budget and truncates submission list if budget exceeded"""
-#     submit = 0
-#
-#     for candidate in x:
-#         if fixed_cost:
-#             c = 1.0
-#         else:
-#             c = candidate[-1] + base_cost
-#
-#         total_cost += c
-#
-#         logger.info(
-#             f"Accepting submission candidate {candidate}, cost: {c:4.3}, "
-#             f"Total cost: {total_cost:4.4}"
-#         )
-#
-#         submit += 1
-#
-#         if total_cost > budget:
-#             break
-#
-#     return total_cost, x[:submit]
 
 
 def persistent_mobo(H, persis_info, gen_specs, libE_info):
@@ -115,19 +60,13 @@ def persistent_mobo(H, persis_info, gen_specs, libE_info):
     local_H = np.zeros(len(H), dtype=H.dtype)
 
     # MOBO Setup
-    # fixed_cost = True if gen_specs['user'].get('fixed_cost') else False
-    # restart_file = gen_specs['user'].get('restart_file')
-    # initial_x = gen_specs['user'].get('initial_x')
     generator_options = gen_specs['user'].get('generator_options', {})
-    # custom_model = gen_specs['user'].get('custom_model')
-    # base_cost = gen_specs['user'].get('base_cost', 1.0)
     constraints = gen_specs['user'].get('constraints', {})
     min_calc_to_remodel = gen_specs['user'].get('min_calc_to_remodel', 1)
-    # budget = gen_specs['user']['budget']
     processes = gen_specs['user']['processes']
     ref = gen_specs['user']['ref']
     lb, ub = gen_specs['user']['lb'], gen_specs['user']['ub']
-    # use_cuda = generator_options.get('use_gpu', False)
+    use_cuda = generator_options.get('use_cuda', False)
 
     # assemble necessary VOCS components
     vocs = VOCS()
@@ -139,6 +78,7 @@ def persistent_mobo(H, persis_info, gen_specs, libE_info):
     # create generator
     generator = bayesian.MOBOGenerator(vocs=vocs,
                                        reference_point=reference_dict,
+                                       use_cuda=use_cuda,
                                        **generator_options)
 
     # TODO: Budget and total cost tracking originally allowed variable cost to be calculated or passed back to generator
@@ -147,40 +87,7 @@ def persistent_mobo(H, persis_info, gen_specs, libE_info):
     total_cost = 0
     budget = 1  #  Dummy variables for now, total_cost never increments
 
-    # TODO: WIll need to clean up initialize from file
-    # # get data from previous runs, otherwise start with some initial samples
-    # if restart_file is None:
-    #     # generate initial samples if no initial samples are given
-    #     if initial_x is None:
-    #         initial_x = draw_sobol_samples(
-    #             torch.tensor(np.array([lb, ub]), **candidate_generator.tkwargs), 1, processes
-    #         )[0]
-    #     else:
-    #         initial_x = initial_x
-    #
-    #     # # add initial points to the queue
-    #     # for ele in initial_x:
-    #     #     q.put(ele)
-    #
-    #     train_x, train_y, train_c, inputs, outputs = torch.empty(0, len(vocs.variables)), \
-    #                                                  torch.empty(0, len(vocs.objectives)), \
-    #                                                  torch.empty(0, len(vocs.constraints)), None, None
-    #
-    # else:
-    #     data = get_data_json(restart_file, vocs, **candidate_generator.tkwargs)
-    #     train_x = data["variables"]
-    #     train_y = data["objectives"]
-    #     train_c = data["constraints"]
-    #
-    #     # get a new set of candidates and put them in the queue
-    #     logger.info(f"generating {processes} new candidate(s) from restart file")
-    #     initial_x = generate_new_candidates(train_x, train_y, train_c, vocs, candidate_generator, processes,
-    #                                         custom_model=custom_model, cuda=use_cuda)
-
-    # Submit initial candidates and tally cost
-
     # Get initial submissions from Xopt generator and send to libEnsemble allocator
-    # TODO: Check ramifications of include_constant
     initial_num_samples = max(processes, min_calc_to_remodel)
     submissions = generator.vocs.random_inputs(initial_num_samples, seed=None, custom_bounds=None,
                                                include_constants=True
@@ -249,8 +156,6 @@ def persistent_mobo(H, persis_info, gen_specs, libE_info):
                 new_candidates = None
 
             if new_candidates is not None:
-                # total_cost, submissions = budgeting(new_candidates, base_cost,
-                #                                     total_cost, budget, fixed_cost)
                 logger.debug("Sending out {} new candidates for eval".format(len(submissions)))
 
                 submissions_array = candidates_to_array(new_candidates, vocs)
