@@ -58,13 +58,13 @@ def persistent_mobo(H, persis_info, gen_specs, libE_info):
     local_H = np.zeros(len(H), dtype=H.dtype)
 
     # MOBO Setup
-    generator_options = gen_specs['user'].get('generator_options', {})
-    constraints = gen_specs['user'].get('constraints', {})
-    min_calc_to_remodel = gen_specs['user'].get('min_calc_to_remodel', 1)
+    constraints = gen_specs['user']['constraints']
+    min_calc_to_remodel = gen_specs['user']['min_calc_to_remodel']
     processes = gen_specs['user']['processes']
-    ref = gen_specs['user']['ref']
+    ref = gen_specs['user']['reference_point']
     lb, ub = gen_specs['user']['lb'], gen_specs['user']['ub']
-    use_cuda = generator_options.get('use_cuda', False)
+    use_cuda = gen_specs['user']['use_cuda']
+    
 
     # assemble necessary VOCS components
     vocs = VOCS()
@@ -76,8 +76,8 @@ def persistent_mobo(H, persis_info, gen_specs, libE_info):
     # create generator
     generator = bayesian.MOBOGenerator(vocs=vocs,
                                        reference_point=reference_dict,
-                                       use_cuda=use_cuda,
-                                       **generator_options)
+                                       use_cuda=use_cuda
+                                      )
 
     # TODO: Budget and total cost tracking originally allowed variable cost to be calculated or passed back to generator
     #       This isn't really needed for MOBO now but could be useful for multi-fidelity. Leaving in until that is checked.
