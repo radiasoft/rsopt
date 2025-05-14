@@ -16,9 +16,8 @@ codes:
 options:
   software: nlopt
   method: LN_BOBYQA
+  record_interval: 2
   software_options: {'xtol_abs': 1e-6,
-                     'ftol_abs': 1e-6,
-                     'record_interval': 2}
+                     'ftol_abs': 1e-6}
   exit_criteria:
     sim_max: 30
-  objective_function: []
