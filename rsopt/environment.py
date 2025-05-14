@@ -37,7 +37,6 @@ def _get_application_path(application_name: str) -> str:
 
 def get_run_command_with_path(job: "import rsopt.configuration.schemas.code") -> str:
     from rsopt.libe_tools.executors import EXECUTION_TYPES
-    # TODO: Shifter will need handling (if still being used?)
     if job.setup.execution_type == EXECUTION_TYPES.SHIFTER:
         run_command = 'shifter'
         return _get_application_path(run_command)

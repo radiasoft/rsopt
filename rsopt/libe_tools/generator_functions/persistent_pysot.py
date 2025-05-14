@@ -155,7 +155,6 @@ def persistent_pysot(H, persis_info, gen_specs, libE_info):
 
         return local_H, persis_info, FINISHED_PERSISTENT_GEN_TAG
     finally:
-        # TODO: Is there cleanup to do?
         pass
 
 

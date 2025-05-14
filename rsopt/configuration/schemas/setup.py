@@ -9,7 +9,7 @@ class Setup(pydantic.BaseModel, abc.ABC, extra='forbid'):
     postprocess: list[str] = pydantic.Field(default=None, min_length=2, max_length=2)
     execution_type: EXECUTION_TYPES
     input_file: pydantic.FilePath
-    input_distribution: str = None  # TODO: could be a delayed validation against previous code (might be too hard to be worth it)
+    input_distribution: str = None
     output_distribution: str = None
     cores: pydantic.PositiveInt = pydantic.Field(default=1)
     timeout: pydantic.PositiveFloat = pydantic.Field(default=1324512000)

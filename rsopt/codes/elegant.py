@@ -3,9 +3,20 @@ import typing
 from copy import deepcopy
 from rsopt.configuration.schemas import code
 from rsopt.configuration.schemas import setup as setup_schema
-from rsopt.configuration.setup import IGNORED_FIELDS
 
 LOG = logging.getLogger('libensemble')
+
+
+# Ignored fields in sirepo schema that rsopt editor should check for - keyed by code name
+IGNORED_FIELDS = {
+    'elegant': [
+                "mpi_io_write_buffer_size",
+                "rootname",
+                "search_path",
+                "semaphore_file"
+    ],
+}
+
 
 
 def _get_model_fields(model):

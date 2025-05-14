@@ -186,8 +186,6 @@ def run_local_nlopt(user_specs, comm_queue, x0, f0, child_can_read, parent_can_r
     if 'ftol_abs' in user_specs:
         opt.set_ftol_abs(user_specs['ftol_abs'])
 
-    # FIXME: Do we need to do something of the final 'x_opt'?
-    # print('[Child]: Started my optimization', flush=True)
     x_opt = opt.optimize(x0)
     return_val = opt.last_optimize_result()
 

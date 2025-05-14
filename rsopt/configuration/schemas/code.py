@@ -42,7 +42,6 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
     settings: list[Setting] = pydantic.Field(default_factory=list)
     setup: Setup
 
-    # TODO: Make _executor_arguments a computed_field?
     # Executor arguments are passed to libEnsemble's Executor submit command
     # Will not be set directly by user - set by the libEnsemble setup class from the info in Code
     _executor_arguments: dict

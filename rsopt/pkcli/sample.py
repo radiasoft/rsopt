@@ -8,7 +8,8 @@ app = typer.Typer()
 
 # @run.cleaup
 @app.command()
-def configuration(config: str) -> ("numpy.ndarray", dict, "rsopt.configuration.configuration.Configuration") :
+def configuration(config: str) -> ("numpy.ndarray", dict,
+                                   "rsopt.configuration.schemas.configuration.ConfigurationSample"):
     """Runs a sampling job.
 
        A sampling job will be started based on the content of the configuration file.

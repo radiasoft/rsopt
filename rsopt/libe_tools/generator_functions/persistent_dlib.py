@@ -59,7 +59,7 @@ def persistent_dlib(H, persis_info, gen_specs, libE_info):
         if work_requests:
             add_to_local_H(local_H, work_requests, work_log)
             persistent.send(local_H[-len(work_requests):][[i[0] for i in gen_specs['out']]])
-    # TODO: Result of Last point evaluated is not always being recorded in H before termination
+
     return local_H, persis_info, FINISHED_PERSISTENT_GEN_TAG
 
 
@@ -76,7 +76,6 @@ def add_to_local_H(local_H, points, log):
     len_local_H = len(local_H)
     num_pts = len(points)
 
-    # TODO: Is this needed? I thought local_H is sized to H when created.
     local_H.resize(len(local_H)+num_pts, refcheck=False)  # Adds num_pts rows of zeros to O
     local_H['x'][-num_pts:] = x
     local_H['sim_id'][-num_pts:] = np.arange(len_local_H, len_local_H+num_pts)

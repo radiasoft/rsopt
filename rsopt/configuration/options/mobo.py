@@ -4,7 +4,6 @@ import typing
 
 
 class MoboOptions(pydantic.BaseModel, extra='forbid'):
-    # TODO: Ideally we would check that this dict has keys matching parameters
     reference_point: dict[str, float]
     constraints: dict = pydantic.Field(default_factory=dict)
     num_of_objectives: int

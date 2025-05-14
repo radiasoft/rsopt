@@ -5,9 +5,6 @@ from functools import cached_property
 from rsopt import util
 
 
-# TODO: This will completely replace the rsopt.configuration.options.Options
-#       Options schema will also be removed
-
 class SimSpecs(pydantic.BaseModel):
     inputs: list[str]  #  = pydantic.Field(alias='in')
     static_outputs: list[typing.Union[tuple[str, type], tuple[str, type, int]]] = pydantic.Field(default_factory=list)
