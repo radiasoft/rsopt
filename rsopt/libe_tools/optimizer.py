@@ -8,13 +8,14 @@ from libensemble.tools import add_unique_random_streams
 from rsopt.libe_tools import tools
 from rsopt.libe_tools.interface import get_local_optimizer_method
 from rsopt.simulation import SimulationFunction
-from pykern import pkyaml
+from ruamel.yaml import YAML
 from rsopt import EXECUTOR_SCHEMA, OPTIMIZER_SCHEMA
 import logging
+import pathlib
 
 logger = logging.getLogger('libensemble')
-OPT_SCHEMA = pkyaml.load_file(OPTIMIZER_SCHEMA)
-EXECUTOR_SCHEMA = pkyaml.load_file(EXECUTOR_SCHEMA)
+OPT_SCHEMA = YAML().load(pathlib.Path(OPTIMIZER_SCHEMA))
+EXECUTOR_SCHEMA = YAML().load(pathlib.Path(EXECUTOR_SCHEMA))
 
 # dtype dimensions > 1 are set at run time
 persistent_local_opt_gen_out = [('x', float, None),

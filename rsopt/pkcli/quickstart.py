@@ -1,6 +1,5 @@
 import shutil
 import os
-from pykern import pkyaml
 from ruamel.yaml import YAML
 from rsopt import EXAMPLE_SYMLINK, EXAMPLE_REGISTRY
 import typer

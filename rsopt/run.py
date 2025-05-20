@@ -1,9 +1,5 @@
-from rsopt import mpi
 from rsopt.configuration.schemas import configuration
-from pykern import pkio
-from pykern import pkresource
-from pykern import pkyaml
-import functools
+from ruamel.yaml import YAML
 import importlib.util
 import os
 import pathlib
@@ -66,7 +62,7 @@ def _local_opt_startup() -> None:
     Returns:
 
     """
-    _OPT_SCHEMA = pkyaml.load_file(pkio.py_path(pkresource.filename('optimizer_schema.yml')))
+    _OPT_SCHEMA = YAML().load(rsopt.util.package_data_path() / 'optimizer_schema.yml')
     allowed_optimizer_list = [s for s, v in _OPT_SCHEMA.items() if v['type'] == 'local']
     available_opt = []
     for optimizer in allowed_optimizer_list:

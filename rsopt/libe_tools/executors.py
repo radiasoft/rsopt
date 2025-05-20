@@ -3,10 +3,10 @@ import logging
 import pathlib
 from enum import Enum
 from libensemble.executors.mpi_executor import MPIExecutor, Executor
-from pykern import pkyaml
+from ruamel.yaml import YAML
 from rsopt import EXECUTOR_SCHEMA
 
-EXECUTOR_SCHEMA = pkyaml.load_file(EXECUTOR_SCHEMA)
+EXECUTOR_SCHEMA = YAML().load(pathlib.Path(EXECUTOR_SCHEMA))
 logger = logging.getLogger(__name__)
 # To change logging level for just this module
 # logger.setLevel(logging.DEBUG)
