@@ -13,6 +13,8 @@ requires-python = ">=3.9"
 
 dependencies = [
     "libEnsemble",
+    "ruamel.yaml",
+    "jinja2",
     "numpy",
     "pydantic==2.8.2",
     "sortedcontainers",
