@@ -1,21 +1,24 @@
 # CONFIG FILE MUST ALWAYS BE LAST in `files` LIST
 examples:
-  start:
+  quickstart_example:
     files:
       - rsopt_example.py
       - rsopt_example.yml
     result: -1.0316284450007094
-  python_dfols:
+    job_type: sample
+  python_dfols_example:
     files:
       - chwirut.py
       - config_chwirut.yaml
     result: 2384.477139309358
-  python_camel_aposmm:
+    job_type: optimize
+  python_aposmm_example:
     files:
       - six_hump_camel.py
       - config_six_hump_camel.yaml
     result: -1.0316271843445015
-  elegant_parallel:
+    job_type: optimize
+  elegant_matching_parallel_execution_example:
     files:
       - elegant.ele
       - elegant.lte
@@ -23,4 +26,5 @@ examples:
       - preprocess.py
       - match_parallel.yml
     result: 4.2644972852249e-18
+    job_type: optimize
 # python_radia_undulator_example takes too long to be run routinely

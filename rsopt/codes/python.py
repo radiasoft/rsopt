@@ -42,8 +42,10 @@ class Python(code.Code):
 
     @classmethod
     def serial_run_command(cls) -> str or None:
-        # serial not executed by Executor subprocess so no run command is needed
-        return None
+        """Python's serial run command in s a special case. Unless the 'force_executor' flag is set, it should not be
+        used since python code will either be run directly by the worker process in some manner or parallel
+        execution is requested and the parallel run command branch is followed."""
+        return 'python'
 
     @classmethod
     def parallel_run_command(cls) -> str or None:

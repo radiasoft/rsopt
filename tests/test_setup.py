@@ -29,8 +29,8 @@ class TestSetupFeatures(unittest.TestCase):
         config_yaml = parse.read_configuration_file(self.timeout_config)
         config_yaml['codes'][0]['python']['settings']['t'] = 5.0
         config_yaml['codes'][0]['python']['setup']['timeout'] = 1.0
-        _config = parse.parse_yaml_configuration(config_yaml)
-        software = _config.options.NAME
+        _config = parse.parse_optimize_configuration(config_yaml)
+        software = _config.options.software
         runner = run.run_modes[software](_config)
         H, persis_info, _ = runner.run()
 
@@ -44,8 +44,8 @@ class TestSetupFeatures(unittest.TestCase):
         config_yaml = parse.read_configuration_file(self.timeout_config)
         config_yaml['codes'][0]['python']['settings']['t'] = 1.0
         config_yaml['codes'][0]['python']['setup']['timeout'] = 5.0
-        _config = parse.parse_yaml_configuration(config_yaml)
-        software = _config.options.NAME
+        _config = parse.parse_optimize_configuration(config_yaml)
+        software = _config.options.software
         runner = run.run_modes[software](_config)
         H, persis_info, _ = runner.run()
 
@@ -57,19 +57,19 @@ class TestSetupFeatures(unittest.TestCase):
         from libensemble.executors.executor import Executor
         os.chdir(self.run_dir.name)
         config_yaml = parse.read_configuration_file(self.timeout_config)
-        _config = parse.parse_yaml_configuration(config_yaml)
-        software = _config.options.NAME
+        _config = parse.parse_optimize_configuration(config_yaml)
+        software = _config.options.software
         runner = run.run_modes[software](_config)
         runner._configure_executors()
         self.assertTrue(isinstance(runner.executor, Executor))
-        self.assertTrue(runner._config.jobs[0].executor)
+        self.assertTrue(runner._config.codes[0].executor)
 
     def test_ignored_files(self):
         # parsing assumes you are same directory as config file
         os.chdir(SUPPORT_PATH)
 
         config_yaml = parse.read_configuration_file(self.ignored_files_config)
-        _config = parse.parse_yaml_configuration(config_yaml)
+        _config = parse.parse_sample_configuration(config_yaml)
 
     def test_ignored_files_exception(self):
         # parsing assumes you are same directory as config file
@@ -77,10 +77,11 @@ class TestSetupFeatures(unittest.TestCase):
 
         config_yaml = parse.read_configuration_file(self.ignored_files_config)
         # Take out first ignored_files declaration
-        config_yaml.codes[0].elegant.setup.ignored_files = []
+        config_yaml['codes'][0]['elegant']['setup']['ignored_files'] = []
+        aa = parse.parse_sample_configuration(config_yaml)
 
         self.assertRaisesRegex(AssertionError, 'file=transverse_w_type1.sdds missing',
-                               parse.parse_yaml_configuration, config_yaml)
+                               parse.parse_sample_configuration, config_yaml)
 
     def tearDown(self):
         os.chdir(HOME)

@@ -55,10 +55,11 @@ thus changed by the optimizer at every execution.::
     options:
         ...
 
-Every parameter given must have the fields: ``min``, ``max``, and ``start``. Which correspond to the minimum, maximum,
+Usually, numeric parameter given must have the fields: ``min``, ``max``, and ``start``. Which correspond to the minimum, maximum,
 and starting values for that parameter. Depending on the software being run by rsopt (specified in ``options``), or
 other run parameters (e.g. a run with just 1 step would begin at the start values, execute, and stop)
-all of these values may be used at run, however, they must always be given in the configuration.
+all of these values may be used at run, however, they must always be given in the configuration. For a more complete
+description see :ref:`parameters & settings<params_and_settings>`.
 
 Setup and Execution
 -------------------
