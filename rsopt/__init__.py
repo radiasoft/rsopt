@@ -5,15 +5,10 @@ u""":mod:`rsopt` package
 :license: http://www.apache.org/licenses/LICENSE-2.0.html
 """
 from __future__ import absolute_import, division, print_function
-import pkg_resources
 import rsopt.util
 
+__version__ = '0.1.0'
 
-try:
-    # We only have a version once the package is installed.
-    __version__ = pkg_resources.get_distribution('rsopt').version
-except pkg_resources.DistributionNotFound:
-    pass
 
 EXAMPLE_SYMLINK = rsopt.util.package_data_path() / 'examples'
 EXAMPLE_REGISTRY = rsopt.util.package_data_path() / 'example_registry.yml'
