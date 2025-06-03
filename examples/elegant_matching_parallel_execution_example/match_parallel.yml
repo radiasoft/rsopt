@@ -1,1 +1,39 @@
-../../rsopt/package_data/examples/match_parallel.yml
+codes:
+  - elegant:
+      settings:
+          bunched_beam.n_particles_per_bunch: 16384
+      parameters:
+        Q1.K1:
+          min: 8.
+          max: 12.
+          start: 10.
+        Q2.K1:
+          min: -12.
+          max: -8.
+          start: -10.
+        Q3.K1:
+          min: 8.
+          max: 12.
+          start: 10.
+        Q4.K1:
+          min: -4.
+          max:  0.
+          start: -2.
+      setup:
+        preprocess: [preprocess.py, f_pre]
+        input_file: elegant.ele
+        execution_type: parallel
+        cores: 4
+options:
+  software: dfols
+  method: dfols
+  components: 4
+  software_options: {'do_logging': False,
+                     'rhoend': 1e-5,
+                     'user_params': {'model.abs_tol': 1e-10,
+                                     'model.rel_tol': 1e-4
+                                    }
+                     }
+  objective_function: [obj_f_bunch_matching.py, obj_f_dfols]
+  exit_criteria:
+    sim_max: 199

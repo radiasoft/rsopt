@@ -14,18 +14,18 @@ codes:
         function: tnk
         execution_type: serial
 options:
-  nworkers: 4
+  nworkers: 2
   software: mobo
-  objectives: 2
-  constraints: 2
-  reference: [1.4, 1.4]
   software_options:
-    fixed_cost: True
+    use_cuda: False
+    num_of_objectives: 2
     min_calc_to_remodel: 3  # if min_calc_to_remodel == nworkers - 1 then model update is synchronous
-    use_gpu: False
     constraints:
       c1: ['GREATER_THAN', 0]
       c2: ['LESS_THAN', 0.5]
+    reference_point:
+      x1: 1.4
+      x2: 1.4
   exit_criteria:
-    sim_max: 80
+    sim_max: 22
   output_file: mobo_example_results

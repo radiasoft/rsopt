@@ -1,0 +1,19 @@
+codes:
+  - python:
+      parameters:
+        x1:
+          min: 0
+          max: 1
+          start: 0
+        x_n:
+          dimension: 9
+          min: -10
+          max: 10
+          start: 0
+      setup:
+        input_file: zdt4.py
+        function: obj_zd4
+        argument_passing: args
+        execution_type: serial
+options:
+  software: mesh_scan

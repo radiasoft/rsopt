@@ -1,5 +1,6 @@
 import pathlib
 import pytest
+import rsopt.environment
 import os
 import shutil
 import typing
@@ -26,9 +27,8 @@ def setup(tmp_path,
 def test_app_full_paths(tmp_path, config, resource_path, setup):
     os.chdir(tmp_path)
     config_yaml = parse.read_configuration_file(config.name)
-    _config = parse.parse_yaml_configuration(config_yaml)
+    _config = parse.parse_sample_configuration(config_yaml)
 
-
-    for job in _config.jobs:
+    for job in _config.codes:
         # This is the same check that libEnsemble's _check_app_exists uses
-        assert os.path.isfile(job.full_path)
+        assert os.path.isfile(rsopt.environment.get_run_command_with_path(job))

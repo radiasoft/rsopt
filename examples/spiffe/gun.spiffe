@@ -1,0 +1,78 @@
+&define_geometry
+	command_name = define_geometry,
+	nz = 513,
+	nr = 263,
+	zmin = 0.0,
+	zmax = 0.072,
+	rmax = 0.042,
+	boundary = "dc.geo",
+	boundary_output = "dc.bnd",
+	discrete_boundary_output = "dc.dbnd",
+	interior_points = "dc.pts",
+	radial_interpolation = 1,
+	longitudinal_interpolation = 1,
+&end
+
+&define_cathode
+	command_name = define_cathode,
+	z_position = 1e-06,
+	outer_radius = 0.003,
+	current_density = 1000000.0,
+	number_per_step = 8.0,
+	start_time = 0.0,
+	stop_time = 2e-10,
+	initial_pz = 1e-06,
+	distribution_correction_interval = 1,
+&end
+
+&define_screen
+	command_name = define_screen,
+	filename = "dc.sc1",
+	z_position = 0.02,
+	direction = forward,
+&end
+
+&define_screen
+	command_name = define_screen,
+	filename = "dc.sc2",
+	z_position = 0.04,
+	direction = forward,
+&end
+
+&define_snapshots
+	command_name = define_snapshots,
+	filename = "dc.snap",
+	time_interval = 4.375e-11,
+	start_time = 4.375e-11,
+&end
+
+&define_field_output
+	command_name = define_field_output,
+	filename = dc.fld,
+	time_interval = 4.375e-11,
+	start_time = 4.375e-11,
+	z_interval = 1,
+	r_interval = 1,
+&end
+
+&poisson_correction
+	command_name = poisson_correction,
+	step_interval = 32,
+	accuracy = 0.0001,
+	error_charge_threshold = 1e-15,
+	verbosity = 1,
+&end
+
+&integrate
+	command_name = integrate,
+	dt_integration = 8.544921875e-14,
+	start_time = 0.0,
+	finish_time = 7e-10,
+	status_interval = 256,
+	space_charge = 1,
+	check_divergence = 1,
+	smoothing_parameter = 0.0,
+	J_filter_multiplier = 0.0,
+	terminate_on_total_loss = 1,
+&end
+

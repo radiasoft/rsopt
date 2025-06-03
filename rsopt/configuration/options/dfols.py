@@ -1,29 +1,28 @@
-import rsopt.configuration
+from rsopt.configuration.schemas import options
+import pydantic
+import typing
 
 
-class Dfols(rsopt.configuration.Options):
-    NAME = 'dfols'
-    REQUIRED_OPTIONS = ('exit_criteria', 'components')
+class DfolsOptions(options.SoftwareOptions, extra='allow'):
+    components: int
 
-    def __init__(self):
-        super().__init__()
-        self.components = 1
-        self.method = 'dfols'
 
-    @classmethod
-    def _check_options(cls, options):
-        for key in cls.REQUIRED_OPTIONS:
-            assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
-
-        if 'software_options' in options.keys():
-            options['software_options'].setdefault('components', options.get('components'))
-        else:
-            options['software_options'] = {'components': options.get('components')}
-
-    def get_sim_specs(self):
-        sim_specs = {
-            'in': ['x'],
-            'out': [('f', float), ('fvec', float, self.components)]
+class MethodDfols(options.Method):
+    name: typing.Literal['dfols'] = 'dfols'
+    parent_software = 'dfols'
+    aposmm_support = True
+    local_support = True
+    persis_in = ['f', 'fvec']
+    sim_specs = options.SimSpecs(
+        inputs=['x'],
+        static_outputs=[('f', float)],
+        dynamic_outputs={
+            'components': ('fvec', float)
         }
+    )
+    option_spec = DfolsOptions
 
-        return sim_specs
+class Dfols(options.OptionsExit):
+    software: typing.Literal['dfols']
+    method: typing.Union[MethodDfols] = pydantic.Field(default=MethodDfols(), discriminator='name')
+    software_options: DfolsOptions

@@ -2,8 +2,8 @@ import pathlib
 import tempfile
 import unittest
 import rsopt.libe_tools.executors as execs
-from pykern import pkyaml
 from rsopt import parse
+from ruamel.yaml import YAML
 
 _SSH_CONFIG = \
     """
@@ -58,73 +58,73 @@ class TestIsParallel(unittest.TestCase):
 
     def setUp(self) -> None:
         config_file = pathlib.Path('./support/config_six_hump_camel.yaml')
-        self.config = pkyaml.load_file(config_file)
+        self.config = YAML().load(config_file)
 
     def test_serial_explicit(self):
         _config = self.config.copy()
         _config['codes'][0]['python']['setup']['execution_type'] = 'serial'
-        _config = parse.parse_yaml_configuration(_config)
+        _config = parse.parse_optimize_configuration(_config)
 
-        self.assertFalse(_config.jobs[0].use_mpi)
+        self.assertFalse(_config.codes[0].use_mpi)
 
     def test_serial_one_core_parallel(self):
         _config = self.config.copy()
         _config['codes'][0]['python']['setup']['execution_type'] = 'parallel'
         _config['codes'][0]['python']['setup']['cores'] = 1
-        _config = parse.parse_yaml_configuration(_config)
+        _config = parse.parse_optimize_configuration(_config)
 
-        self.assertTrue(_config.jobs[0].use_mpi)
+        self.assertTrue(_config.codes[0].use_mpi)
 
     def test_serial_one_core_rsmpi(self):
         _config = self.config.copy()
         _config['codes'][0]['python']['setup']['execution_type'] = 'rsmpi'
         _config['codes'][0]['python']['setup']['cores'] = 1
-        _config = parse.parse_yaml_configuration(_config)
+        _config = parse.parse_optimize_configuration(_config)
 
-        self.assertTrue(_config.jobs[0].use_mpi)
+        self.assertTrue(_config.codes[0].use_mpi)
 
     def test_parallel(self):
         _config = self.config.copy()
         _config['codes'][0]['python']['setup']['execution_type'] = 'parallel'
         _config['codes'][0]['python']['setup']['cores'] = 2
-        _config = parse.parse_yaml_configuration(_config)
+        _config = parse.parse_optimize_configuration(_config)
 
-        self.assertTrue(_config.jobs[0].use_mpi)
+        self.assertTrue(_config.codes[0].use_mpi)
 
     def test_rsmpi(self):
         _config = self.config.copy()
         _config['codes'][0]['python']['setup']['execution_type'] = 'rsmpi'
         _config['codes'][0]['python']['setup']['cores'] = 2
-        _config = parse.parse_yaml_configuration(_config)
+        _config = parse.parse_optimize_configuration(_config)
 
-        self.assertTrue(_config.jobs[0].is_parallel)
+        self.assertTrue(_config.codes[0].use_mpi)
 
     def test_force_executor_parallel(self):
         _config = self.config.copy()
         _config['codes'][0]['python']['setup']['execution_type'] = 'parallel'
         _config['codes'][0]['python']['setup']['cores'] = 1
         _config['codes'][0]['python']['setup']['force_executor'] = True
-        _config = parse.parse_yaml_configuration(_config)
+        _config = parse.parse_optimize_configuration(_config)
 
-        self.assertTrue(_config.jobs[0].use_mpi)
+        self.assertTrue(_config.codes[0].use_mpi)
 
     def test_force_executor_series(self):
         _config = self.config.copy()
         _config['codes'][0]['python']['setup']['execution_type'] = 'serial'
         _config['codes'][0]['python']['setup']['cores'] = 1
         _config['codes'][0]['python']['setup']['force_executor'] = True
-        _config = parse.parse_yaml_configuration(_config)
+        _config = parse.parse_optimize_configuration(_config)
 
-        self.assertTrue(_config.jobs[0].use_executor)
+        self.assertTrue(_config.codes[0].use_executor)
 
     def test_force_executor_rsmpi(self):
         _config = self.config.copy()
         _config['codes'][0]['python']['setup']['execution_type'] = 'rsmpi'
         _config['codes'][0]['python']['setup']['cores'] = 1
         _config['codes'][0]['python']['setup']['force_executor'] = True
-        _config = parse.parse_yaml_configuration(_config)
+        _config = parse.parse_optimize_configuration(_config)
 
-        self.assertTrue(_config.jobs[0].use_executor)
+        self.assertTrue(_config.codes[0].use_executor)
 
 
 

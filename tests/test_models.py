@@ -1,9 +1,10 @@
 import tempfile
 import unittest
-from rsopt.configuration.setup.elegant import Elegant
-from rsopt.configuration.setup.opal import Opal
-from rsopt.configuration.setup.madx import Madx
-from rsopt.configuration.setup.genesis import Genesis
+from rsopt.codes.parsers import parse_simulation_input_file
+from rsopt.codes.elegant import Elegant
+from rsopt.codes.opal import Opal
+from rsopt.codes.madx import Madx
+from rsopt.codes.genesis import Genesis
 
 _TMP_DIR = 'tmp'
 
@@ -27,9 +28,12 @@ class TestElegantModels(unittest.TestCase):
     def test_elegant_case_passing(self):
         # Various mixtures of cases that should be valid
         # Element Names and Parameters can be entered with any combination of case
-        setup = Elegant()
-        setup.setup['input_file'] = 'e.ele'
-        setup.input_file_model = Elegant.parse_input_file('support/linac_files/first.ele', shifter=False)
+        # setup = Elegant()
+        # setup.setup['input_file'] = 'e.ele'
+        input_file_model = parse_simulation_input_file(input_file='support/linac_files/first.ele',
+                                                       code_name='elegant',
+                                                       ignored_files=[],
+                                                       shifter=False)
 
         kwarg_dict = {
             'run_setup.default_order': 3,
@@ -39,8 +43,9 @@ class TestElegantModels(unittest.TestCase):
             'correction_matrix_output.BnL_Units': 1  # Incorrect case for case-sensitive name (is BnL_units)
 
         }
-
-        new_model = setup._edit_input_file_schema(kwarg_dict=kwarg_dict)
+        mock_model = Elegant.construct()
+        mock_model.input_file_model = input_file_model
+        new_model = mock_model._edit_input_file_schema(kwarg_dict=kwarg_dict)
         new_model.write_files(self.test_dir.name)
 
     def test_elegant_command_name_failure(self):

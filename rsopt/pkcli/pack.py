@@ -3,7 +3,9 @@ import modulefinder
 import tarfile
 import pathlib
 import os
+import typer
 
+app = typer.Typer()
 
 def _get_local_modules(script_name):
     # return a list of modules used defined in the same directory as `script_name` (including `script_name`)
@@ -98,7 +100,8 @@ def _create_tar(name, file_list):
     return tarname
 
 
-def configuration(config, ignore=None, add=None):
+@app.command()
+def configuration(config: str, ignore=None, add=None):
     """Create a tarball of all configuration file dependencies.
 
     Locally defined Python modules will be included but not library files.

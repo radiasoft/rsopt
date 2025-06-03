@@ -1,18 +1,102 @@
-from rsopt.configuration.options import Options
+# TODO: Check local_opt setup for the key name to pass nlopt options to.
+#  Set up separate libE class like with scipy
+from rsopt.configuration.schemas import options
+import pydantic
+import typing
 
+# Nlopt Generator setup only will pass a few specific arguments so we do not use "extra='allow'" for nlopt
+class NloptOptionsBase(options.SoftwareOptions, extra='forbid'):
+    xtol_rel: float = pydantic.Field(None, description='End optimization if relative tolerance level in function input (x) is reached.')
+    xtol_abs: float = pydantic.Field(None, description='End optimization if absolute tolerance level in function input (x) is reached.')
+    ftol_rel: float = pydantic.Field(None, description='End optimization if relative tolerance level in function output (f) is reached.')
+    ftol_abs: float = pydantic.Field(None, description='End optimization if absolute tolerance level in function output (f) is reached.')
 
-class Nlopt(Options):
-    NAME = 'nlopt'
-    # Ordering of required keys matters to validate method assignment is correct
-    REQUIRED_OPTIONS = ('method', 'exit_criteria')
-    # Only can allow what aposmm_localopt_support handles right now
-    ALLOWED_METHODS = ('LN_BOBYQA', 'LN_SBPLX', 'LN_COBYLA', 'LN_NEWUOA',
-                         'LN_NELDERMEAD', 'LD_MMA')
+class NloptOptionsMma(NloptOptionsBase):
+    grad_dimensions: int = pydantic.Field(..., description='Number of dimensions (size) of the gradient data.')
 
-    @classmethod
-    def _check_options(cls, options):
-        for key in cls.REQUIRED_OPTIONS:
-            assert options.get(key), f"{key} must be defined in options to use {cls.NAME}"
-        proposed_method = options.get(cls.REQUIRED_OPTIONS[0])
-        assert proposed_method in cls.ALLOWED_METHODS, \
-            f"{proposed_method} not available for use in software {cls.NAME}"
+# Naming for nlopt algorithms should follow the NLopt usage
+class MethodBobyqa(options.Method):
+    name: typing.Literal['LN_BOBYQA'] = 'LN_BOBYQA'
+    parent_software = 'nlopt'
+    aposmm_support = True
+    local_support = True
+    persis_in = ['f', ]
+    sim_specs=options.SimSpecs(
+        inputs=['x'],
+        static_outputs=[('f', float)],
+        dynamic_outputs={}
+    )
+    option_spec: typing.ClassVar = NloptOptionsBase
+
+class MethodCobyla(options.Method):
+    name: typing.Literal['LN_COBYLA'] = 'LN_COBYLA'
+    parent_software = 'nlopt'
+    aposmm_support = True
+    local_support = True
+    persis_in = ['f', ]
+    sim_specs=options.SimSpecs(
+        inputs=['x'],
+        static_outputs=[('f', float)],
+        dynamic_outputs={}
+    )
+    option_spec: typing.ClassVar = NloptOptionsBase
+
+class MethodNewuoa(options.Method):
+    name: typing.Literal['LN_NEWUOA'] = 'LN_NEWUOA'
+    parent_software = 'nlopt'
+    aposmm_support = True
+    local_support = True
+    persis_in = ['f', ]
+    sim_specs=options.SimSpecs(
+        inputs=['x'],
+        static_outputs=[('f', float)],
+        dynamic_outputs={}
+    )
+    option_spec: typing.ClassVar = NloptOptionsBase
+
+class MethodNelderMead(options.Method):
+    name: typing.Literal['LN_NELDERMEAD'] = 'LN_NELDERMEAD'
+    parent_software = 'nlopt'
+    aposmm_support = True
+    local_support = True
+    persis_in = ['f', ]
+    sim_specs=options.SimSpecs(
+        inputs=['x'],
+        static_outputs=[('f', float)],
+        dynamic_outputs={}
+    )
+    option_spec: typing.ClassVar = NloptOptionsBase
+
+class MethodSubplex(options.Method):
+    name: typing.Literal['LN_SBPLX'] = 'LN_SBPLX'
+    parent_software = 'nlopt'
+    aposmm_support = True
+    local_support = True
+    persis_in = ['f', ]
+    sim_specs=options.SimSpecs(
+        inputs=['x'],
+        static_outputs=[('f', float)],
+        dynamic_outputs={}
+    )
+    option_spec: typing.ClassVar = NloptOptionsBase
+
+class MethodMma(options.Method):
+    name: typing.Literal['LD_MMA'] = 'LD_MMA'
+    parent_software = 'nlopt'
+    aposmm_support = True
+    local_support = True
+    persis_in = ['f', 'grad']
+    sim_specs=options.SimSpecs(
+        inputs=['x'],
+        static_outputs=[('f', float)],
+        dynamic_outputs={'grad_dimensions': ('grad', float)}
+    )
+    option_spec: typing.ClassVar = NloptOptionsMma
+    _opt_return_code = [0]
+
+_METHODS = typing.Union[MethodNelderMead, MethodCobyla, MethodBobyqa, MethodNewuoa, MethodSubplex, MethodMma]
+
+class Nlopt(options.OptionsExit):
+    software: typing.Literal['nlopt']
+    method: _METHODS = pydantic.Field(..., discriminator='name')
+    software_options: typing.Union[NloptOptionsBase, NloptOptionsMma] = NloptOptionsBase()

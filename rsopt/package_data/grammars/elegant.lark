@@ -1,0 +1,46 @@
+?start: (command | NEWLINE)+
+
+?command: valid_command
+    | ignored_command    -> ignore
+
+?value: macro
+    | NUMBER -> numbers
+    | string_value -> string
+    | escaped_string -> string
+
+
+?command_name: "&" NAME NEWLINE*
+?command_end: "&end" NEWLINE*
+parameter: NAME "=" value ","?
+?parameter_list: parameter? NEWLINE* (parameter | NEWLINE)* NEWLINE*
+valid_command : command_name parameter_list* command_end
+ignored_command : "!" command_name parameter_list* "!" command_end
+
+
+macro : "<" NAME ">"
+?string_value: /[a-zA-Z~\/\_\-.][a-zA-Z0-9\/\_\-.]*/
+?escaped_string: "\"" (rpn_expression | shell_cmd | string_inner)* "\""
+?rpn_expression : ESCAPED_RPN_START (shell_cmd | RPN_CONTENT)* ESCAPED_RPN_END
+?shell_cmd : ESCAPED_SHELL_START SHELL_CONTENT ESCAPED_SHELL_END
+
+ESCAPED_RPN_START: /\(/
+ESCAPED_RPN_END: /\)/
+RPN_CONTENT: /[^\)\{\}\"]+/
+ESCAPED_SHELL_START: /\{/
+ESCAPED_SHELL_END: /\}/
+SHELL_CONTENT: /[^,\}\"]+/
+
+COMMENT: /!.*/
+
+
+?string_inner: /[^{}\(\)\"]+/
+name: NAME
+
+%import common.SIGNED_NUMBER    -> NUMBER
+%import common.WS_INLINE
+%import common.NEWLINE
+%import common.CNAME -> NAME
+
+%ignore WS_INLINE
+%ignore COMMENT
+%ignore NEWLINE

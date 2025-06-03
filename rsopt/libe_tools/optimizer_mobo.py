@@ -1,6 +1,6 @@
 from rsopt.libe_tools import tools
 from rsopt.libe_tools import optimizer
-from rsopt.libe_tools.generator_functions.persistent_mobo import persistent_mobo
+from rsopt.libe_tools.generator_functions.persistent_xopt_bo import persistent_mobo
 from libensemble.alloc_funcs.start_only_persistent import only_persistent_gens
 
 mobo_gen_out = [('x', float, None), ]
@@ -8,23 +8,20 @@ mobo_gen_out = [('x', float, None), ]
 
 class MoboOptimizer(optimizer.libEnsembleOptimizer):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, config_model):
+        super().__init__(config_model)
 
     def _configure_optimizer(self):
-        gen_out = [tools.set_dtype_dimension(dtype, self.dimension) for dtype in mobo_gen_out]
-        user_keys = {'lb': self.lb,
-                     'ub': self.ub,
-                     'dim': self._config.get_dimension(),
+        gen_out = [tools.set_dtype_dimension(dtype, self._config.dimension) for dtype in mobo_gen_out]
+        user_keys = {'lb': self._config.lower_bounds,
+                     'ub': self._config.upper_bounds,
+                     'dim': self._config.dimension,
                      'processes': self._config.options.nworkers - 1,
-                     'budget': self._config.options.exit_criteria['sim_max'],
-                     # TODO: or set budget directly
-                     'constraints': self._config.options.software_options.get('constraints', {}),
-                     'ref': self._config.options.reference,
-                     **self._config.options.software_options}
+                     **self._config.options.software_options.model_dump()
+                     }
 
         self.gen_specs.update({'gen_f': persistent_mobo,
-                               'persis_in': self._set_persis_in(self._config.software, self._config.method) +
+                               'persis_in': self._config.options.method.persis_in +
                                             [n[0] for n in gen_out],
                                'out': gen_out,
                                'user': user_keys})

@@ -1,0 +1,17 @@
+?start: (file | NEWLINE)+
+
+?value: NUMBER
+    | STRING
+
+?parameter: NAME "=" value*
+file: "$newrun" parameter* "$end"
+
+%import common.SIGNED_NUMBER    -> NUMBER
+%import common.SIGNED_INT       -> INT
+%import common.WS_INLINE
+%import common.NEWLINE
+%import common.CNAME -> NAME
+%import common.ESCAPED_STRING   -> STRING
+
+%ignore WS_INLINE
+%ignore NEWLINE

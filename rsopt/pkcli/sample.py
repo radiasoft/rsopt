@@ -1,28 +1,43 @@
-import rsopt.configuration.configuration
+import atexit
+from rsopt import parse
 from rsopt import run
+import typer
+
+app = typer.Typer()
 
 
-@run.cleaup
-def configuration(config: str) -> ("numpy.ndarray", dict, "rsopt.configuration.configuration.Configuration") :
+# @run.cleaup
+@app.command()
+def configuration(config: str) -> ("numpy.ndarray", dict,
+                                   "rsopt.configuration.schemas.configuration.ConfigurationSample"):
     """Runs a sampling job.
 
-    A sampling job will be started based on the content of the configuration file.
-    The configuration file should have the software field in options set to one of:
-      mesh_scan, lh_scan
+       A sampling job will be started based on the content of the configuration file.
+       The configuration file should have the software field in options set to one of:
+          mesh_scan, lh_scan
 
-    :param config: (str) Name of configuration file to use
-    :return: None
+    Args:
+        config: (str) Path to configuration file to use
+
+    Returns:
+
     """
-    _config = run.startup_sequence(config)
-    sampler_type = _config.options.NAME
+    _config_dict = parse.read_configuration_file(config)
+    _config = parse.parse_sample_configuration(_config_dict)
+    _config = run.startup_sequence(_config)
+
+    sampler_type = _config.options.software
     runner = run.sample_modes[sampler_type](_config)
 
     H, persis_info, _ = runner.run()
 
+    atexit.register(run.cleanup, config, H, persis_info, _config)
+
     return H, persis_info, _config
 
-@run.cleaup
-def start(config, n=1):
+
+@app.command()
+def start(config: str, n=1):
     """Run a single pass through the run chain in the configuration file.
 
     All settings are applied. Any parameters in the configuration are set to the value in `start`.
@@ -38,7 +53,11 @@ def start(config, n=1):
     Returns:
 
     """
-    _config = run.startup_sequence(config)
+
+    _config_dict = parse.read_configuration_file(config)
+    _config = parse.parse_unknown_configuration(_config_dict)
+    _config = run.startup_sequence(_config)
+
     n = int(n)
 
     # nworkers may be set for a full scan - only use the minimum needed workers
@@ -46,12 +65,20 @@ def start(config, n=1):
     runner = run.single_sampler(_config, n=n)
     H, persis_info, _ = runner.run()
 
+    atexit.register(run.cleanup, config, H, persis_info, _config)
+
     return H, persis_info, _config
 
-@run.cleaup
-def restart(config, history, rerun_failed=''):
-    _config = run.startup_sequence(config)
+
+@app.command()
+def restart(config: str, history: str, rerun_failed: bool = False):
+    _config_dict = parse.read_configuration_file(config)
+    _config = parse.parse_sample_configuration(_config_dict)
+    _config = run.startup_sequence(_config)
+
     runner = run.restart_sampler(_config, history)
     H, persis_info, _ = runner.run()
+
+    atexit.register(run.cleanup, config, H, persis_info, _config)
 
     return H, persis_info, _config

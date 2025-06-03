@@ -1,22 +1,36 @@
-import rsopt.configuration
+from rsopt.configuration.schemas import options
+import pydantic
+import typing
 
 
-class Mobo(rsopt.configuration.Options):
-    NAME = 'mobo'
-    REQUIRED_OPTIONS = ('exit_criteria', 'objectives', 'constraints')
+class MoboOptions(pydantic.BaseModel, extra='forbid'):
+    reference_point: dict[str, float]
+    constraints: dict = pydantic.Field(default_factory=dict)
+    num_of_objectives: int
+    min_calc_to_remodel: int = 1
+    use_cuda: bool = False
 
-    def __init__(self):
-        super().__init__()
-        self.nworkers = 2
-        self.objectives = 1
-        self.constraints = 0
-        self.method = 'mobo'
-        self.reference = []
+    @property
+    def num_of_constraints(self):
+        return len(self.constraints)
 
-    def get_sim_specs(self):
-        sim_specs = {
-            'in': ['x'],
-            'out': [('f', float, self.objectives), ('c', float, self.constraints)]
+
+class MethodMobo(options.Method):
+    name: typing.Literal['mobo'] = 'mobo'
+    aposmm_support = False
+    local_support = False
+    persis_in = ['f', 'c']
+    sim_specs=options.SimSpecs(
+        inputs=['x'],
+        static_outputs=[],
+        dynamic_outputs={
+            'num_of_objectives': ('f', float),
+            'num_of_constraints': ('c', float),
         }
+    )
+    option_spec = MoboOptions
 
-        return sim_specs
+class Mobo(options.OptionsExit):
+    software: typing.Literal['mobo'] = 'mobo'
+    method: typing.Union[MethodMobo] = pydantic.Field(MethodMobo(), discriminator='name')
+    software_options: MoboOptions

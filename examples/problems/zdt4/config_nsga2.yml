@@ -1,0 +1,26 @@
+codes:
+  - python:
+      parameters:
+        x0:
+          min: 0
+          max: 1
+          start: 0
+        x_n:
+          dimension: 9
+          min: -10
+          max: 10
+          start: 0
+      setup:
+        input_file: zdt4.py
+        function: obj_zdt4
+        argument_passing: args
+        execution_type: serial
+options:
+  software: nsga2
+  nworkers: 10
+  software_options:
+    pop_size: 100
+    n_objectives: 2
+    eta: 1
+  exit_criteria:
+    sim_max: 300

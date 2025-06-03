@@ -1,11 +1,5 @@
-from rsopt import mpi
-from rsopt import parse
-from rsopt.configuration import Configuration
-from pykern import pkcollections
-from pykern import pkio
-from pykern import pkresource
-from pykern import pkyaml
-import functools
+from rsopt.configuration.schemas import configuration
+from ruamel.yaml import YAML
 import importlib.util
 import os
 import pathlib
@@ -22,7 +16,8 @@ if os.uname().sysname == 'Darwin':
     set_start_method('fork', force=True)
 
 
-def startup_sequence(config: str) -> Configuration:
+def startup_sequence(config: configuration.ConfigurationOptimize or configuration.ConfigurationSample) -> (
+        configuration.ConfigurationOptimize or configuration.ConfigurationSample):
     """Safely initialize rsopt accounting for the local MPI configuration (if any).
 
     Args:
@@ -33,35 +28,32 @@ def startup_sequence(config: str) -> Configuration:
     """
 
     _local_opt_startup()
-    config_yaml = parse.read_configuration_file(config)
-    _config = parse.parse_yaml_configuration(config_yaml)
-    _config.configuration_file = config
-    mpi_environment = mpi.get_mpi_environment()
+
+    # TODO: This does some important things for MPI management. Will need to think about how to store this information.
+    # mpi_environment = mpi.get_mpi_environment()
+
+    # TEMP
+    mpi_environment = None
 
     if not mpi_environment:
-        return _config
+        return config
     else:
-        if _config.options.nworkers != mpi_environment['nworkers']:
+        if config.options.nworkers != mpi_environment['nworkers']:
             print("`nworkers` in Config file does not match MPI communicator size.")
             print("MPI communicator size will be used to set up {} workers".format(mpi_environment['nworkers']))
-            _config.options.nworkers = mpi_environment['nworkers']
+            config.options.nworkers = mpi_environment['nworkers']
         for k, v in mpi_environment.items():
-            if hasattr(_config, k):
-                _config.__setattr__(k, v)
+            if hasattr(config, k):
+                config.__setattr__(k, v)
 
-    return _config
+    return config
 
 
-def cleaup(action):
-    # Make inner's metadata look like action. Allows it to be registered with pkcli.
-    @functools.wraps(action)
-    def inner(*args, **kwargs):
-        H, persis_info, config = action(*args, **kwargs)
-        if config.is_manager:
-            history, _ = rsopt.util.save_final_history(config, H, persis_info, message='Run finished')
-            if config.options.copy_final_logs:
-                rsopt.util.copy_final_logs(config.configuration_file, config.options, history)
-    return inner
+def cleanup(config_path, H, persis_info, config):
+    if config.is_manager:
+        history, _ = rsopt.util.save_final_history(config, config_path, H, persis_info, message='Run finished')
+        if config.options.copy_final_logs:
+            rsopt.util.copy_final_logs(config_path, config.options, history)
 
 
 def _local_opt_startup() -> None:
@@ -70,7 +62,7 @@ def _local_opt_startup() -> None:
     Returns:
 
     """
-    _OPT_SCHEMA = pkyaml.load_file(pkio.py_path(pkresource.filename('optimizer_schema.yml')))
+    _OPT_SCHEMA = YAML().load(rsopt.util.package_data_path() / 'optimizer_schema.yml')
     allowed_optimizer_list = [s for s, v in _OPT_SCHEMA.items() if v['type'] == 'local']
     available_opt = []
     for optimizer in allowed_optimizer_list:
@@ -87,93 +79,98 @@ def _local_opt_startup() -> None:
     except OSError:
         print("Writing .opt_modules.csv failed")
 
+############
+# These functions are split up to localize imports and remove the requirement that every optimization package be
+# installed for rsopt to function
+############
 
-def local_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
+def local_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer import libEnsembleOptimizer
-    opt = libEnsembleOptimizer()
-    opt.load_configuration(config)
+    opt = libEnsembleOptimizer(config)
 
     return opt
 
+def local_optimizer_scipy(config: configuration.ConfigurationOptimize):
+    from rsopt.libe_tools.optimizer_scipy import SciPyOptimizer
+    opt = SciPyOptimizer(config)
 
-def grid_sampler(config: dict or pkcollections.PKDict or Configuration or str):
+    return opt
+
+def local_optimizer_nlopt(config: configuration.ConfigurationOptimize):
+    from rsopt.libe_tools.optimizer_nlopt import NloptOptimizer
+    opt = NloptOptimizer(config)
+
+    return opt
+
+def grid_sampler(config: configuration.ConfigurationSample):
     from rsopt.libe_tools import sampler
-    sample = sampler.GridSampler()
-    sample.load_configuration(config)
+    sample = sampler.GridSampler(config)
 
     return sample
 
 
-def single_sampler(config: dict or pkcollections.PKDict or Configuration or str, n:int = 1):
+def single_sampler(config: configuration.ConfigurationSample, n:int = 1):
     from rsopt.libe_tools import sampler
-    sample = sampler.SingleSample(sampler_repeats=n)
-    sample.load_configuration(config)
+    sample = sampler.SingleSample(config, sampler_repeats=n)
 
     return sample
 
 
-def lh_sampler(config: dict or pkcollections.PKDict or Configuration or str):
+def lh_sampler(config: configuration.ConfigurationSample):
     from rsopt.libe_tools import sampler
-    sample = sampler.LHSampler()
-    sample.load_configuration(config)
+    sample = sampler.LHSampler(config)
 
     return sample
 
 
-def restart_sampler(config: dict or pkcollections.PKDict or Configuration or str, history: str):
+def restart_sampler(config: configuration.ConfigurationSample, history: str):
     from rsopt.libe_tools import sampler
-    sample = sampler.RestartSampler(restart_from=history)
-    sample.load_configuration(config)
+    sample = sampler.RestartSampler(config, restart_from=history)
 
     return sample
 
 
-def aposmm_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
+def aposmm_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer_aposmm import AposmmOptimizer
-    opt = AposmmOptimizer()
-    opt.load_configuration(config)
+    opt = AposmmOptimizer(config)
 
     return opt
 
 
-def nsga2_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
+def nsga2_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer_nsga2 import EvolutionaryOptimizer
-    opt = EvolutionaryOptimizer()
-    opt.load_configuration(config)
+    opt = EvolutionaryOptimizer(config)
 
     return opt
 
 
-def pysot_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
+def pysot_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer_pysot import PysotOptimizer
-    opt = PysotOptimizer()
-    opt.load_configuration(config)
+    opt = PysotOptimizer(config)
 
     return opt
 
 
-def dlib_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
+def dlib_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer_dlib import DlibOptimizer
-    opt = DlibOptimizer()
-    opt.load_configuration(config)
+    opt = DlibOptimizer(config)
 
     return opt
 
 
-def mobo_optimizer(config: dict or pkcollections.PKDict or Configuration or str):
+def mobo_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer_mobo import MoboOptimizer
-    opt = MoboOptimizer()
-    opt.load_configuration(config)
+    opt = MoboOptimizer(config)
 
     return opt
 
-
+# TODO: Can these be more strongly tied to the models so I don't have to reuse the names here?
 # These names have to line up with accepted values for setup.execution_type
 # Another place where shared names are imported from common source
 run_modes = {
-    'nlopt': local_optimizer,
+    'nlopt': local_optimizer_nlopt,
     'dfols': local_optimizer,
-    'scipy': local_optimizer,
+    'scipy': local_optimizer_scipy,
     'aposmm': aposmm_optimizer,
     'nsga2': nsga2_optimizer,
     'pysot': pysot_optimizer,

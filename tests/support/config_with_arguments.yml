@@ -24,7 +24,4 @@ codes:
         ignored_files:
           - opal.dist
 options:
-  software: nlopt
-  method: LN_BOBYQA
-  exit_criteria:
-    sim_max: 2
+  software: mesh_scan

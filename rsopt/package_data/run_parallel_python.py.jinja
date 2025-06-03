@@ -1,4 +1,4 @@
-from pykern.pkrunpy import run_path_as_module
+from rsopt import util
 
 input_dict = {
 {% for key, value in dict_item.items() %}
@@ -9,6 +9,6 @@ input_dict = {
 {% endfor %}
 }
 
-m = run_path_as_module('{{full_input_file_path}}')
+m = util.run_path_as_module('{{full_input_file_path}}')
 
 m.{{function}}(**input_dict)
