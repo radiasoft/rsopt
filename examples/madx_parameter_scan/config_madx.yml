@@ -4,6 +4,11 @@ codes:
             TWISS.BETX: 40.042
             BEAM.ENERGY: 5.000001
         parameters:
+            UQ3.K1:
+                min: -0.0
+                max:  1.0
+                start: 0.06660381904
+                samples: 3
             UQ12.K1:
                 min: -0.125
                 max:  0.125
