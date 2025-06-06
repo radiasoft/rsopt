@@ -16,9 +16,12 @@ import numpy as np
 from rsopt.configuration.options import SUPPORTED_OPTIONS
 
 _SUPPORTED_CODES = typing.Annotated[codes.SUPPORTED_CODES, pydantic.Field(discriminator='code')]
-_SUPPORTED_SAMPLE_OPTIONS = typing.Annotated[typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_sample_models()], pydantic.Field(discriminator='software')]
-_SUPPORTED_OPTIMIZER_OPTIONS = typing.Annotated[typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_optimize_models()], pydantic.Field(discriminator='software')]
-
+_SUPPORTED_SAMPLE_OPTIONS = typing.Annotated[
+    typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_sample_models()], pydantic.Field(
+        discriminator='software')]
+_SUPPORTED_OPTIMIZER_OPTIONS = typing.Annotated[
+    typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_optimize_models()], pydantic.Field(
+        discriminator='software')]
 
 
 class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
@@ -53,6 +56,26 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         into a format compatible with the Pydantic model by extracting the key as 'code'.
         """
         return [{"code": key, **value} for item in parsed_data for key, value in item.items()]
+
+    @pydantic.field_validator('codes', mode='after')
+    @classmethod
+    def validate_parameter_groups(cls, codes):
+        """Ensures that parameters in the same group all have the same number of samples.
+
+        Grouped parameters share a dimensions in a scan, so they always change together. Not having the same
+        number of samples would lead to undefined behavior in this case.
+        """
+        groups = {}
+        for code in codes:
+            for param in code.parameters:
+                if param.group:
+                    groups.setdefault(param.group, []).append(param.samples)
+        for group, sample_sizes in groups.items():
+            assert all(map(lambda x: x == sample_sizes[0], sample_sizes)), \
+                (f"Parameter group `{group}` contains multiple sample sizes. "
+                 f"All parameters in a group must have the same number of "
+                 f"samples but got sample sizes {sample_sizes}")
+        return codes
 
     @pydantic.field_validator('codes', mode='after')
     @classmethod
@@ -148,8 +171,10 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
 
         return list(sym_link_files)
 
+
 class ConfigurationOptimize(ConfigurationSample):
     options: _SUPPORTED_OPTIMIZER_OPTIONS = pydantic.Field(discriminator='software')
+
     @pydantic.model_validator(mode='after')
     def check_objective_function_requirement(self):
         """If the last code listed is Python and runs on the worker then an objective function is not required."""
