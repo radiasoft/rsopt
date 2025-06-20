@@ -110,7 +110,11 @@ class CategoryParameter(Parameter):
 
     @pydantic.computed_field(return_type=int)
     def samples(self):
-        len(self.values)
+        return len(self.values)
+
+    @pydantic.computed_field(return_type=Union[int, float, str])
+    def start(self):
+        return self.values[0]
 
     def create_array(self):
         return np.array(self.values)
