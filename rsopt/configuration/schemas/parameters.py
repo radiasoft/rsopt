@@ -25,7 +25,7 @@ def parameter_discriminator(v: dict) -> str:
         return ParameterClasses.CATEGORICAL
 
 
-class Parameter(pydantic.BaseModel):
+class Parameter(pydantic.BaseModel, extra='forbid'):
     name: str = pydantic.Field(description='User specified name or the parameter. May include formatting to give attribute and index.')
     item_name: str = pydantic.Field('', exclude=True, description='Internal usage. Parsed name to get just the item name.')
     item_attribute: str = ''
