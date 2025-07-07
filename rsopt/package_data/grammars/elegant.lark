@@ -18,8 +18,9 @@ ignored_command : "!" command_name parameter_list* "!" command_end
 
 
 macro : "<" NAME ">"
-?string_value: /[a-zA-Z~\/\_\-.][a-zA-Z0-9\/\_\-.]*/
-?escaped_string: "\"" (rpn_expression | shell_cmd | string_inner)* "\""
+NUMBER.2: SIGNED_NUMBER
+?string_value.1: /[a-zA-Z~\/\_\-.][a-zA-Z0-9\/\_\-.]*/
+?escaped_string.0: "\"" (rpn_expression | shell_cmd | string_inner)* "\""
 ?rpn_expression : ESCAPED_RPN_START (shell_cmd | RPN_CONTENT)* ESCAPED_RPN_END
 ?shell_cmd : ESCAPED_SHELL_START SHELL_CONTENT ESCAPED_SHELL_END
 
@@ -36,7 +37,7 @@ COMMENT: /!.*/
 ?string_inner: /[^{}\(\)\"]+/
 name: NAME
 
-%import common.SIGNED_NUMBER    -> NUMBER
+%import common.SIGNED_NUMBER
 %import common.WS_INLINE
 %import common.NEWLINE
 %import common.CNAME -> NAME

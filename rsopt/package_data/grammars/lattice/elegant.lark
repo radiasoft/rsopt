@@ -45,7 +45,8 @@ stored_value: "%" (NUMBER | NAME | OPERATOR)* "sto"i NAME
 // elegant does not have a problem with repeated commas in line definitions
 ?single_line_element: ["&"] ","* (INT "*" | "-")? LINE_ELEMENT_NAME
 
-?string_value: /[a-zA-Z~\/\_\-.][a-zA-Z0-9\/\_\-.]*/
+NUMBER.2: SIGNED_NUMBER
+?string_value.1: /[a-zA-Z~\/\_\-.][a-zA-Z0-9\/\_\-.]*/
 
 ELEMENT_TYPE: NAME | ELEMENT_NAME
 OPERATOR: "+"  | "-"  | "*" | "/"
@@ -65,7 +66,7 @@ USE: "use"i "," ELEMENT_NAME
 CONT_LINE: "&" NEWLINE
 COMMENT: /!.*/
 
-%import common.SIGNED_NUMBER    -> NUMBER
+%import common.SIGNED_NUMBER
 %import common.DIGIT
 %import common.SIGNED_INT       -> INT
 %import common.ESCAPED_STRING   -> ESC_STR
