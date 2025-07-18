@@ -13,7 +13,8 @@ _TEMPLATE_PATH = util.package_data_path()
 
 
 class Setup(setup_schema.Setup):
-    input_file: pydantic.FilePath
+    input_file: pydantic.FilePath = None
+    module: str = None
     serial_python_mode: typing.Literal["process", "thread", "worker"] = 'worker'
     function: str or callable
     argument_passing: code.ArgumentModes = pydantic.Field(code.ArgumentModes.KWARGS)
@@ -26,13 +27,31 @@ class Python(code.Code):
     _function: typing.Callable
 
     @pydantic.model_validator(mode='after')
+    def mutually_exclusive(self, obj: typing.Any) -> typing.Any:
+        # Check for any mutually exclusive options in the code block
+        assert (self.setup.input_file is None) ^ (self.setup.module is None), \
+            f"Configuration defines input_file={self.setup.input_file} and module={self.setup.module}. Only one may be given."
+
+        return self
+
+
+    @pydantic.model_validator(mode='after')
     def instantiate_function(self):
         # libEnsemble workers change active directory - sys.path will not record locally available modules
-        sys.path.append('.')
+        if self.setup.input_file:
+            sys.path.append('.')
 
-        module = util.run_path_as_module(self.setup.input_file)
-        function = getattr(module, self.setup.function)
-        self._function = function
+            module = util.run_path_as_module(self.setup.input_file)
+            function = getattr(module, self.setup.function)
+            self._function = function
+        elif self.setup.module:
+            import importlib
+            module = importlib.import_module(self.setup.module)
+            function = getattr(module, self.setup.function)
+            self._function = function
+        else:
+            # Pydantic validation should make sure this is never reached... in theory
+            raise NotImplementedError("Either module or input_file must be defined in a Python setup block.")
 
         return self
 

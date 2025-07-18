@@ -17,7 +17,8 @@ can execute MPI commands.::
 
 Required ``setup`` fields for ``python`` are:
 
-* ``input_file``: The path to a Python module, either absolute or relative to execution directory.
+* ``input_file``: The path to a Python module, either absolute or relative to execution directory. Mutually exclusive with `module`.
+* ``module``: Name of a module in PATH to import `function` from. Mutually exclusive with `input_file`.
 * ``function``: Name of a function in `input_file` to be executed
 * ``execution_type``: Method to use when executing the Python code. See :ref:`Execution Methods<exec_methods>` for accepted types.
 
