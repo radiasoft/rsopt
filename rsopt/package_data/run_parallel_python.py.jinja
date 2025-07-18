@@ -1,4 +1,9 @@
+{% if full_input_file_path %}
 from rsopt import util
+m = util.run_path_as_module('{{full_input_file_path}}')
+{% else %}
+import {{ input_module_name }} as m
+{% endif %}
 
 input_dict = {
 {% for key, value in dict_item.items() %}
@@ -8,7 +13,5 @@ input_dict = {
     '{{key}}': '{{value}}'{% if not loop.last %},{% endif %}
 {% endfor %}
 }
-
-m = util.run_path_as_module('{{full_input_file_path}}')
 
 m.{{function}}(**input_dict)

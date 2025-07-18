@@ -89,7 +89,7 @@ class Python(code.Code):
 
     @property
     def get_sym_link_targets(self) -> set:
-        if self.use_executor:
+        if self.use_executor and self.setup.input_file is not None:
             return {self.setup.input_file}
         return set()
 
@@ -116,6 +116,7 @@ class Python(code.Code):
 
         output_template = template.render(dict_item=kwarg_dict, dict_item_str=dict_item_str,
                                           full_input_file_path=self.setup.input_file,
+                                          input_module_name=self.setup.module,
                                           function=self.setup.function)
 
         file_path = pathlib.Path(directory).joinpath(_PARALLEL_PYTHON_RUN_FILE)
