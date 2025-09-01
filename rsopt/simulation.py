@@ -64,10 +64,12 @@ class SimulationFunction:
         x = get_x_from_H(H, self.sim_specs)
 
         halt_job_sequence = False
+        parameter_index = 0
 
         for job in self.jobs:
             # Pair values in vector x with named settings/parameters
-            args, kwargs = job.get_kwargs(x)
+            args, kwargs = job.get_kwargs(x, parameter_index)
+            parameter_index += len(job.parameters)
             self.J['inputs'] = kwargs
 
             # Call preprocess functions from user - if any
