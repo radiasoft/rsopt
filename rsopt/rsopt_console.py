@@ -11,12 +11,14 @@ from rsopt.pkcli.quickstart import app as quickstart_app
 from rsopt.pkcli.pack import app as pack_app
 from rsopt.pkcli.optimize import app as optimize_app
 from rsopt.pkcli.cleanup import app as cleanup_app
+from rsopt.pkcli.logs import app as logs_app
 app = typer.Typer()
 app.add_typer(sample_app, name="sample")
 app.add_typer(quickstart_app, name="quickstart")
 app.add_typer(pack_app, name="pack")
 app.add_typer(optimize_app, name="optimize")
 app.add_typer(cleanup_app, name="cleanup")
+app.add_typer(logs_app, name="logs")
 
 
 def main():
