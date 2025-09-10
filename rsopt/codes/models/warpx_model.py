@@ -1,6 +1,6 @@
 from typing import Optional, List, Dict, Literal
 from pydantic import BaseModel
-
+from typing import Type
 
 # ---------------------------
 # Top-level / Misc parameters
@@ -18,10 +18,12 @@ class Misc(BaseModel):
 # ---------------------------
 
 class Amr(BaseModel):
-    n_cell: Optional[List[int]] = None  # 2 ints (2D) or 3 ints (3D)
+    n_cell: Optional[List[int]] = None
     max_level: Optional[int] = None
     ref_ratio: Optional[List[int]] = None
     ref_ratio_vect: Optional[List[List[int]]] = None
+    max_grid_size: Optional[int] = None  # docs: Distribution across MPI ranks
+
 
 
 class Geometry(BaseModel):
@@ -63,11 +65,11 @@ class Parallel(BaseModel):
     # placeholder for distribution across MPI ranks, etc.
     pass
 
-class MyConstants(BaseModel):
-    # user-defined constants, free-form names → values via AMReX parser
-    # Represented as a simple mapping the app can parse/expand as needed.
-    values: Optional[Dict[str, float]] = None  # e.g. {"a0": 3.0}
-    # Math parser usage for RHS expressions is documented. :contentReference[oaicite:4]{index=4}
+# class MyConstants(BaseModel):
+#     # user-defined constants, free-form names → values via AMReX parser
+#     # Represented as a simple mapping the app can parse/expand as needed.
+#     values: Optional[Dict[str, float]] = None  # e.g. {"a0": 3.0}
+#     # Math parser usage for RHS expressions is documented. :contentReference[oaicite:4]{index=4}
 
 
 # ---------------------------------
@@ -142,12 +144,19 @@ class Algo(BaseModel):
     evolve_scheme: Optional[Literal["explicit", "theta_implicit_em", "semi_implicit_em"]] = None
     maxwell_solver: Optional[MaxwellSolver] = None
     em_solver_medium: Optional[EMMedium] = None
+    # PSATD/macroscopic/hybrid families have many sub-keys.
+    # Keep containers below to collect them when present.
 
     # current deposition & related:
     current_deposition: Optional[CurrentDeposition] = None  # options per docs. :contentReference[oaicite:8]{index=8}
+    load_balance_intervals: Optional[str] = None
+    load_balance_efficiency_ratio_threshold: Optional[float] = None
+    load_balance_with_sfc: Optional[bool] = None
+    load_balance_knapsack_factor: Optional[float] = None
+    load_balance_costs_update: Optional[Literal["heuristic", "timers"]] = None
+    costs_heuristic_particles_wt: Optional[float] = None
+    costs_heuristic_cells_wt: Optional[float] = None
 
-    # PSATD/macroscopic/hybrid families have many sub-keys.
-    # Keep containers below to collect them when present.
 
 
 class Macroscopic(BaseModel):
@@ -451,39 +460,79 @@ class Probes(BaseModel):
 # Root container for a deck
 # ---------------------------
 
-class WarpxInputsModel(BaseModel):
-    misc: Optional[Misc] = None
-    amr: Optional[Amr] = None
-    geometry: Optional[Geometry] = None
-    boundary: Optional[Boundary] = None
-    pml: Optional[Pml] = None
-    embedded_boundary: Optional[EmbeddedBoundary] = None
-    parallel: Optional[Parallel] = None
-    my_constants: Optional[MyConstants] = None
-    warpx: Optional[Warpx] = None
-    warpx_moving_window: Optional[WarpxMovingWindow] = None
+class Warpx(BaseModel):
+    used_inputs_file: Optional[str] = None
+    gamma_boost: Optional[float] = None
+    boost_direction: Optional[Literal["x", "y", "z"]] = None
+    zmax_plasma_to_compute_max_step: Optional[float] = None
+    compute_max_step_from_btd: Optional[int] = None
+    random_seed: Optional[str | int] = None
+    grid_type: Optional[Literal["collocated", "staggered", "hybrid"]] = None
 
-    algo: Optional[Algo] = None
-    macroscopic: Optional[Macroscopic] = None
-    hybrid_pic_model: Optional[HybridPICModel] = None
-    implicit: Optional[ImplicitConfig] = None
-    psatd: Optional[Psatd] = None
+    B_ext_grid_init_style: Optional[Literal["constant", "parse_B_ext_grid_function", "read_from_file"]] = None
+    E_ext_grid_init_style: Optional[Literal["constant", "parse_E_ext_grid_function", "read_from_file"]] = None
+    B_external_grid: Optional[List[float]] = None
+    E_external_grid: Optional[List[float]] = None
+    Bx_external_grid_function: Optional[str] = None
+    By_external_grid_function: Optional[str] = None
+    Bz_external_grid_function: Optional[str] = None
+    Ex_external_grid_function: Optional[str] = None
+    Ey_external_grid_function: Optional[str] = None
+    Ez_external_grid_function: Optional[str] = None
+    read_fields_from_path: Optional[str] = None
+    maxlevel_extEMfield_init: Optional[int] = None
+    do_initial_div_cleaning: Optional[int] = None
+    projection_div_cleaner_rtol: Optional[float] = None
+    projection_div_cleaner_atol: Optional[float] = None
+    use_hybrid_QED: Optional[bool] = None
+    quantum_xi: Optional[float] = None
 
-    particles: Optional[Particles] = None
-    particles_external_fields: Optional[ParticlesExternalFields] = None
-    # dynamic species go here (keyed externally by the deck loader):
-    species: Optional[Dict[str, Species]] = None
+    numprocs: Optional[List[int]] = None
+    do_dynamic_scheduling: Optional[bool] = None
+    roundrobin_sfc: Optional[bool] = None
+    split_high_density_boxes: Optional[bool] = None
+    split_high_density_boxes_threshold: Optional[float] = None
 
-    lasers: Optional[Lasers] = None
-    # dynamic lasers:
-    laser_defs: Optional[Dict[str, Laser]] = None
+class My_Constants(BaseModel):
+    class Config:
+        extra = "allow"  # accept any key/value
 
-    collisions: Optional[Collisions] = None
-    # dynamic collision groups:
-    collision_defs: Optional[Dict[str, Collision]] = None
 
-    diagnostics: Optional[Diagnostics] = None
-    full_diagnostics: Optional[Dict[str, FullDiagnostics]] = None
-    time_averaged_diagnostics: Optional[Dict[str, TimeAveragedDiagnostics]] = None
-    back_transformed_diagnostics: Optional[Dict[str, BackTransformedDiagnostics]] = None
-    reduced_diagnostics: Optional[Dict[str, ReducedDiagnostics]] = None
+ALL_MODELS = [
+    Misc,
+    Amr,
+    Geometry,
+    Boundary,
+    Pml,
+    EmbeddedBoundary,
+    Parallel,
+    My_Constants,
+    WarpxMovingWindow,
+    Warpx,
+    Algo,
+    Macroscopic,
+    HybridPICModel,
+    ImplicitEvolve,
+    Picard,
+    Newton,
+    ImplicitParticleSolve,
+    Preconditioner,
+    ImplicitConfig,
+    Particles,
+    Species,
+    Lasers,
+    Laser,
+    ParticlesExternalFields,
+    Diagnostics,
+    FullDiagnostics,
+    TimeAveragedDiagnostics,
+    BackTransformedDiagnostics,
+    ReducedDiagnostics,
+    Collisions,
+    Collision,
+    Psatd,
+    Probes,
+]
+
+MODEL_REGISTRY: Dict[str, Type[BaseModel]] = {cls.__name__.lower(): cls for cls in ALL_MODELS}
+
