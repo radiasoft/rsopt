@@ -149,7 +149,7 @@ class Algo(BaseModel):
 
     # current deposition & related:
     current_deposition: Optional[CurrentDeposition] = None  # options per docs. :contentReference[oaicite:8]{index=8}
-    load_balance_intervals: Optional[str] = None
+    load_balance_intervals: Optional[int] = None
     load_balance_efficiency_ratio_threshold: Optional[float] = None
     load_balance_with_sfc: Optional[bool] = None
     load_balance_knapsack_factor: Optional[float] = None
