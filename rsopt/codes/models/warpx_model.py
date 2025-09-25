@@ -332,7 +332,7 @@ class Species(BaseModel):
 # ---------------------------------
 
 class Lasers(BaseModel):
-    names: Optional[List[str]] = None
+    names: Optional[ str] = None
 
 
 LaserProfile = Literal["Gaussian", "parse_field_function", "from_lasy_file", "from_binary_file"]

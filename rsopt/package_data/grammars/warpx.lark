@@ -1,0 +1,30 @@
+?start: (file | NEWLINE)+
+
+?value: NUMERICAL
+    | STRING
+    | STRING_VALUE
+
+?parameter: NAME "=" value*
+?class_parameter: NAME "." NAME "=" value*
+?function_parameter: NAME "." NAME FUNCTION "=" value*
+file: (parameter | class_parameter | function_parameter)*
+
+COMMENT: /#.*/
+FUNCTION: /(\(.+?\))/
+// INT.3: SIGNED_INT
+//NUMBER.2: SIGNED_NUMBER
+NUMERICAL: (SIGNED_NUMBER | SIGNED_INT)
+
+STRING_VALUE.1: /[a-zA-Z~\/\_\-.][a-zA-Z0-9\/\_\-.]*/
+
+%import common.SIGNED_NUMBER
+%import common.SIGNED_INT
+%import common.WS_INLINE
+%import common.NEWLINE
+%import common.CNAME -> NAME
+%import common.ESCAPED_STRING   -> STRING
+
+%ignore WS_INLINE
+%ignore NEWLINE
+%ignore COMMENT
+%ignore FUNCTION
