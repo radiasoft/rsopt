@@ -1,13 +1,16 @@
+import uuid
 import numpy as np
 from rsopt.libe_tools.optimizer import libEnsembleOptimizer
 from rsopt.libe_tools.tools import set_dtype_dimension
 from rsopt.libe_tools import tools
 from rsopt.libe_tools.generator_functions import utility_generators
 from libensemble.tools import add_unique_random_streams
+from rsopt.libe_tools.tools import _total_scan_entries
 from libensemble.gen_funcs.sampling import latin_hypercube_sample
 from libensemble.alloc_funcs.give_pregenerated_work import give_pregenerated_sim_work
 
-mesh_sampler_gen_out = [('x', float, None)]
+# mesh sampler datatype must be object to support possibility of string values
+mesh_sampler_gen_out = [('x', 'O', None)]
 lh_sampler_gen_out = [('x', float, None)]
 
 
@@ -20,21 +23,40 @@ class GridSampler(libEnsembleOptimizer):
         self.nworkers = self._config.options.nworkers
         self.exact_mesh = self._config.options.software_options.mesh_file
         sampler_repeats = int(self._config.options.software_options.sampler_repeats)
+        vectors = []
+
+        # Named groups is a temporary construct to organize user-specified groups into separate lists.
+        # Group labels can be thrown away after that.
+        _named_groups = {}
+        param_index = 0
+        for code in self._config.codes:
+            for param in code.parameters:
+                vectors.append(param.create_array())
+                if param.group:
+                    _named_groups.setdefault(param.group, []).append(param_index)
+                else:
+                    _named_groups[uuid.uuid1()] = [param_index, ]
+                param_index += 1
+        groups = list(_named_groups.values())
 
         if self.exact_mesh:
             # Mesh should have shape (number of parameters, number of samples)
             mesh = np.load(self.exact_mesh)
+            gen_out_dim = len(mesh)
+            assert gen_out_dim == len(vectors), "Mesh file does not have the expected number of elements"
             sim_max = mesh.shape[1]
         else:
-            mesh, sim_max = self._define_mesh_parameters()
+            sim_max = _total_scan_entries(vectors, groups)
+            gen_out_dim = len(vectors)
 
         user_keys = {
-                     'mesh_definition': mesh,
-                     'exact_mesh': True if self.exact_mesh else False,
-                     'sampler_repeats': sampler_repeats
-                     }
+            'vectors': vectors,
+            'groups': groups,
+            'exact_mesh': np.load(self.exact_mesh) if self.exact_mesh else None,
+            'sampler_repeats': sampler_repeats
+        }
 
-        gen_out = [set_dtype_dimension(dtype, len(mesh)) for dtype in mesh_sampler_gen_out]
+        gen_out = [set_dtype_dimension(dtype, gen_out_dim) for dtype in mesh_sampler_gen_out]
 
         # for key, val in self._options.items():
         #     user_keys[key] = val
@@ -52,20 +74,6 @@ class GridSampler(libEnsembleOptimizer):
     def _configure_persistant_info(self):
         # _configure_specs must have been already called
         self.persis_info = add_unique_random_streams({}, self.nworkers + 1, seed=self._config.options.seed)
-
-    def _define_mesh_parameters(self):
-        mesh_parameters = []
-        size = 1
-        for lb, ub, st, s in zip(self._config.lower_bounds, self._config.upper_bounds, self._config.start,
-                                 self._config.samples):
-            if s == 1:
-                mp = [st, st, s]
-            else:
-                mp = [lb, ub, s]
-            mesh_parameters.append(mp)
-            size *= s
-
-        return mesh_parameters, size
 
 
 class SingleSample(GridSampler):
@@ -98,12 +106,12 @@ class SingleSample(GridSampler):
         mesh, sim_max = self._define_mesh_parameters()
 
         user_keys = {
-                     'mesh_definition': mesh,
-                     'exact_mesh': True,
-                     # Sampler repeats was already handled by self._define_mesh_parameters
-                     # Set to 1 here so the generator does not double up repetitions.
-                     'sampler_repeats': 1
-                     }
+            'mesh_definition': mesh,
+            'exact_mesh': True,
+            # Sampler repeats was already handled by self._define_mesh_parameters
+            # Set to 1 here so the generator does not double up repetitions.
+            'sampler_repeats': 1
+        }
 
         gen_out = [set_dtype_dimension(dtype, len(mesh)) for dtype in mesh_sampler_gen_out]
 
@@ -174,7 +182,8 @@ class RestartSampler(libEnsembleOptimizer):
 
     def _configure_allocation(self):
         self.alloc_specs = {'alloc_f': give_pregenerated_sim_work,
-                            'out': [tools.set_dtype_dimension(dtype, self._config.dimension) for dtype in restart_alloc_out]}
+                            'out': [tools.set_dtype_dimension(dtype, self._config.dimension) for dtype in
+                                    restart_alloc_out]}
 
     def _configure_persistant_info(self):
         # No persis info needs to be maintained

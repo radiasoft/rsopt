@@ -25,12 +25,12 @@ def parameter_discriminator(v: dict) -> str:
         return ParameterClasses.CATEGORICAL
 
 
-class Parameter(pydantic.BaseModel):
+class Parameter(pydantic.BaseModel, extra='forbid'):
     name: str = pydantic.Field(description='User specified name or the parameter. May include formatting to give attribute and index.')
     item_name: str = pydantic.Field('', exclude=True, description='Internal usage. Parsed name to get just the item name.')
     item_attribute: str = ''
     item_index: int = 0
-    group: Optional[str or int] = None
+    group: Optional[Union[str, int]] = None
 
     @pydantic.model_validator(mode="before")
     @classmethod
@@ -55,6 +55,10 @@ class Parameter(pydantic.BaseModel):
 
         return values
 
+    def create_array(self):
+        # Concrete implementations should be defined by subclasses
+        pass
+
 
 class NumericParameter(Parameter):
     # TODO: Type of all must match
@@ -64,6 +68,13 @@ class NumericParameter(Parameter):
     # TODO: Checking requirement means looking at Options
     samples: int = 1
     scale: Union[Literal['linear'], Literal['log']] = 'linear'
+
+    def create_array(self):
+        if self.scale == 'linear':
+            return np.linspace(self.start, self.max, num=self.samples)
+        elif self.scale == 'log':
+            return np.logspace(self.start, self.max, num=self.samples)
+
 
 # Cannot subclass NumericParameter or RepeatedNumericParameter will use the min/max/start fields and not the property
 # versions defined in RepeatedNumericParameter
@@ -89,6 +100,21 @@ class RepeatedNumericParameter(Parameter):
     def samples(self):
         return np.array([self.samples_setting,] * self.dimension)
 
+    def create_array(self):
+        raise NotImplementedError('MultiDimensional parameters are only supported for optimization. '
+                                  'They cannot currently be used for parameter scans.')
+
 
 class CategoryParameter(Parameter):
     values: List[Union[int, float, str]]
+
+    @pydantic.computed_field(return_type=int)
+    def samples(self):
+        return len(self.values)
+
+    @pydantic.computed_field(return_type=Union[int, float, str])
+    def start(self):
+        return self.values[0]
+
+    def create_array(self):
+        return np.array(self.values)

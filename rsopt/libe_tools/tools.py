@@ -75,3 +75,11 @@ def set_dtype_dimension(dtype, dimension):
         return new_dtype
     else:
         raise IndexError('size of dtype cannot be set')
+
+def _total_scan_entries(vectors: list[numpy.ndarray], groups: list[list[int]]) -> int:
+    """Calculate the total number of scan entries, accounting for grouped parameters."""
+    size = 1
+    for group in groups:
+        size *= vectors[group[0]].size
+
+    return size
