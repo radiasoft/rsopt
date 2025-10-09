@@ -71,9 +71,9 @@ class NumericParameter(Parameter):
 
     def create_array(self):
         if self.scale == 'linear':
-            return np.linspace(self.start, self.max, num=self.samples)
+            return np.linspace(self.min, self.max, num=self.samples)
         elif self.scale == 'log':
-            return np.logspace(self.start, self.max, num=self.samples)
+            return np.logspace(self.min, self.max, num=self.samples)
 
 
 # Cannot subclass NumericParameter or RepeatedNumericParameter will use the min/max/start fields and not the property
