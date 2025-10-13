@@ -167,7 +167,7 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
                                                                self.setup.execution_type == EXECUTION_TYPES.SHIFTER)
         return input_file_model
 
-    def get_kwargs(self, x: typing.Any) -> (Iterable, dict):
+    def get_kwargs(self, x: typing.Any, start_index: int = 0) -> (Iterable, dict):
         """Create a dictionary with parameter/setting names paired to values in iterable x.
 
         Pair settings and parameters in the job with concrete values that will be used in a simulation.
@@ -175,8 +175,9 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
         structured data the user sees.
 
         Args:
-            x: Usually an iterable (will be made Iterable if single valued). Should be equal in length
-            to len(parameters) + len(settings).
+            x: Usually an iterable (will be made Iterable if single valued). Values for parameters are taken
+               from x based on `Code`
+            start_index: (int) Provides the starting index in x to begin assigning parameters.
 
         Returns: (dict)
 
@@ -184,6 +185,11 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
         parameters_dict = {}
         if not isinstance(x, Iterable):
             x = [x, ]
+
+        # x is a flat object that will contain all parameter assignments from all codes. The caller of
+        # get_kwargs is responsible maintaining the starting indexing
+        x = x[start_index:]
+
         for val, name in zip(x, [param.name for param in self.parameters]):
             parameters_dict[name] = val
 

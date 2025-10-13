@@ -20,7 +20,7 @@ class PysotOptimizer(optimizer.libEnsembleOptimizer):
                      # libEnsemble is controlling when to stop running so give the exact max if libEnsemble has it
                      # otherwise set max_evals very high so that pySOT should run until stopped externally
                      'max_evals': self._config.options.exit_criteria.sim_max or DEFAULT_MAX_EVALS,
-                     **self._config.options.software_options}
+                     **self._config.options.software_options.model_dump()}
 
         self.gen_specs.update({'gen_f': persistent_pysot,
                                'persis_in': self._config.options.method.persis_in +

@@ -49,9 +49,23 @@ class Results:
                 
     def __iter__(self):
         return iter(self.results)
+    
+    def __len__(self):
+        return len(self.results)
 
     def __getitem__(self, index):
         return self.results[index]
+    
+    def gather(self, quantity: str) -> np.ndarray:
+        """Gather values from all results.
+        
+        quantity: (str) Quantity to gather. May be a parameter, setting, or libEnsemble history datum.
+        
+        returns arrays of values.
+        """
+        values = [getattr(q, quantity) for q in self.results]
+        
+        return np.array(values)
 
     def range_query(self, parameter: str, low, high):
         index = self._indexed_parameters[parameter]
@@ -88,7 +102,7 @@ def create_model(config: dict) -> pydantic.BaseModel:
     x_keys = gather_config_params(config)
     Result = pydantic.create_model(
         'Result',
-                    **{x: (float, ...) for x in x_keys},
+                    **{x: (typing.Union[float, str, int], ...) for x in x_keys},
                     __base__=BaseResult
     )
 
@@ -102,7 +116,7 @@ def load_results(directory: str,
     config = YAML(typ='safe').load(
         pathlib.Path(config_name) if config_name is not None else [f for f in directory.glob('*.yml')][0]
     )
-    history = np.load(history_name if history_name is not None else [f for f in directory.glob('*.npy')][0])
+    history = np.load(history_name if history_name is not None else [f for f in directory.glob('*.npy')][0], allow_pickle=True)
 
     x_names = gather_config_params(config)
     model = create_model(config)
