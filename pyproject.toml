@@ -1,0 +1,57 @@
+[build-system]
+requires = ["chronver", "setuptools>=66"]
+build-backend = "setuptools.build_meta"
+
+[project]
+authors = [
+    { name = "RadiaSoft LLC", email = "pip@radiasoft.net" },
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "pykern",
+    "libEnsemble",
+    "numpy",
+    "nlopt",
+    "mpmath",
+    "jinja2>=3.0.1",
+]
+description = "A Python library with tools for optimization problems"
+dynamic = ["version"]
+name = "rsopt"
+readme = "README.md"
+
+[project.scripts]
+rsopt = "rsopt.rsopt_console:main"
+
+[project.optional-dependencies]
+full = [
+    'rsbeams@git+https://github.com/radiasoft/rsbeams',
+    'sirepo',
+    'lume-genesis@git+https://github.com/cchall/lume-genesis',
+    'DFO-LS',  # If using dfols optimizer
+    'pandas',  # Needed for some post-processing utilities
+    'xopt',  # If using MOBO algorithm for optimization
+    'pymoo',  # Used by some MOBO examples
+    'deap'  # Used for NSGA-II algorithm implementation
+]
+nersc = [
+    'rsbeams@git+https://github.com/radiasoft/rsbeams',
+    'lume-genesis@git+https://github.com/cchall/lume-genesis',
+]
+
+[project.urls]
+Homepage = "https://git.radiasoft.org/rsopt"
+
+[tool.setuptools.package-data]
+rsopt = ["package_data/**"]
+
+[tool.setuptools.packages.find]
+include = ["rsopt*"]
