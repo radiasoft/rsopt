@@ -85,7 +85,7 @@ def load_results(directory: str,
     config = YAML(typ='safe').load(
         pathlib.Path(config_name) if config_name is not None else [f for f in directory.glob('*.yml')][0]
     )
-    history = np.load(history_name if history_name is not None else [f for f in directory.glob('*.npy')][0])
+    history = np.load(history_name if history_name is not None else [f for f in directory.glob('*.npy')][0], allow_pickle=True)
 
     x_names = gather_config_params(config)
     model = create_model(config)
