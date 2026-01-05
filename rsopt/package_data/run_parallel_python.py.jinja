@@ -13,5 +13,5 @@ input_dict = {
     '{{key}}': '{{value}}'{% if not loop.last %},{% endif %}
 {% endfor %}
 }
-
-m.{{function}}(**input_dict)
+if __name__ == "__main__":
+    m.{{function}}(**input_dict)
