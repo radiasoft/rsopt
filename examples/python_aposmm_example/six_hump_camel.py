@@ -1,3 +1,4 @@
+import numpy as np
 def six_hump_camel_func(x, y):
     """
     Definition of the six-hump camel
@@ -9,6 +10,21 @@ def six_hump_camel_func(x, y):
     term3 = (-4+4*x2**2) * x2**2
 
     return term1 + term2 + term3
+
+
+def six_hump_camel_func_dfols(x, y):
+    """
+    Definition of the six-hump camel
+    """
+    x1 = x
+    x2 = y
+    term1 = (4-2.1*x1**2+(x1**4)/3) * x1**2
+    term2 = x1*x2
+    term3 = (-4+4*x2**2) * x2**2
+    sum = term1**2 + term2**2 + term3**2
+    vec = np.array([term1, term2, term3])
+
+    return sum, vec
 
 
 def mo_six_hump_camel_func(x, y):

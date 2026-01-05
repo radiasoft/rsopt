@@ -11,17 +11,17 @@ codes:
           start: -0.7
       setup:
         input_file: six_hump_camel.py
-        function: six_hump_camel_func
+        function: six_hump_camel_func_dfols
         execution_type: serial
 options:
   nworkers: 4
   software: aposmm
-  method: LN_BOBYQA
+  method: dfols
   record_interval: 25
   software_options:
     initial_sample_size: 50
     max_active_runs: 3
-#  {'ftol_abs': 1.0e-4,
-#                     'dist_to_bound_multiple': 0.5}
+    local_opt_options:
+      components: 3
   exit_criteria:
     sim_max: 400
