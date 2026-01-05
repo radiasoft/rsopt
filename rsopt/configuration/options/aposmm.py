@@ -34,7 +34,7 @@ class AposmmOptions(pydantic.BaseModel, extra='forbid'):
     initial_sample_size: int
     # max_active_runs is not required but a value will be set by Aposmm.set_default_active_runs if user does not give one
     max_active_runs: int = None
-    local_opt_options: dict = None
+    local_opt_options: dict = pydantic.Field(default_factory=dict)
     load_start_sample: pydantic.FilePath = None
     # dist_to_bound_multiple: float =
     # lhs_divisions
@@ -85,7 +85,7 @@ class Aposmm(options.OptionsExit):
             if hasattr(self, param):
                 size = getattr(self, param)
             elif hasattr(self.software_options.local_opt_options, param):
-                size = getattr(self.software_options, param)
+                size = getattr(self.software_options.local_opt_options, param)
             else:
                 raise AttributeError(f"{param} not a member of {self}")
             self.method.sim_specs._initialized_dynamic_outputs.append(

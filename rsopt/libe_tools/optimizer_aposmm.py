@@ -37,9 +37,16 @@ def format_user_specs(rsopt_options: "rsopt.configuration.schemas.options.Option
     if rsopt_options.method.parent_software == 'nlopt':
         # nlopt does not handle values of None if a number was expected, so unset fields should not be passed
         user_options = {**user_options, **rsopt_options.software_options.local_opt_options.dict(exclude_unset=True)}
-    elif rsopt_options.method.parent_software in ('scipy', 'dfols'):
+    elif rsopt_options.method.parent_software in ('scipy',):
         k = '{}_kwargs'.format(rsopt_options.method.parent_software)
         user_options[k] = rsopt_options.software_options.local_opt_options.dict()
+    elif rsopt_options.method.parent_software == 'dfols':
+        # components must be passed in the top level of the user_specs dictionary
+        k = '{}_kwargs'.format(rsopt_options.method.parent_software)
+        dict_copy = rsopt_options.software_options.local_opt_options.dict().copy()
+        components = dict_copy.pop('components')
+        user_options[k] = dict_copy
+        user_options['components'] = components
 
     return user_options
 
