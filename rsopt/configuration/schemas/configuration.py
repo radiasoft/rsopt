@@ -179,7 +179,7 @@ class ConfigurationOptimize(ConfigurationSample):
     def check_objective_function_requirement(self):
         """If the last code listed is Python and runs on the worker then an objective function is not required."""
         if self.codes[-1].code == 'python':
-            if self.codes[-1].setup.serial_python_mode == 'worker':
+            if self.codes[-1].setup.serial_python_mode in ('worker', 'thread', 'process'):
                 return self
         if self.options.objective_function is not None:
             return self
