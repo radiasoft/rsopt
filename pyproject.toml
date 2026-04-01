@@ -1,16 +1,11 @@
 [build-system]
+requires = ["chronver", "setuptools>=66"]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools>=66"]
 
 [project]
 authors = [
     { name = "Chris Hall", email = "chall@radiasoft.net" },
 ]
-name = "rsopt"
-dynamic = ["version"]
-description = "Flexible configuration and execution of large, black-box optimization problems"
-requires-python = ">=3.9"
-
 dependencies = [
     "libEnsemble",
     "ruamel.yaml",
@@ -21,6 +16,13 @@ dependencies = [
     "typer",
     "lark",
 ]
+description = "A Python library with tools for optimization problems"
+dynamic = ["version"]
+name = "rsopt"
+readme = "README.md"
+
+[project.scripts]
+rsopt = "rsopt.rsopt_console:main"
 
 [project.optional-dependencies]
 full = [

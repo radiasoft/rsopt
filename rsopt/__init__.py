@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-u""":mod:`rsopt` package
+""":mod:`rsopt` package
 
-:copyright: Copyright (c) 2020 RadiaSoft LLC.  All Rights Reserved.
-:license: http://www.apache.org/licenses/LICENSE-2.0.html
+:copyright: Copyright (c) 2025 RadiaSoft LLC.  All Rights Reserved.
+:license: https://www.apache.org/licenses/LICENSE-2.0.html
 """
 from __future__ import absolute_import, division, print_function
 import rsopt.util
