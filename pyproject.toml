@@ -9,10 +9,11 @@ dependencies = [
   "ruamel.yaml",
   "jinja2",
   "numpy",
-  "pydantic==2.8.2",
+  "pydantic",
   "sortedcontainers",
   "typer",
   "lark",
+  "pytest>=9.1.1",
 ]
 description = "A Python library with tools for optimization problems"
 dynamic = ["version"]
@@ -41,3 +42,8 @@ include = ["rsopt*"]
 
 [tool.setuptools.package-data]
 "rsopt" = ["package_data/**"]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
