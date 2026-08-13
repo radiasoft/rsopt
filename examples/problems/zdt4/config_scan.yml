@@ -12,7 +12,7 @@ codes:
           start: 0
       setup:
         input_file: zdt4.py
-        function: obj_zd4
+        function: obj_zdt4
         argument_passing: args
         execution_type: serial
 options:
