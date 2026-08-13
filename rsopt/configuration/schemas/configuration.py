@@ -30,7 +30,7 @@ _SUPPORTED_OPTIMIZER_OPTIONS = typing.Annotated[
 
 class ConfigurationSample(pydantic.BaseModel, extra="forbid"):
     codes: list[_SUPPORTED_CODES]
-    options: _SUPPORTED_SAMPLE_OPTIONS = pydantic.Field(discriminator="software")
+    options: _SUPPORTED_SAMPLE_OPTIONS
 
     # MPI Communicator fields
     # For libEnsemble use - should not be used to determine individual code parallel/serial operation
@@ -196,7 +196,7 @@ class ConfigurationSample(pydantic.BaseModel, extra="forbid"):
 
 
 class ConfigurationOptimize(ConfigurationSample):
-    options: _SUPPORTED_OPTIMIZER_OPTIONS = pydantic.Field(discriminator="software")
+    options: _SUPPORTED_OPTIMIZER_OPTIONS
 
     @pydantic.model_validator(mode="after")
     def check_objective_function_requirement(self):
