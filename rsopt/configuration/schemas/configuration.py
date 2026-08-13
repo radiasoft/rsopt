@@ -15,22 +15,28 @@ import numpy as np
 
 from rsopt.configuration.options import SUPPORTED_OPTIONS
 
-_SUPPORTED_CODES = typing.Annotated[codes.SUPPORTED_CODES, pydantic.Field(discriminator='code')]
+_SUPPORTED_CODES = typing.Annotated[
+    codes.SUPPORTED_CODES, pydantic.Field(discriminator="code")
+]
 _SUPPORTED_SAMPLE_OPTIONS = typing.Annotated[
-    typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_sample_models()], pydantic.Field(
-        discriminator='software')]
+    typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_sample_models()],
+    pydantic.Field(discriminator="software"),
+]
 _SUPPORTED_OPTIMIZER_OPTIONS = typing.Annotated[
-    typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_optimize_models()], pydantic.Field(
-        discriminator='software')]
+    typing.Union[rsopt.configuration.options.SUPPORTED_OPTIONS.get_optimize_models()],
+    pydantic.Field(discriminator="software"),
+]
 
 
-class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
-    codes: list[_SUPPORTED_CODES] = pydantic.Field(discriminator='code')
-    options: _SUPPORTED_SAMPLE_OPTIONS = pydantic.Field(discriminator='software')
+class ConfigurationSample(pydantic.BaseModel, extra="forbid"):
+    codes: list[_SUPPORTED_CODES]
+    options: _SUPPORTED_SAMPLE_OPTIONS = pydantic.Field(discriminator="software")
 
     # MPI Communicator fields
     # For libEnsemble use - should not be used to determine individual code parallel/serial operation
-    comms: typing.Literal['mpi', 'local'] = pydantic.Field(default='local', exclude=True)
+    comms: typing.Literal["mpi", "local"] = pydantic.Field(
+        default="local", exclude=True
+    )
     mpi_size: int = pydantic.Field(default=0, exclude=True)
     is_manager: bool = pydantic.Field(default=True, exclude=True)
     mpi_comm: typing.Any = pydantic.Field(default=None, exclude=True)
@@ -48,16 +54,20 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
             for c in self.codes:
                 _ = c.input_file_model
 
-    @pydantic.field_validator('codes', mode='before')
+    @pydantic.field_validator("codes", mode="before")
     @classmethod
     def format_codes_list(cls, parsed_data: list):
         """
         This validator transforms the list of dictionaries from the YAML format
         into a format compatible with the Pydantic model by extracting the key as 'code'.
         """
-        return [{"code": key, **value} for item in parsed_data for key, value in item.items()]
+        return [
+            {"code": key, **value}
+            for item in parsed_data
+            for key, value in item.items()
+        ]
 
-    @pydantic.field_validator('codes', mode='after')
+    @pydantic.field_validator("codes", mode="after")
     @classmethod
     def validate_parameter_groups(cls, codes):
         """Ensures that parameters in the same group all have the same number of samples.
@@ -71,13 +81,14 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
                 if param.group:
                     groups.setdefault(param.group, []).append(param.samples)
         for group, sample_sizes in groups.items():
-            assert all(map(lambda x: x == sample_sizes[0], sample_sizes)), \
-                (f"Parameter group `{group}` contains multiple sample sizes. "
-                 f"All parameters in a group must have the same number of "
-                 f"samples but got sample sizes {sample_sizes}")
+            assert all(map(lambda x: x == sample_sizes[0], sample_sizes)), (
+                f"Parameter group `{group}` contains multiple sample sizes. "
+                f"All parameters in a group must have the same number of "
+                f"samples but got sample sizes {sample_sizes}"
+            )
         return codes
 
-    @pydantic.field_validator('codes', mode='after')
+    @pydantic.field_validator("codes", mode="after")
     @classmethod
     def check_executors(cls, codes):
         # libEnsemble does not support multiple types of executors
@@ -85,13 +96,14 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         # if 'force_executor' is not given
 
         executors = [c.setup.execution_type for c in codes if c.use_executor]
-        assert all([executors[0] == e for e in executors]), \
+        assert all([executors[0] == e for e in executors]), (
             f"All Executors must be the same type. Executor list is: {executors}"
+        )
 
         return codes
 
     @property
-    def executor_type(self) -> 'rsopt.libe_tools.executors.EXECUTOR_TYPES':
+    def executor_type(self) -> "rsopt.libe_tools.executors.EXECUTOR_TYPES":
         """libEnsemble Executor to use for any codes not run directly by workers."""
         executors = [c.setup.execution_type for c in self.codes if c.use_executor]
         if len(executors) > 0:
@@ -105,7 +117,11 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         for code in self.codes:
             for param in code.parameters:
                 lower_bounds.append(param.min)
-        lower_bounds = list(chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in lower_bounds))
+        lower_bounds = list(
+            chain.from_iterable(
+                v if isinstance(v, Iterable) else [v] for v in lower_bounds
+            )
+        )
         return np.array(lower_bounds)
 
     @property
@@ -115,7 +131,11 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         for code in self.codes:
             for param in code.parameters:
                 upper_bounds.append(param.max)
-        upper_bounds = list(chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in upper_bounds))
+        upper_bounds = list(
+            chain.from_iterable(
+                v if isinstance(v, Iterable) else [v] for v in upper_bounds
+            )
+        )
         return np.array(upper_bounds)
 
     @property
@@ -125,7 +145,9 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         for code in self.codes:
             for param in code.parameters:
                 start.append(param.start)
-        start = list(chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in start))
+        start = list(
+            chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in start)
+        )
         return np.array(start)
 
     @property
@@ -135,7 +157,9 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         for code in self.codes:
             for param in code.parameters:
                 samples.append(param.samples)
-        samples = list(chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in samples))
+        samples = list(
+            chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in samples)
+        )
         return np.array(samples)
 
     @property
@@ -143,7 +167,7 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         dimension = 0
         for code in self.codes:
             for param in code.parameters:
-                if hasattr(param, 'dimension'):
+                if hasattr(param, "dimension"):
                     dimension += param.dimension
                 else:
                     dimension += 1
@@ -152,9 +176,8 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
 
     @property
     def rsmpi_executor(self) -> bool:
-        """Is rsmpi used for any Job (code)
-        """
-        rsmpi_used = any([c.setup.execution_type == 'rsmpi' for c in self.codes])
+        """Is rsmpi used for any Job (code)"""
+        rsmpi_used = any([c.setup.execution_type == "rsmpi" for c in self.codes])
         return rsmpi_used
 
     def get_sym_link_list(self) -> list:
@@ -165,7 +188,7 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
         for code in self.codes:
             sym_link_files.update(code.get_sym_link_targets)
             # Each flash simulation may be a unique executable and will not be in PATH
-            if code.code == 'flash':
+            if code.code == "flash":
                 sym_link_files.add(code.setup.executable)
         sym_link_files.update(self.options.sym_links)
 
@@ -173,22 +196,27 @@ class ConfigurationSample(pydantic.BaseModel, extra='forbid'):
 
 
 class ConfigurationOptimize(ConfigurationSample):
-    options: _SUPPORTED_OPTIMIZER_OPTIONS = pydantic.Field(discriminator='software')
+    options: _SUPPORTED_OPTIMIZER_OPTIONS = pydantic.Field(discriminator="software")
 
-    @pydantic.model_validator(mode='after')
+    @pydantic.model_validator(mode="after")
     def check_objective_function_requirement(self):
         """If the last code listed is Python and runs on the worker then an objective function is not required."""
-        if self.codes[-1].code == 'python':
-            if self.codes[-1].setup.serial_python_mode in ('worker', 'thread', 'process'):
+        if self.codes[-1].code == "python":
+            if self.codes[-1].setup.serial_python_mode in (
+                "worker",
+                "thread",
+                "process",
+            ):
                 return self
         if self.options.objective_function is not None:
             return self
 
-        raise pydantic_core.PydanticCustomError('objective_function_requirement',
-                                                'Last code is {code} not python with python_exec_type: worker ' + \
-                                                'an objective_function must be set in options: {options}.',
-                                                {'code': self.codes[-1].code, 'options': self.options}
-                                                )
+        raise pydantic_core.PydanticCustomError(
+            "objective_function_requirement",
+            "Last code is {code} not python with python_exec_type: worker "
+            + "an objective_function must be set in options: {options}.",
+            {"code": self.codes[-1].code, "options": self.options},
+        )
 
 
 # This thin wrapper just validates the software field with pydantic so that the mode for the full model validation can
@@ -198,4 +226,6 @@ class ConfigurationOptimize(ConfigurationSample):
 # This could be used to entirely remove the optimize/sample command, but it would be more brittle than just having
 # the user provide instructions on what to do.
 class _ThinConfiguration(pydantic.BaseModel):
-    software: str = pydantic.Field(validation_alias=pydantic.AliasPath('options', 'software'))
+    software: str = pydantic.Field(
+        validation_alias=pydantic.AliasPath("options", "software")
+    )
