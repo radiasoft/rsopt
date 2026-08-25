@@ -45,6 +45,15 @@ class PybobyqaOptions(options.SoftwareOptions, extra='forbid'):
                                                                                         'nworkers-1 so that every '
                                                                                         'simulation worker is kept '
                                                                                         'busy.')
+    additional_instance_starts: list[list[float]] = pydantic.Field(default_factory=list,
+        description='Explicit starting points for instances after the first. Instance 0 always '
+                    'starts from the `start` values given for the parameters, so the points listed '
+                    'here are used for instance 1 onwards, in order, and at most `instances`-1 of '
+                    'them may be given. Any instance not covered starts from a random point within '
+                    'the bounds, as do all relaunches after an instance converges. Each point is a '
+                    'list in the flattened parameter vector space and must have one entry per '
+                    'dimension of the problem, which is not the same as the number of named '
+                    'parameters when any of them are multi-dimensional.')
     restart_on_convergence: bool = pydantic.Field(True, description='Start a new run from a new random point when an '
                                                                     'instance finishes, so its worker does not go '
                                                                     'idle. When False the run ends once every '

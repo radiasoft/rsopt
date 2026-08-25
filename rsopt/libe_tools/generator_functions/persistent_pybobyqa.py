@@ -190,10 +190,19 @@ class PyBobyqaRunner:
         self.is_running = False
 
 
-def start_points(xstart, lb, ub, n_instances, rand_stream):
-    """First instance starts from the user's start point, the rest are drawn uniformly in bounds."""
+def start_points(xstart, additional_starts, lb, ub, n_instances, rand_stream):
+    """Starting point for every instance.
+
+    Instance 0 always starts from the user's start point. The instances after it take the points in
+    `additional_starts`, in order, and any instance left over starts from a point drawn uniformly
+    within the bounds. Relaunches after convergence are always random rather than reusing a given
+    point: Py-BOBYQA is deterministic in its starting point, so a relaunch from the same point would
+    replay an identical sequence of evaluations.
+    """
     points = [np.asarray(xstart, dtype=float)]
-    for _ in range(n_instances - 1):
+    for point in additional_starts[:max(n_instances - 1, 0)]:
+        points.append(np.asarray(point, dtype=float))
+    while len(points) < n_instances:
         points.append(rand_stream.uniform(lb, ub))
 
     return points
@@ -231,6 +240,7 @@ def persistent_pybobyqa(H, persis_info, gen_specs, libE_info):
     lb = np.asarray(user_specs['lb'], dtype=float)
     ub = np.asarray(user_specs['ub'], dtype=float)
     n_instances = user_specs.get('instances') or 1
+    additional_starts = user_specs.get('additional_instance_starts') or []
     restart_on_convergence = user_specs.get('restart_on_convergence', True)
     rand_stream = persis_info.get('rand_stream', np.random.default_rng())
     track_given_back = 'given_back' in (local_H.dtype.names or ())
@@ -247,7 +257,8 @@ def persistent_pybobyqa(H, persis_info, gen_specs, libE_info):
     try:
         # Start every instance and collect the first point from each
         points, instance_ids = [], []
-        for instance_id, x0 in enumerate(start_points(user_specs['xstart'], lb, ub, n_instances, rand_stream)):
+        for instance_id, x0 in enumerate(start_points(user_specs['xstart'], additional_starts,
+                                                      lb, ub, n_instances, rand_stream)):
             runners[instance_id] = launch(instance_id, x0)
             points.append(runners[instance_id].next_x)
             instance_ids.append(instance_id)
