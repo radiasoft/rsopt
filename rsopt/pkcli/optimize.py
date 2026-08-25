@@ -13,7 +13,7 @@ def configuration(config: str):
 
     An optimization job will be started based on the content of the configuration file.
     The configuration file should have the software field in options set to one of:
-      nlopt, dfols, scipy, aposmm, nsga2, pysot, dlib, mobo
+      nlopt, dfols, scipy, aposmm, nsga2, pysot, dlib, mobo, pybobyqa
 
     :param config: (str) Name of configuration file to use
     :return: None
@@ -53,5 +53,6 @@ _final_result = {
     'scipy': _final_local_result,
     'aposmm': _final_global_result,
     'pysot': _final_local_result,
-    'dlib': _final_local_result
+    'dlib': _final_local_result,
+    'pybobyqa': _final_local_result
 }

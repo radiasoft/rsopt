@@ -136,3 +136,18 @@ mobo:
         out:
           - ['f', float, objectives]
           - ['c', float, constraints]
+pybobyqa:
+  # NOTE: must be 'global'. A 'local' entry is written into libEnsemble's .opt_modules.csv by
+  # run._local_opt_startup, and libEnsemble rejects optimizer names it does not know at import time.
+  type: global
+  methods:
+    pybobyqa:
+      aposmm_support: False
+      local_support: False
+      persis_in:
+        - f
+        - sim_id
+      sim_specs:
+        in: ['x']
+        out:
+          - ['f', float]

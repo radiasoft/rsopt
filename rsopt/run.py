@@ -158,6 +158,13 @@ def dlib_optimizer(config: configuration.ConfigurationOptimize):
     return opt
 
 
+def pybobyqa_optimizer(config: configuration.ConfigurationOptimize):
+    from rsopt.libe_tools.optimizer_pybobyqa import PybobyqaOptimizer
+    opt = PybobyqaOptimizer(config)
+
+    return opt
+
+
 def mobo_optimizer(config: configuration.ConfigurationOptimize):
     from rsopt.libe_tools.optimizer_mobo import MoboOptimizer
     opt = MoboOptimizer(config)
@@ -175,7 +182,8 @@ run_modes = {
     'nsga2': nsga2_optimizer,
     'pysot': pysot_optimizer,
     'dlib': dlib_optimizer,
-    'mobo': mobo_optimizer
+    'mobo': mobo_optimizer,
+    'pybobyqa': pybobyqa_optimizer
 }
 
 sample_modes = {
