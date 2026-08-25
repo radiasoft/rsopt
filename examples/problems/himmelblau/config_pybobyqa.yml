@@ -1,0 +1,38 @@
+codes:
+  - python:
+      parameters:
+        x:
+          min: -5.
+          max: 5.
+          # The start of the parameters is always the starting point of Py-BOBYQA instance 0.
+          # This one sits in the basin of the minimum at (3, 2).
+          start: 4.0
+        y:
+          min: -5.
+          max: 5.
+          start: 3.5
+      setup:
+        input_file: himmelblau.py
+        function: himmelblau
+        execution_type: serial
+options:
+  software: pybobyqa
+  # One worker runs the generator, leaving 3 to evaluate the objective. `instances` is not set, so
+  # it defaults to nworkers-1 = 3 and every simulation worker keeps an independent search busy.
+  nworkers: 4
+  software_options:
+    # Starting points for instances 1 and 2. Instance 0 uses the parameter `start` values above, so
+    # only instances-1 = 2 points are given here. Each lies in the basin of a different minimum.
+    additional_instance_starts:
+      - [-4.0, 4.0]    # basin of (-2.805118,  3.131312)
+      - [-4.5, -4.5]   # basin of (-3.779310, -3.283186)
+    # Plain local searches, so each instance stays in the basin it started in and the effect of the
+    # starting points is easy to see. The fourth minimum, near (3.58, -1.85), is never reached
+    # because no instance starts in its basin.
+    seek_global_minimum: False
+    # End the run once all three searches have converged rather than restarting them at random.
+    restart_on_convergence: False
+  exit_criteria:
+    # Deliberately larger than the run needs: the three searches converge in about 110
+    # evaluations in total, so termination comes from the optimizer rather than the budget.
+    sim_max: 200
