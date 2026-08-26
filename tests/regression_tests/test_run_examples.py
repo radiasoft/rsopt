@@ -12,9 +12,11 @@ _EXAMPLES = pkyaml.load_file(EXAMPLE_REGISTRY)['examples']
 
 
 def copy_example_files(example):
-    example_file_list = example['files']
-    for filename in example_file_list:
-        filepath = os.path.join(EXAMPLE_SYMLINK, filename)
+    # Registry paths may be nested under the packaged examples directory, but every example expects
+    # its files to sit alongside each other in the working directory, so copy them out by basename.
+    example_file_list = [os.path.basename(f) for f in example['files']]
+    for filename, source in zip(example_file_list, example['files']):
+        filepath = os.path.join(EXAMPLE_SYMLINK, source)
         shutil.copyfile(filepath, filename, follow_symlinks=True)
 
     return example_file_list

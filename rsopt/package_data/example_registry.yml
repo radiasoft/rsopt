@@ -27,4 +27,11 @@ examples:
       - match_parallel.yml
     result: 4.2644972852249e-18
     job_type: optimize
+  pybobyqa_himmelblau_example:
+    # Paths are relative to the packaged examples directory; files are copied out by basename.
+    files:
+      - problems/himmelblau/himmelblau.py
+      - problems/himmelblau/config_pybobyqa.yml
+    result: 6.1860788698306575e-20
+    job_type: optimize
 # python_radia_undulator_example takes too long to be run routinely
