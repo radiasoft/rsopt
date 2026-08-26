@@ -66,3 +66,11 @@ _build_html/
 
 # PyBuilder
 target/
+
+# libEnsemble
+libE_stats.txt
+ensemble.log
+H_*.npy
+libe_*.npy
+H_*.pickle
+libe_*.pickle

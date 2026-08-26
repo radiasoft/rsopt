@@ -28,6 +28,7 @@ full = [
   'rsbeams@git+https://github.com/radiasoft/rsbeams',
   'sirepo@git+https://github.com/radiasoft/sirepo',
   'DFO-LS',                                           # If using dfols optimizer
+  'Py-BOBYQA',                                        # If using pybobyqa optimizer
   'scipy',
   'nlopt',
   'pandas',                                           # Needed for some post-processing utilities
