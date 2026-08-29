@@ -121,6 +121,9 @@ each library.
 
 * :doc:`mobo<optimizers/mobo>`: A Multi-Objective Bayesian Optimization algorithm from Xopt [7]_. Supports constraints.
 
+* :doc:`pybobyqa<optimizers/pybobyqa>`: Py-BOBYQA [8]_ is a derivative-free trust-region solver with a heuristic for
+  seeking a global minimum. rsopt runs several independent searches at once so that more than one worker can be used.
+
 Parameter Scans
 ---------------
 
@@ -186,3 +189,4 @@ Other useful helper commands.
 .. [5] https://github.com/dme65/pySOT
 .. [6] https://github.com/davisking/dlib
 .. [7] https://github.com/ChristopherMayes/xopt
+.. [8] https://github.com/numericalalgorithmsgroup/pybobyqa
