@@ -12,6 +12,7 @@ class Setup(pydantic.BaseModel, abc.ABC, extra='forbid'):
     input_distribution: str = None
     output_distribution: str = None
     cores: pydantic.PositiveInt = pydantic.Field(default=1)
+    gpu: bool = False
     timeout: pydantic.PositiveFloat = pydantic.Field(default=1324512000)
     force_executor: bool = False
     ignored_files: list[str] = None

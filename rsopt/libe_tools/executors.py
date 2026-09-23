@@ -95,12 +95,15 @@ def create_executor_arguments(job: "import rsopt.configuration.schemas.code") ->
     # Really creates Executor.submit() arguments
     if job.use_mpi:
         args = {
-            'num_procs': job.setup.cores,
+            # num_procs and match_procs_to_gpus are mutually exclusive in libEnsemble
+            'num_procs': None if job.setup.gpu else job.setup.cores,
             'num_nodes': None,  # No user interface right now
             'procs_per_node': None, # No user interface right now
             'machinefile': None,  # Add in  setup.machinefile if user wants to control
             'app_args': format_task_string(job),
             'hyperthreads': False,  # Add in  setup.hyperthreads if this is needed
+            'auto_assign_gpus': job.setup.gpu,
+            'match_procs_to_gpus': job.setup.gpu,
             # 'app_name': None,  # Handled at optimizer setup
             # 'stdout': None,  # Handled at optimizer setup
             # 'stderr': None, # Handled at optimizer setup

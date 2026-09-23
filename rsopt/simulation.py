@@ -125,6 +125,10 @@ class SimulationFunction:
                         task.kill()  # Timeout
                         halt_job_sequence = True
                         break
+
+                if job._executor_arguments.get('auto_assign_gpus') and self.log.isEnabledFor(logging.DEBUG):
+                    from libensemble.tools.test_support import check_gpu_setting
+                    self.log.debug(check_gpu_setting(task, assert_setting=False, print_setting=True))
             else:
                 raise NotImplementedError(f"Execution mode for job type: {job.code} was not handled")
 
