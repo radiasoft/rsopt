@@ -90,24 +90,21 @@ class SingleSample(GridSampler):
         self.sampler_repeats = sampler_repeats
 
     def _define_mesh_parameters(self):
-        mesh_parameters = []
-        size = self.sampler_repeats
+        # Mesh has shape (number of parameters, number of samples), one column per repeat of the start point
+        mesh_parameters = np.repeat(self._config.start.reshape(-1, 1), repeats=self.sampler_repeats, axis=1)
 
-        for lb, ub, s in zip(self._config.lower_bounds, self._config.upper_bounds, self._config.start):
-            mesh_parameters.append(s)
-        mesh_parameters = np.array(mesh_parameters).reshape(len(mesh_parameters), 1)
-        mesh_parameters = np.repeat(mesh_parameters, repeats=self.sampler_repeats, axis=1)
-
-        return mesh_parameters, size
+        return mesh_parameters, self.sampler_repeats
 
     def _configure_optimizer(self):
         self.nworkers = self._config.options.nworkers
 
         mesh, sim_max = self._define_mesh_parameters()
 
+        # generate_mesh only builds a mesh from `vectors` and `groups` when `exact_mesh` is None
         user_keys = {
-            'mesh_definition': mesh,
-            'exact_mesh': True,
+            'vectors': [],
+            'groups': [],
+            'exact_mesh': mesh,
             # Sampler repeats was already handled by self._define_mesh_parameters
             # Set to 1 here so the generator does not double up repetitions.
             'sampler_repeats': 1
