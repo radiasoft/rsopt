@@ -4,6 +4,7 @@ from rsopt.codes.models import base_model, genesis_model
 from rsopt.codes.parsers import genesis_parser
 from rsopt.codes.writers import write
 from rsopt.configuration.schemas import code
+from rsopt.configuration.schemas.names import AttributeIndex
 from rsopt.configuration.schemas import setup as setup_schema
 
 class Setup(setup_schema.Setup):
@@ -11,7 +12,11 @@ class Setup(setup_schema.Setup):
 
 class Genesis(code.Code):
     code: typing.Literal['genesis'] = 'genesis'
+    name_format = AttributeIndex
     setup: Setup
+
+    def parsed_name(self, name: str) -> AttributeIndex:
+        return typing.cast(AttributeIndex, super().parsed_name(name))
 
     @classmethod
     def serial_run_command(cls) -> str or None:
@@ -26,11 +31,11 @@ class Genesis(code.Code):
         genesis_model_instance = self.input_file_model.model_copy(deep=True)
 
         for name, value in kwarg_dict.items():
-            item_model = self.get_parameter_or_setting(name)
+            parsed_name = self.parsed_name(name)
             genesis_model_instance.edit_command(command_name=genesis_model.GENESIS_COMMAND_NAME,
-                                               parameter_name=item_model.item_name,
+                                               parameter_name=parsed_name.attribute,
                                                parameter_value=value,
-                                               command_index=item_model.item_index
+                                               command_index=parsed_name.zero_based_index
                                                )
         # TODO: Right now we don't handle linking of resources like the geometry file. User will need to do that in rsopt config
         write.write_to_file(

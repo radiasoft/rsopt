@@ -8,6 +8,7 @@ from itertools import chain
 from rsopt.configuration.schemas.parameters import Parameter, NumericParameter, CategoryParameter, \
     parameter_discriminator, RepeatedNumericParameter, ParameterClasses
 from rsopt.configuration.schemas.settings import Setting
+from rsopt.configuration.schemas.names import NameFormat, RawName
 from rsopt.configuration.schemas.setup import Setup
 from rsopt.libe_tools.executors import EXECUTION_TYPES
 from rsopt import util
@@ -42,6 +43,10 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
     settings: list[Setting] = pydantic.Field(default_factory=list)
     setup: Setup
 
+    # How parameter/setting names are interpreted when editing the input file. Subclasses override as needed.
+    name_format: typing.ClassVar[type[NameFormat]] = RawName
+    _parsed_names: dict[str, NameFormat] = pydantic.PrivateAttr(default_factory=dict)
+
     # Executor arguments are passed to libEnsemble's Executor submit command
     # Will not be set directly by user - set by the libEnsemble setup class from the info in Code
     _executor_arguments: dict
@@ -75,6 +80,13 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
             if param.name in setting_names:
                 raise NameError(f"Parameter `{param.name}` is already defined in settings. "
                                 f"Must be defined in only one location.")
+        return self
+
+    @pydantic.model_validator(mode='after')
+    def parse_names(self):
+        # Parsed at config load so malformed names fail before any simulation runs
+        self._parsed_names = {item.name: self.name_format.parse(item.name)
+                              for item in (*self.parameters, *self.settings)}
         return self
 
     @pydantic.model_validator(mode='after')
@@ -113,20 +125,12 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
     def get_sym_link_targets(self) -> set:
         return set()
 
-    @classmethod
-    def _parse_name(cls, name: str) -> dict:
-        """Parse parameter/setting name for use in model editing.
-
-        Parses rsopt's string formatting for specifying model command/element names and attributes
-        `command-or-element-name.[command-or-element-attribute].[command-index]`
-
-        Args:
-            name: str
-
-        Returns: dict
-
-        """
-        return Parameter.parse_name({'name': name})
+    def parsed_name(self, name: str) -> NameFormat:
+        """Parameter/setting `name` as interpreted by this code's `name_format`."""
+        try:
+            return self._parsed_names[name]
+        except KeyError:
+            raise NameError(f"{name} could not be found in Parameter or Setting lists for Code {self.code}")
 
     @abc.abstractmethod
     def generate_input_file(self, kwarg_dict: dict, directory: str, is_parallel: bool) -> None:
@@ -199,10 +203,3 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
         args = list(chain.from_iterable(v if isinstance(v, Iterable) else [v] for v in x))
 
         return args, {**parameters_dict, **settings_dict}
-
-    def get_parameter_or_setting(self, name: str) -> Parameter or Setting:
-        for item in [*self.parameters, *self.settings]:
-            if item.name == name:
-                return item
-
-        raise NameError(f"{name} could not be found in Parameter or Setting lists for Code {self.code}")

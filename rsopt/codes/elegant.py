@@ -2,6 +2,7 @@ import logging
 import typing
 from copy import deepcopy
 from rsopt.configuration.schemas import code
+from rsopt.configuration.schemas.names import ItemAttributeIndex
 from rsopt.configuration.schemas import setup as setup_schema
 
 LOG = logging.getLogger('libensemble')
@@ -39,7 +40,11 @@ class Setup(setup_schema.Setup):
 
 class Elegant(code.Code):
     code: typing.Literal['elegant'] = 'elegant'
+    name_format = ItemAttributeIndex
     setup: Setup
+
+    def parsed_name(self, name: str) -> ItemAttributeIndex:
+        return typing.cast(ItemAttributeIndex, super().parsed_name(name))
 
     @classmethod
     def serial_run_command(cls) -> str or None:
@@ -77,17 +82,17 @@ class Elegant(code.Code):
         model = deepcopy(self.input_file_model)
 
         for n, v in kwarg_dict.items():
-            item_model = self.get_parameter_or_setting(n)
-            field, index, name = item_model.item_name, item_model.item_index, item_model.item_attribute
+            parsed_name = self.parsed_name(n)
+            field, index, name = parsed_name.item, parsed_name.index, parsed_name.attribute
 
             # If this is a command
             if field.lower() in commands.keys():
                 # Make sure that if it is a repeated command we know which one to edit
-                assert index or len(commands[field.lower()]) == 1, \
+                assert index is not None or len(commands[field.lower()]) == 1, \
                     "{} is not unique in {}. Please add identifier".format(n, self.setup.input_file)
-                if index:
-                    assert int(index) <= len(commands[field.lower()]), f"Cannot assign to instance {index} of command '{field}'. There are only {len(commands[field.lower()])} instances."
-                fid = commands[field.lower()][int(index) - 1 if index else 0]
+                if index is not None:
+                    assert index <= len(commands[field.lower()]), f"Cannot assign to instance {index} of command '{field}'. There are only {len(commands[field.lower()])} instances."
+                fid = commands[field.lower()][parsed_name.zero_based_index or 0]
                 # Handle commands in a case-insensitive fashion
                 if name.lower() in map(str.lower, model.models.commands[fid].keys()):  # Command fields are case-sensitive in schema so we standardize to lower
                     # If we need to edit the command now we need to match case to access dict

@@ -42,7 +42,7 @@ class CommandModel(pydantic.BaseModel, typing.Generic[T]):
         command_name: typing.Annotated[str, pydantic.StringConstraints(to_lower=True)],
         parameter_name: str,
         parameter_value: typing.Any,
-        command_index: int or None = None,
+        command_index: typing.Optional[int] = None,
     ) -> None:
         """Edit a copy of a command model and return CommandContainer with the copy.
 
