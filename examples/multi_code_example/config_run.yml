@@ -6,11 +6,11 @@ codes:
             track.zstop: "{0.28,8.25}"
             beam.bcurrent: 1.3  # Sets bunch to be 1 nC of charge
         parameters:
-            DISTRIBUTION.1.TPULSEFWHM:
+            DISTRIBUTION.TPULSEFWHM.1:
                 min: 2.5e-11
                 max: 6.0e-11
                 start: 4.42409587e-11
-            DISTRIBUTION.1.SIGMAR:
+            DISTRIBUTION.SIGMAR.1:
                 min: 0.0002
                 max: 0.004
                 start: 1.18951526e-03
