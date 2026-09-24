@@ -18,6 +18,7 @@ dependencies = [
 description = "A Python library with tools for optimization problems"
 dynamic = ["version"]
 name = "rsopt"
+requires-python = ">=3.11"
 readme = "README.md"
 
 [project.scripts]
