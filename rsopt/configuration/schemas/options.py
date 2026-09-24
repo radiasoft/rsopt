@@ -27,6 +27,23 @@ class ExitCriteria(pydantic.BaseModel):
 class SoftwareOptions(pydantic.BaseModel, abc.ABC):
     pass
 
+class GpuOptions(pydantic.BaseModel, extra='forbid'):
+    devices: typing.Optional[list[pydantic.NonNegativeInt]] = pydantic.Field(
+        default=None,
+        description='Device indices on each node that jobs with setup.gpu may use. If not set all detected GPUs are used.'
+    )
+
+    @pydantic.field_validator('devices')
+    @classmethod
+    def validate_devices(cls, devices):
+        if devices is None:
+            return devices
+        if len(devices) == 0:
+            raise ValueError('gpu_options.devices must list at least one device')
+        if len(set(devices)) != len(devices):
+            raise ValueError(f'gpu_options.devices contains duplicate devices: {devices}')
+        return devices
+
 class Method(pydantic.BaseModel, abc.ABC):
     name: str
     parent_software: typing.ClassVar[str] = pydantic.Field(..., description='Applicable to methods used by APOSMM. Informs what package to load the method from.')
@@ -57,6 +74,7 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
 
     # TODO: This could end up being its own model
     executor_options: dict = pydantic.Field(default_factory=dict)
+    gpu_options: GpuOptions = pydantic.Field(default_factory=GpuOptions)
     use_zero_resources: bool = pydantic.Field(default=True, frozen=True, exclude=True)
 
     @pydantic.field_validator('method', mode='before')

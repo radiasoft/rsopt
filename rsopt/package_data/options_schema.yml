@@ -13,6 +13,9 @@ options: &options
   executor_options:
     typing:
       - dict
+  gpu_options:
+    typing:
+      - dict
   software:
     typing:
       - str

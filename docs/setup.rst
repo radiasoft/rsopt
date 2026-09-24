@@ -37,6 +37,12 @@ General Setup Fields
         * ``serial``: The worker's GPUs are exposed through the platform's GPU environment variable
           (e.g. ``CUDA_VISIBLE_DEVICES``) while the job runs. This applies to serial Python jobs in any
           ``serial_python_mode`` and to serial executables. The code should use the first visible GPU(s).
+
+    To restrict which GPUs are used see `gpu_options` in the options documentation. Most GPU libraries read
+    ``CUDA_VISIBLE_DEVICES`` once, when the GPU is first used in a process. With ``serial_python_mode`` set to
+    ``worker`` or ``thread`` the job runs in the worker's own process, so a GPU library that has already been
+    initialized there (for example on import, or in an earlier trial) will not see later changes. Use ``process``
+    for serial Python GPU jobs.
 - `force_executor` [bool]:
     If used with Python can be set to `True` to force a serial Python job to use an Executor. Otherwise Python jobs are
     run directly by the worker. Kept as a general setup field for backwards compatibility even though it will only

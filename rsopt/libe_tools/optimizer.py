@@ -2,7 +2,9 @@ from libensemble.libE import libE
 from rsopt.configuration.schemas import configuration
 from rsopt.environment import get_run_command_with_path
 from rsopt.libe_tools.executors import create_executor_arguments
-from rsopt.libe_tools.generator_functions.local_opt_generator import persistent_local_opt
+from rsopt.libe_tools.generator_functions.local_opt_generator import (
+    persistent_local_opt,
+)
 from libensemble.alloc_funcs.persistent_aposmm_alloc import persistent_aposmm_alloc
 from libensemble.tools import add_unique_random_streams
 from rsopt.libe_tools import tools
@@ -13,24 +15,29 @@ from rsopt import EXECUTOR_SCHEMA, OPTIMIZER_SCHEMA
 import logging
 import pathlib
 
-logger = logging.getLogger('libensemble')
+logger = logging.getLogger("libensemble")
 OPT_SCHEMA = YAML().load(pathlib.Path(OPTIMIZER_SCHEMA))
 EXECUTOR_SCHEMA = YAML().load(pathlib.Path(EXECUTOR_SCHEMA))
 
 # dtype dimensions > 1 are set at run time
-persistent_local_opt_gen_out = [('x', float, None),
-                                ('x_on_cube', float, None),
-                                ('sim_id', int),
-                                ('local_pt', bool)]
+persistent_local_opt_gen_out = [
+    ("x", float, None),
+    ("x_on_cube", float, None),
+    ("sim_id", int),
+    ("local_pt", bool),
+]
 
 # Some libE_spec keys are re-mapped to rsopt terminology
-LIBE_SPECS_ALLOWED = {'record_interval': 'save_every_k_sims',
-                      'use_worker_dirs': 'use_worker_dirs',
-                      'working_directory': 'ensemble_dir_path'}
+LIBE_SPECS_ALLOWED = {
+    "record_interval": "save_every_k_sims",
+    "use_worker_dirs": "use_worker_dirs",
+    "working_directory": "ensemble_dir_path",
+}
+
 
 def _configure_executor(job, name, executor):
     full_path = get_run_command_with_path(job)
-    executor.register_app(full_path=full_path, app_name=name, calc_type='sim')
+    executor.register_app(full_path=full_path, app_name=name, calc_type="sim")
 
 
 def _set_app_names(config):
@@ -41,7 +48,7 @@ def _set_app_names(config):
         code = code.code
         if codes.get(code):
             index += codes[code]
-        app_name = f'{code}_{index}'
+        app_name = f"{code}_{index}"
         app_names.append(app_name)
 
         codes[code] = index
@@ -52,10 +59,14 @@ def _set_app_names(config):
 class libEnsembleOptimizer:
     # Configurationf or Local Optimization through uniform_or_localopt
     # Just sets up a local optimizer for now
-    _NAME = 'libEnsemble'
+    _NAME = "libEnsemble"
     _OPT_SCHEMA = OPT_SCHEMA
 
-    def __init__(self, config_model: configuration.ConfigurationOptimize or configuration.ConfigurationSample):
+    def __init__(
+        self,
+        config_model: configuration.ConfigurationOptimize
+        or configuration.ConfigurationSample,
+    ):
         self._config = config_model
         self.options = []
         self.H0 = None
@@ -68,93 +79,129 @@ class libEnsembleOptimizer:
         self.alloc_specs = {}
 
         # Sampling jobs may not need to give an exit criteria - in that case it will be calculated by the sampling class
-        if hasattr(self._config.options, 'exit_criteria'):
+        if hasattr(self._config.options, "exit_criteria"):
             self.exit_criteria = self._config.options.exit_criteria.model_dump()
         else:
             self.exit_criteria = None
-
 
     def run(self, clean_work_dir=False):
         self.clean_working_directory = clean_work_dir
         self._configure_libE()
 
-        H, persis_info, flag = libE(self.sim_specs, self.gen_specs, self.exit_criteria, self.persis_info,
-                                    self.alloc_specs, self.libE_specs, H0=self.H0)
+        H, persis_info, flag = libE(
+            self.sim_specs,
+            self.gen_specs,
+            self.exit_criteria,
+            self.persis_info,
+            self.alloc_specs,
+            self.libE_specs,
+            H0=self.H0,
+        )
 
         return H, persis_info, flag
 
     def _configure_optimizer(self):
-        local_opt_method = get_local_optimizer_method(self._config.options.method.name,
-                                                      self._config.options.software)
-        gen_out = [tools.set_dtype_dimension(dtype, self._config.dimension) for dtype in persistent_local_opt_gen_out]
-        user_keys = {'lb': self._config.lower_bounds,
-                     'ub': self._config.upper_bounds,
-                     'initial_sample_size': 1,
-                     'xstart': self._config.start,
-                     'localopt_method': local_opt_method,
-                     **self._config.options.software_options.model_dump()
-                     }
+        local_opt_method = get_local_optimizer_method(
+            self._config.options.method.name, self._config.options.software
+        )
+        gen_out = [
+            tools.set_dtype_dimension(dtype, self._config.dimension)
+            for dtype in persistent_local_opt_gen_out
+        ]
+        user_keys = {
+            "lb": self._config.lower_bounds,
+            "ub": self._config.upper_bounds,
+            "initial_sample_size": 1,
+            "xstart": self._config.start,
+            "localopt_method": local_opt_method,
+            **self._config.options.software_options.model_dump(),
+        }
 
-        self.gen_specs.update({'gen_f': persistent_local_opt,
-                               'persis_in': self._config.options.method.persis_in +
-                                            [n[0] for n in gen_out],
-                               'out': gen_out,
-                               'user': user_keys})
+        self.gen_specs.update(
+            {
+                "gen_f": persistent_local_opt,
+                "persis_in": self._config.options.method.persis_in
+                + [n[0] for n in gen_out],
+                "out": gen_out,
+                "user": user_keys,
+            }
+        )
 
     def _configure_allocation(self):
         # local optimizer allocation
-        self.alloc_specs.update({'alloc_f': persistent_aposmm_alloc})
+        self.alloc_specs.update({"alloc_f": persistent_aposmm_alloc})
 
     def _configure_persistant_info(self):
         self.persis_info = add_unique_random_streams({}, self.nworkers + 1)
 
     def _configure_specs(self):
         # Persistent generator + local optimization eval = 2 workers always
-        self.comms = 'local'
+        self.comms = "local"
 
         # Directory structure setup
-        self.libE_specs['sim_dirs_make'] = True
-        self.libE_specs['use_worker_dirs'] = self._config.options.use_worker_dirs
-        self.libE_specs['ensemble_dir_path'] = self._config.options.run_dir
+        self.libE_specs["sim_dirs_make"] = True
+        self.libE_specs["use_worker_dirs"] = self._config.options.use_worker_dirs
+        self.libE_specs["ensemble_dir_path"] = self._config.options.run_dir
 
         # Files needed for each simulation
-        self.libE_specs['sim_dir_symlink_files'] = self._config.get_sym_link_list()
+        self.libE_specs["sim_dir_symlink_files"] = self._config.get_sym_link_list()
         if self._config.options.record_interval:
-            self.libE_specs['save_every_k_sims'] = self._config.options.record_interval
+            self.libE_specs["save_every_k_sims"] = self._config.options.record_interval
 
-        self.libE_specs.update({'nworkers': self.nworkers, 'comms': self._config.comms, **self.libE_specs})
+        self.libE_specs.update(
+            {"nworkers": self.nworkers, "comms": self._config.comms, **self.libE_specs}
+        )
         if self._config.mpi_comm:
-            self.libE_specs['mpi_comm'] = self._config.mpi_comm
+            self.libE_specs["mpi_comm"] = self._config.mpi_comm
 
-        self.libE_specs['dedicated_mode'] = True  # This used to be called 'central_mode' and was set in Executor
-        self.libE_specs['disable_resource_manager'] = False  # This used to be called 'auto_resources and was set in Executor
+        self.libE_specs["dedicated_mode"] = (
+            True  # This used to be called 'central_mode' and was set in Executor
+        )
+        self.libE_specs["disable_resource_manager"] = (
+            False  # This used to be called 'auto_resources and was set in Executor
+        )
 
         # If no executor is used libEnsemble will raise an error for calculation of task_timing
         if any([c.use_executor for c in self._config.codes]):
             executor_timings = True
         else:
             executor_timings = False
-        self.libE_specs['stats_fmt'] = {'task_timing': executor_timings,
-                                        'task_datetime': executor_timings
-                                        }
+        self.libE_specs["stats_fmt"] = {
+            "task_timing": executor_timings,
+            "task_datetime": executor_timings,
+        }
 
         if self._config.rsmpi_executor:
-            self.libE_specs['resource_info'] = {'cores_on_node':
-                                                    (EXECUTOR_SCHEMA['rsmpi']['cores_on_node']['physical_cores'],
-                                                     EXECUTOR_SCHEMA['rsmpi']['cores_on_node']['logical_cores']),
-                                                'node_file': EXECUTOR_SCHEMA['rsmpi']['node_file']}
+            self.libE_specs["resource_info"] = {
+                "cores_on_node": (
+                    EXECUTOR_SCHEMA["rsmpi"]["cores_on_node"]["physical_cores"],
+                    EXECUTOR_SCHEMA["rsmpi"]["cores_on_node"]["logical_cores"],
+                ),
+                "node_file": EXECUTOR_SCHEMA["rsmpi"]["node_file"],
+            }
+
+        if self._config.options.gpu_options.devices:
+            # libEnsemble assigns GPU slots as if only these devices exist on each node.
+            # SimulationFunction will map the libEnsemble assigned slots onto the device indices from gpu_options.devices.
+            self.libE_specs.setdefault("resource_info", {})["gpus_on_node"] = len(
+                self._config.options.gpu_options.devices
+            )
 
         if self._config.options.use_zero_resources:
             # Do not assign resources to the generator
-            self.libE_specs['zero_resource_workers'] = [1]
+            self.libE_specs["zero_resource_workers"] = [1]
 
     def _configure_sim(self):
-        sim_function = SimulationFunction(self._config.codes, self._config.options.instantiated_objective_function)
+        sim_function = SimulationFunction(
+            self._config.codes,
+            self._config.options.instantiated_objective_function,
+            gpu_devices=self._config.options.gpu_options.devices,
+        )
         self.sim_specs.update(
             {
-                'sim_f': sim_function,
-                'inputs': self._config.options.method.sim_specs.inputs,
-                'outputs': self._config.options.method.sim_specs.outputs,
+                "sim_f": sim_function,
+                "inputs": self._config.options.method.sim_specs.inputs,
+                "outputs": self._config.options.method.sim_specs.outputs,
             }
         )
 
@@ -171,7 +218,7 @@ class libEnsembleOptimizer:
                 _configure_executor(job, app_name, self.executor)
                 job._executor_arguments = {
                     **create_executor_arguments(job),
-                    'app_name': app_name
+                    "app_name": app_name,
                 }
 
     def _create_executor(self):

@@ -66,6 +66,11 @@ Global Options
   Options given here are passed directly to the libEnsemble Executor.
     - `hosts` [list] (rsmpi only): A list of rsmpi host indices that workers can use. To see your available host indices run
       :code:`rsmpi` on the command line. If not set rsmpi will be allowed to assign work to all rsmpi nodes available to you.
+- `gpu_options` [dict]:
+  Options for GPU assignment. These apply to every job that sets `gpu: True` in its `setup`.
+    - `devices` [list]: GPU device indices that jobs may use on each node, e.g. :code:`[2, 3]`. GPUs are divided
+      among workers as if only these devices exist, then each worker's share is mapped onto these indices. The same
+      indices are used on every node. If not set, all detected GPUs are used.
 - `seed` *[int or None or str]*: Sets the seed to initialize the pseudo-random number generator used by the sampler.
   Behavior depends on the setting:
     * :code:`''`: **default** If an empty string is given, or seed is not explicitly included then a fixed seed is set.
