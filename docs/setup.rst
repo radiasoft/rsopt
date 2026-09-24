@@ -27,8 +27,10 @@ General Setup Fields
 - `cores` [int]:
     Number of cores to use for parallel run modes (``parallel``, ``shifter``, ``rsmpi``). This is ignored for ``serial``.
 - `gpu` [bool]:
-    If `True`, the job is restricted to the GPUs libEnsemble assigns to the worker running it, so that multiple workers
-    are spread across the available GPUs. Default is `False`.
+    If `True`, libEnsemble assigns GPU slots to the worker running each job, so that multiple workers
+    are spread across the available GPUs. Default is `False`. This assignment cannot be strictly enforced,
+    running programs that hard-code a GPU assignment or externally modifying environment variables at run time can 
+    circumvent this process. There are slight differences in resource distribution depending on `execution_type`:
 
         * Parallel run modes (``parallel``, ``shifter``, ``rsmpi``): libEnsemble assigns GPUs to the MPI task and sets
           the number of MPI processes to match the number of GPUs assigned. `cores` is ignored.
