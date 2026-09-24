@@ -7,6 +7,7 @@ import rsopt.util
 import typing
 from libensemble import message_numbers
 from libensemble.executors.executor import Executor
+from libensemble.resources.resources import Resources
 from rsopt.libe_tools import serial_python
 from rsopt.configuration.schemas import code
 from rsopt import environment
@@ -40,6 +41,35 @@ def format_evaluation(sim_specs, container):
         output[spec] = value
 
     return output
+
+
+def set_worker_gpu_env() -> dict:
+    """Restrict GPU visibility to the GPUs libEnsemble assigned to this worker.
+
+    libEnsemble only assigns GPUs itself for MPIExecutor tasks. For jobs run in-process or as serial subprocesses the
+    worker's GPU slots are applied by setting the platform's GPU environment variable (e.g. CUDA_VISIBLE_DEVICES).
+
+    Returns:
+        (dict) Prior values of any environment variables that were changed (None if previously unset), to be passed to
+        `restore_env`.
+    """
+    worker_resources = Resources.resources.worker_resources if Resources.resources else None
+    if worker_resources is None or not worker_resources.doihave_gpus():
+        logging.getLogger('libensemble').warning('gpu was requested but no GPUs are assigned to this worker')
+        return {}
+
+    before = dict(os.environ)
+    worker_resources.set_env_to_gpus()
+
+    return {k: before.get(k) for k, v in os.environ.items() if before.get(k) != v}
+
+
+def restore_env(previous: dict) -> None:
+    for name, value in previous.items():
+        if value is None:
+            os.environ.pop(name, None)
+        else:
+            os.environ[name] = value
 
 
 class SimulationFunction:
@@ -87,6 +117,11 @@ class SimulationFunction:
                     os.remove(job.input_distribution)
                 self.switchyard.write(job.input_distribution, job.code)
 
+            # MPI jobs get GPUs through MPIExecutor's auto_assign_gpus
+            gpu_env = set_worker_gpu_env() if job.setup.gpu and not job.use_mpi else {}
+            if gpu_env:
+                self.log.debug(f'Worker GPU environment set: { {k: os.environ[k] for k in gpu_env} }')
+
             if job.code == 'python' and not job.use_mpi:
                 # Serial Python Job
                 python_exec = serial_python.SERIAL_MODES[job.setup.serial_python_mode]
@@ -131,6 +166,9 @@ class SimulationFunction:
                     self.log.debug(check_gpu_setting(task, assert_setting=False, print_setting=True))
             else:
                 raise NotImplementedError(f"Execution mode for job type: {job.code} was not handled")
+
+            # Don't let this job's GPU restriction leak into later jobs in the chain
+            restore_env(gpu_env)
 
             if halt_job_sequence:
                 break

@@ -27,9 +27,14 @@ General Setup Fields
 - `cores` [int]:
     Number of cores to use for parallel run modes (``parallel``, ``shifter``, ``rsmpi``). This is ignored for ``serial``.
 - `gpu` [bool]:
-    If `True`, libEnsemble will automatically assign GPUs to the job and set the number of MPI processes to match the
-    number of GPUs assigned. When set, `cores` is ignored. Only applies to parallel run modes (``parallel``,
-    ``shifter``, ``rsmpi``); ignored for ``serial``. Default is `False`.
+    If `True`, the job is restricted to the GPUs libEnsemble assigns to the worker running it, so that multiple workers
+    are spread across the available GPUs. Default is `False`.
+
+        * Parallel run modes (``parallel``, ``shifter``, ``rsmpi``): libEnsemble assigns GPUs to the MPI task and sets
+          the number of MPI processes to match the number of GPUs assigned. `cores` is ignored.
+        * ``serial``: The worker's GPUs are exposed through the platform's GPU environment variable
+          (e.g. ``CUDA_VISIBLE_DEVICES``) while the job runs. This applies to serial Python jobs in any
+          ``serial_python_mode`` and to serial executables. The code should use the first visible GPU(s).
 - `force_executor` [bool]:
     If used with Python can be set to `True` to force a serial Python job to use an Executor. Otherwise Python jobs are
     run directly by the worker. Kept as a general setup field for backwards compatibility even though it will only
