@@ -1,0 +1,19 @@
+codes:
+  - python:
+      settings:
+      parameters:
+        dummy:
+          min: 0
+          max: 1
+          start: 0
+          samples: 7
+      setup:
+        cores: 1
+        execution_type: serial
+        serial_python_mode: worker
+        gpu: True
+        input_file: resources_gpu.py
+        function: gpu_test
+options:
+  software: mesh_scan
+  nworkers: 3
