@@ -20,21 +20,12 @@ Example::
                 b: 21
                 c: false
 
-Settings Naming and Parsing
---------------------------
-
-Settings can be simple values, or follow a naming convention to target specific parts of a code's input. rsopt uses a string formatting convention to specify model command/element names and attributes: ``command-or-element-name.[command-or-element-attribute].[command-index]``.
-
-* ``command-or-element-name``: The name of the command or element.
-* ``command-or-element-attribute``: The specific attribute of the command or element.
-* ``command-index``: The index of the command or element, in case there are multiple instances.
-
-If a setting name includes the ``.`` character, this formatting is not usable. In such cases, the ``item_name``, ``item_attribute``, and ``item_index`` fields can be used directly.  Settings also support this explicit naming convention.
+Setting names are interpreted the same way as parameter names; see :ref:`naming`.
 
 Settings Class Definition
 -------------------------
 
-.. automodule:: rsopt.configuration.settings
+.. automodule:: rsopt.configuration.schemas.settings
    :members: Setting
 
 Parameters
@@ -94,33 +85,42 @@ rsopt supports several types of parameters, each with specific attributes:
 
 * **CategoryParameter:** Represents a parameter that can take on values from a predefined list.
 
-Parameter Naming and Parsing
---------------------------
+.. _naming:
 
-Similar to settings, parameters can also use a naming convention to target specific parts of a code's input. rsopt uses a string formatting convention to specify model command/element names and attributes: ``command-or-element-name.[command-or-element-attribute].[command-index]``.
+Naming Parameters and Settings
+------------------------------
+
+How a parameter or setting name is interpreted depends on the code it belongs to.
+
+**python** and **user** (and **flash**) pass names through unchanged. Any name is accepted, including names
+with any number of ``.`` characters (e.g. ``model.solver.tol``); how the name is used is up to your own code.
+
+**elegant**, **opal**, **madx**, and **spiffe** use names to target a command or element in the input file::
+
+    command-or-element-name.attribute[.index]
 
 * ``command-or-element-name``: The name of the command or element.
-* ``command-or-element-attribute``: The specific attribute of the command or element.
-* ``command-index``: The index of the command or element, in case there are multiple instances.
+* ``attribute``: The attribute of the command or element to set. Required.
+* ``index``: Optional. Selects which instance of a command to edit when the command appears more than once
+  in the input file. Indices start at 1. If a command is repeated and no index is given, rsopt raises an error.
 
-For example, consider the following parameter from the `match_parallel.yaml` example:
-
-::
+For example, consider the following parameter from the `match_parallel.yaml` example::
 
    "L1.k1l":
       min: -1.0
       max: 1.0
       start: 0.0
 
-Here, `"L1"` is an element name, and `"k1l"` is an attribute of that element.
+Here, ``L1`` is an element name, and ``k1l`` is an attribute of that element. To set ``z_position`` on the
+second ``define_screen`` command in a spiffe input file, use ``define_screen.z_position.2``.
 
-If a parameter name includes the ``.`` character or this formatting is not desired, the ``item_name``, ``item_attribute``, and ``item_index`` fields can be used directly.  The above parameter could be equivalently specified as:
+**genesis** has a single command type, so names only give the attribute and optional index::
 
-::
+    attribute[.index]
 
-   "my_parameter":
-      item_name: "L1"
-      item_attribute: "k1l"
-      min: -1.0
-      max: 1.0
-      start: 0.0
+Names are checked when the configuration is loaded. A name with the wrong number of parts, or an index that is
+not a positive integer, is reported as a configuration error before any simulation runs.
+
+.. note::
+   Element and command names that themselves contain ``.`` cannot be targeted. The ``item_name``,
+   ``item_attribute``, and ``item_index`` fields supported by earlier versions of rsopt have been removed.
