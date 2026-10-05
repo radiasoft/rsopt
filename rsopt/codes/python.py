@@ -1,4 +1,5 @@
 import jinja2
+import numpy as np
 import pathlib
 import pydantic
 import sys
@@ -107,14 +108,12 @@ class Python(code.Code):
         template_env = jinja2.Environment(loader=template_loader)
         template = template_env.get_template(_PARALLEL_PYTHON_TEMPLATE)
 
-        dict_item_str = {}
-        for k, v in kwarg_dict.items():
-            if type(v) == str:
-                dict_item_str[k] = v
-        for k in dict_item_str.keys():
-            kwarg_dict.pop(k)
+        # Keys and values are written into the run file as Python literals. numpy values are converted to builtins
+        # first since the run file does not import numpy (e.g. repr(np.float64(1.)) is 'np.float64(1.0)').
+        dict_item = {repr(k): repr(v.tolist() if isinstance(v, (np.generic, np.ndarray)) else v)
+                     for k, v in kwarg_dict.items()}
 
-        output_template = template.render(dict_item=kwarg_dict, dict_item_str=dict_item_str,
+        output_template = template.render(dict_item=dict_item,
                                           full_input_file_path=self.setup.input_file,
                                           input_module_name=self.setup.module,
                                           function=self.setup.function)

@@ -7,10 +7,7 @@ import {{ input_module_name }} as m
 
 input_dict = {
 {% for key, value in dict_item.items() %}
-    '{{key}}': {{value}},
-{% endfor %}
-{% for key, value in dict_item_str.items() %}
-    '{{key}}': '{{value}}'{% if not loop.last %},{% endif %}
+    {{key}}: {{value}},
 {% endfor %}
 }
 if __name__ == "__main__":
