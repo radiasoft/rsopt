@@ -107,7 +107,7 @@ class SimulationFunction:
                     f"Worker GPU environment set: { {k: os.environ[k] for k in gpu_env} }"
                 )
 
-            if job.code == "python" and not job.use_mpi:
+            if job.code == "python" and not job.use_executor:
                 # Serial Python Job
                 python_exec = serial_python.SERIAL_MODES[job.setup.serial_python_mode]
                 if job.setup.argument_passing == code.ArgumentModes.KWARGS:
