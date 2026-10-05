@@ -4,7 +4,7 @@ import os
 import types
 import pytest
 from rsopt import parse
-from rsopt import simulation
+from rsopt.libe_tools import gpu
 from rsopt.libe_tools.executors import create_executor_arguments
 from ruamel.yaml import YAML
 
@@ -67,41 +67,41 @@ def worker_gpus(monkeypatch):
 
     def _set(gpus):
         resources = types.SimpleNamespace(worker_resources=_FakeWorkerResources(gpus))
-        monkeypatch.setattr(simulation.Resources, 'resources', resources)
+        monkeypatch.setattr(gpu.Resources, 'resources', resources)
 
     return _set
 
 
 def test_set_worker_gpu_env_and_restore(worker_gpus):
     worker_gpus('2')
-    previous = simulation.set_worker_gpu_env()
+    previous = gpu.set_worker_gpu_env()
 
     assert os.environ['CUDA_VISIBLE_DEVICES'] == '2'
     assert previous == {'CUDA_VISIBLE_DEVICES': None}
 
-    simulation.restore_env(previous)
+    gpu.restore_env(previous)
     assert 'CUDA_VISIBLE_DEVICES' not in os.environ
 
 
 def test_restore_prior_value(worker_gpus, monkeypatch):
     monkeypatch.setenv('CUDA_VISIBLE_DEVICES', '0,1,2,3')
     worker_gpus('3')
-    previous = simulation.set_worker_gpu_env()
+    previous = gpu.set_worker_gpu_env()
     assert os.environ['CUDA_VISIBLE_DEVICES'] == '3'
 
-    simulation.restore_env(previous)
+    gpu.restore_env(previous)
     assert os.environ['CUDA_VISIBLE_DEVICES'] == '0,1,2,3'
 
 
 def test_no_gpus_assigned(worker_gpus):
     worker_gpus('')
-    assert simulation.set_worker_gpu_env() == {}
+    assert gpu.set_worker_gpu_env() == {}
     assert 'CUDA_VISIBLE_DEVICES' not in os.environ
 
 
 def test_no_resource_manager(monkeypatch):
-    monkeypatch.setattr(simulation.Resources, 'resources', None)
-    assert simulation.set_worker_gpu_env() == {}
+    monkeypatch.setattr(gpu.Resources, 'resources', None)
+    assert gpu.set_worker_gpu_env() == {}
 
 
 # gpu_options.devices
@@ -174,19 +174,19 @@ def _slot_resources(slots_on_node, gpus_per_slot=1, local_node_count=1, platform
 ])
 def test_translate_gpu_slots(slots_on_node, gpus_per_slot, devices, expected):
     resources = _slot_resources(slots_on_node, gpus_per_slot)
-    assert simulation.translate_gpu_slots(resources, devices) == expected
+    assert gpu.translate_gpu_slots(resources, devices) == expected
 
 
 def test_translate_gpu_slots_out_of_range():
     with pytest.raises(ValueError, match='out of range'):
-        simulation.translate_gpu_slots(_slot_resources([2]), [2, 3])
+        gpu.translate_gpu_slots(_slot_resources([2]), [2, 3])
 
 
 def test_translate_gpu_slots_non_matching():
     resources = _slot_resources([0])
     resources.matching_slots = False
     with pytest.raises(AssertionError):
-        simulation.translate_gpu_slots(resources, [2, 3])
+        gpu.translate_gpu_slots(resources, [2, 3])
 
 
 @pytest.fixture
@@ -196,7 +196,7 @@ def slot_resources(monkeypatch):
 
     def _set(*args, **kwargs):
         resources = _slot_resources(*args, **kwargs)
-        monkeypatch.setattr(simulation.Resources, 'resources', types.SimpleNamespace(worker_resources=resources))
+        monkeypatch.setattr(gpu.Resources, 'resources', types.SimpleNamespace(worker_resources=resources))
         return resources
 
     return _set
@@ -204,10 +204,10 @@ def slot_resources(monkeypatch):
 
 def test_set_worker_gpu_env_devices(slot_resources):
     slot_resources([1])
-    previous = simulation.set_worker_gpu_env([2, 3])
+    previous = gpu.set_worker_gpu_env([2, 3])
 
     assert os.environ['CUDA_VISIBLE_DEVICES'] == '3'
-    simulation.restore_env(previous)
+    gpu.restore_env(previous)
     assert 'CUDA_VISIBLE_DEVICES' not in os.environ
 
 
@@ -218,16 +218,16 @@ def test_set_worker_gpu_env_devices(slot_resources):
 ])
 def test_set_worker_gpu_env_devices_platform_variable(slot_resources, platform_info, env_name):
     slot_resources([0], platform_info=platform_info)
-    previous = simulation.set_worker_gpu_env([2, 3])
+    previous = gpu.set_worker_gpu_env([2, 3])
 
     assert os.environ[env_name] == '2'
-    simulation.restore_env(previous)
+    gpu.restore_env(previous)
 
 
 def test_gpu_device_executor_arguments(config, slot_resources):
     slot_resources([1], gpus_per_slot=2, local_node_count=2)
     job = _parse_job(config, execution_type='parallel', gpu=True)
-    args = simulation.gpu_device_executor_arguments(create_executor_arguments(job), [4, 5, 6, 7])
+    args = gpu.gpu_device_executor_arguments(create_executor_arguments(job), [4, 5, 6, 7])
 
     assert args['auto_assign_gpus'] is False
     assert args['match_procs_to_gpus'] is False
@@ -237,8 +237,8 @@ def test_gpu_device_executor_arguments(config, slot_resources):
 
 
 def test_gpu_device_executor_arguments_no_gpus(config, monkeypatch):
-    monkeypatch.setattr(simulation.Resources, 'resources', None)
+    monkeypatch.setattr(gpu.Resources, 'resources', None)
     job = _parse_job(config, execution_type='parallel', gpu=True)
     args = create_executor_arguments(job)
 
-    assert simulation.gpu_device_executor_arguments(args, [2, 3]) is args
+    assert gpu.gpu_device_executor_arguments(args, [2, 3]) is args
