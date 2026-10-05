@@ -13,7 +13,10 @@ _CONFIG_FILE = pathlib.Path('./support/config_six_hump_camel.yaml')
 
 @pytest.fixture
 def config():
-    return YAML().load(_CONFIG_FILE)
+    config = YAML().load(_CONFIG_FILE)
+    # Executor runs cannot return a result, so the optimizer needs an objective function
+    config['options']['objective_function'] = ['./support/six_hump_camel.py', 'objective']
+    return config
 
 
 def _parse_job(config, **setup):

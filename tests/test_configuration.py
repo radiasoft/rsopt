@@ -229,12 +229,14 @@ def test_parse_unknown_configuration(software, expected):
     assert type(config) is expected
 
 
-@pytest.mark.xfail(strict=True, reason='check_objective_function_requirement only checks serial_python_mode, not '
-                                        'use_executor; the job then returns NaN for every evaluation')
-def test_objective_function_required_without_worker_python():
+@pytest.mark.parametrize('setup', [
+    {'force_executor': True},
+    {'execution_type': 'parallel', 'cores': 2},
+], ids=['force_executor', 'mpi'])
+def test_objective_function_required_without_worker_python(setup):
     # A Python job run through an Executor cannot hand its result back, so an objective function is needed
     with pytest.raises(pydantic.ValidationError, match='objective_function'):
-        parse.parse_optimize_configuration(_config(PARAMETERS, software='nlopt', force_executor=True))
+        parse.parse_optimize_configuration(_config(PARAMETERS, software='nlopt', **setup))
 
 
 def test_objective_function_satisfies_requirement():

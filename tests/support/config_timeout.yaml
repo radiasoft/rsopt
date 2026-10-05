@@ -20,6 +20,7 @@ codes:
 options:
   software: nlopt
   method: LN_BOBYQA
+  objective_function: [six_hump_camel.py, objective]
   exit_criteria:
     sim_max: 2
 #  sym_links: [support_utils.py, six_hump_camel.py]

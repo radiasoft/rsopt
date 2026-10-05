@@ -200,21 +200,20 @@ class ConfigurationOptimize(ConfigurationSample):
 
     @pydantic.model_validator(mode="after")
     def check_objective_function_requirement(self):
-        """If the last code listed is Python and runs on the worker then an objective function is not required."""
-        if self.codes[-1].code == "python":
-            if self.codes[-1].setup.serial_python_mode in (
-                "worker",
-                "thread",
-                "process",
-            ):
-                return self
+        """If the last code listed is Python and runs on the worker then an objective function is not required.
+
+        Python run through an Executor (force_executor or MPI) cannot return its result, so it needs an objective
+        function like any other code.
+        """
+        if self.codes[-1].code == "python" and not self.codes[-1].use_executor:
+            return self
         if self.options.objective_function is not None:
             return self
 
         raise pydantic_core.PydanticCustomError(
             "objective_function_requirement",
-            "Last code is {code} not python with python_exec_type: worker "
-            + "an objective_function must be set in options: {options}.",
+            "Last code is {code} and is not serial python run by the worker (no force_executor or MPI), "
+            + "so an objective_function must be set in options: {options}.",
             {"code": self.codes[-1].code, "options": self.options},
         )
 

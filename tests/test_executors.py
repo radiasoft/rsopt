@@ -59,6 +59,8 @@ class TestIsParallel(unittest.TestCase):
     def setUp(self) -> None:
         config_file = pathlib.Path('./support/config_six_hump_camel.yaml')
         self.config = YAML().load(config_file)
+        # Executor runs cannot return a result, so the optimizer needs an objective function
+        self.config['options']['objective_function'] = ['./support/six_hump_camel.py', 'objective']
 
     def test_serial_explicit(self):
         _config = self.config.copy()

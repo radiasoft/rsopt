@@ -20,3 +20,9 @@ def sleepy_six_hump_camel_func(x, y, t=0.):
     """
     time.sleep(t)
     return six_hump_camel_func(x, y)
+
+def objective(J):
+    """
+    Objective function for configurations where six hump camel is run through an Executor and cannot return its result
+    """
+    return six_hump_camel_func(J['inputs']['x'], J['inputs']['y'])
