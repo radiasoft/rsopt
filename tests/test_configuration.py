@@ -1,36 +1,25 @@
-import unittest
+import copy
+import pathlib
 import numpy as np
-import rsopt.configuration as config
-from rsopt.configuration.options import options
-from rsopt.parse import read_configuration_file, parse_yaml_configuration
-SUPPORT_PATH = './support/'
+import pydantic
+import pytest
+from rsopt import parse
+from rsopt.codes import python
+from rsopt.configuration.options import SUPPORTED_OPTIONS
+from rsopt.configuration.schemas import configuration, parameters, settings
 
-parameters_array = np.array([('period', 30., 60., 46.),
-                             ('lpy', 1., 10., 5.),
-                             ('lmz', 10., 40., 20.),
-                             ('lpz', 30., 60., 35.),
-                             ('offset', 0.25, 4., 1.)],
-                             dtype=[('name', 'U20'), ('min', 'float'), ('max', 'float'), ('start', 'float')])
+SUPPORT_PATH = pathlib.Path(__file__).parent / 'support'
+CONFIG_FILE = SUPPORT_PATH / 'config_six_hump_camel.yaml'
 
-parameters_dict = {
+PARAMETERS = {
     'period': {'min': 30., 'max': 60., 'start': 46.},
     'lpy': {'min': 1., 'max': 10., 'start': 5.},
     'lmz': {'min': 10., 'max': 40., 'start': 20.},
     'lpz': {'min': 30., 'max': 60., 'start': 35.},
-    'offset': {'min': .25, 'max': 4., 'start': 1.}
+    'offset': {'min': .25, 'max': 4., 'start': 1.},
 }
 
-parameter_test_baseline = {'keys': ['period', 'lpy', 'lmz', 'lpz', 'offset'],
-                           'values': [
-                               [30., 60., 46., None],
-                               [1., 10., 5., None],
-                               [10., 40., 20., None],
-                               [30., 60., 35., None],
-                               [0.25, 4., 1., None]
-                            ]
-                           }
-
-settings_dict = {
+SETTINGS = {
     'lpx': 65,
     'pole_properties': 'h5',
     'pole_segmentation': [2, 2, 5],
@@ -39,108 +28,271 @@ settings_dict = {
     'magnet_properties': 'sdds',
     'magnet_segmentation': [1, 3, 1],
     'magnet_color': [0, 1, 1],
-    'gap': 20.
+    'gap': 20.,
 }
 
-options_dict = {'software': 'nlopt',
-                 'software_options': {'xtol_abs': '1e-6',
-                 'ftol_abs': '1e-6',
-                 'record_interval': 2},
-                 'method': 'LN_SBPLX',
-                 'exit_criteria': {'sim_max': 10000, 'wall_clock': '1e4'},
-                 'objective_function': []
-                }
+EXIT_CRITERIA = {'sim_max': 10}
+
+# Smallest options block each supported software accepts
+MINIMAL_OPTIONS = {
+    'mesh_scan': {},
+    'lh_scan': {'software_options': {'batch_size': 512}},
+    'dfols': {'software_options': {'components': 128}, 'exit_criteria': EXIT_CRITERIA},
+    'dlib': {'exit_criteria': EXIT_CRITERIA},
+    'pysot': {'exit_criteria': EXIT_CRITERIA},
+    'nsga2': {'software_options': {'pop_size': 20, 'n_objectives': 2}, 'exit_criteria': EXIT_CRITERIA},
+    'scipy': {'method': 'Nelder-Mead', 'exit_criteria': EXIT_CRITERIA},
+    'nlopt': {'method': 'LN_SBPLX', 'exit_criteria': EXIT_CRITERIA},
+    'mobo': {'software_options': {'reference_point': {'f1': 2000., 'f2': 2000.}, 'num_of_objectives': 2},
+             'exit_criteria': EXIT_CRITERIA},
+    'aposmm': {'method': 'LN_BOBYQA', 'software_options': {'initial_sample_size': 42},
+               'exit_criteria': EXIT_CRITERIA},
+    'pybobyqa': {'exit_criteria': EXIT_CRITERIA},
+}
 
 
-class TestParameterReaders(unittest.TestCase):
+def _config(parameters=None, settings=None, software='mesh_scan', **setup):
+    python_job = {
+        'setup': {
+            'input_file': str(SUPPORT_PATH / 'six_hump_camel.py'),
+            'function': 'six_hump_camel_func',
+            'execution_type': 'serial',
+            **setup,
+        },
+    }
+    if parameters is not None:
+        python_job['parameters'] = copy.deepcopy(parameters)
+    if settings is not None:
+        python_job['settings'] = copy.deepcopy(settings)
 
-    def test_parameter_array_read(self):
-        for reader, base_key, base_value in zip(config.parameters.read_parameter_array(parameters_array),
-                                                parameter_test_baseline['keys'], parameter_test_baseline['values']):
-
-            self.assertEqual(reader[0], base_key)
-            self.assertEqual(list(reader[1]), base_value)
-
-    def test_parameter_dict_read(self):
-        for reader, base_key, base_value in zip(config.parameters.read_parameter_dict(parameters_dict),
-                                                parameter_test_baseline['keys'], parameter_test_baseline['values']):
-
-            self.assertEqual(reader[0], base_key)
-            self.assertEqual(list(reader[1]), base_value)
-
-
-class TestSettingReaders(unittest.TestCase):
-
-    def test_setting_dict_read(self):
-        for key, value in config.settings.read_setting_dict(settings_dict):
-            print(key, value)
+    return {
+        'codes': [{'python': python_job}],
+        'options': {'software': software, **copy.deepcopy(MINIMAL_OPTIONS[software])},
+    }
 
 
-class TestOptionsReaders(unittest.TestCase):
-    # Should not rely on hardcoded values
-    software_key = 'software'
-    required_keys = {'nlopt': {'method': 'LN_SBPLX',
-                               'exit_criteria': 'fill'},
-                     'aposmm': {'method': 'LN_COBYLA',
-                                'exit_criteria': 'fill',
-                                 'initial_sample_size': 42},
-                     'pysot': {'exit_criteria': 'fill'},
-                     'dlib': {'exit_criteria': 'fill'},
-                     'mesh_scan': {},
-                     'nsga2': {'n_objectives': 2,
-                               'exit_criteria': 'fill'},
-                     'dfols': {'components': 128,
-                               'exit_criteria': 'fill'},
-                     'scipy': {'method': 'Nelder-Mead',
-                               'exit_criteria': 'fill'},
-                     'lh_scan': {'batch_size': 512},
-                     'mobo': {'constraints': 80, 'objectives': 42, 'reference': [2000, 2000], 'exit_criteria': 'fill'}}
-
-    def test_options_set(self):
-        for option_name, option_class in options.option_classes.items():
-            opt_dict = self.required_keys[option_name]
-            opt_dict[self.software_key] = option_name
-            option_obj = config.options.Options.get_option(opt_dict)()
-            self.assertIsInstance(option_obj, option_class)
-
-    def test_missing_req_options(self):
-
-        for option_name, option_class in options.option_classes.items():
-            if option_class.REQUIRED_OPTIONS:
-                opt_dict = {}
-                opt_dict[self.software_key] = option_name
-                with self.assertRaises(AssertionError):  # could use assertRaisesRegex and loop from pulling keys
-                    option_obj = config.options.Options.get_option(opt_dict)()
+def _job(**kwargs):
+    return parse.parse_sample_configuration(_config(**kwargs)).codes[0]
 
 
-class TestConfigurationSetup(unittest.TestCase):
+# Parameters
 
-    def test_option_read(self):
-        cfg = config.configuration.Configuration()
-        cfg.options = options_dict
+def test_numeric_parameters_read():
+    job = _job(parameters=PARAMETERS)
 
-
-class TestYAMLtoConfiguration(unittest.TestCase):
-    config_file = SUPPORT_PATH + 'config_six_hump_camel.yaml'
-
-    def test_config_read(self):
-        config_file = read_configuration_file(self.config_file)
-
-    def test_config_import(self):
-        config_file = read_configuration_file(self.config_file)
-        parse_yaml_configuration(config_file, configuration=None)
-
-    def test_job_setup(self):
-        config_file = read_configuration_file(self.config_file)
-        config = parse_yaml_configuration(config_file, configuration=None)
-
-        python_job = config.jobs[0]
-        setup = python_job._setup
-
-        setup.setup['input_file'] = setup.setup['input_file']
-
-        assert callable(setup.function)
+    assert [p.name for p in job.parameters] == list(PARAMETERS)
+    for param in job.parameters:
+        assert isinstance(param, parameters.NumericParameter)
+        assert (param.min, param.max, param.start) == tuple(PARAMETERS[param.name].values())
+        assert param.samples == 1
+        assert param.scale == 'linear'
+        assert param.group is None
 
 
+def test_parameters_set_as_attributes():
+    job = _job(parameters=PARAMETERS)
+
+    for param in job.parameters:
+        assert getattr(job, param.name) is param
 
 
+def test_category_parameter_read():
+    job = _job(parameters={'mode': {'values': ['a', 'b', 'c']}})
+    param = job.parameters[0]
+
+    assert isinstance(param, parameters.CategoryParameter)
+    assert param.samples == 3
+    assert param.start == 'a'
+
+
+def test_repeated_parameter_read():
+    job = _job(parameters={'v': {'min': -1., 'max': 1., 'start': 0., 'dimension': 3}})
+    param = job.parameters[0]
+
+    assert isinstance(param, parameters.RepeatedNumericParameter)
+    np.testing.assert_array_equal(param.min, [-1., -1., -1.])
+    np.testing.assert_array_equal(param.max, [1., 1., 1.])
+    np.testing.assert_array_equal(param.start, [0., 0., 0.])
+
+
+def test_unknown_parameter_field_rejected():
+    with pytest.raises(pydantic.ValidationError):
+        _job(parameters={'a': {'min': 0., 'max': 1., 'start': 0., 'not_a_field': 1}})
+
+
+def test_no_parameters():
+    assert _job().parameters == []
+
+
+# Settings
+
+def test_settings_read():
+    job = _job(settings=SETTINGS)
+
+    assert [(s.name, s.value) for s in job.settings] == list(SETTINGS.items())
+    for setting in job.settings:
+        assert isinstance(setting, settings.Setting)
+        assert getattr(job, setting.name) is setting
+
+
+def test_name_in_parameters_and_settings_rejected():
+    # Raised directly from a model validator; pydantic does not wrap NameError in a ValidationError
+    with pytest.raises(NameError, match='already defined in settings'):
+        _job(parameters={'gap': {'min': 0., 'max': 1., 'start': 0.}}, settings=SETTINGS)
+
+
+def test_get_kwargs():
+    job = _job(parameters=PARAMETERS, settings=SETTINGS)
+    x = [1., 2., 3., 4., 5., 6., 7.]
+
+    args, kwargs = job.get_kwargs(x, start_index=2)
+
+    assert args == x[2:]
+    assert kwargs == {**dict(zip(PARAMETERS, x[2:])), **SETTINGS}
+
+
+# Options
+
+def test_minimal_options_cover_supported_options():
+    assert set(MINIMAL_OPTIONS) == set(SUPPORTED_OPTIONS.__members__)
+
+
+def test_sample_and_optimize_names_partition_supported_options():
+    sample_names = set(SUPPORTED_OPTIONS.get_sample_names())
+    optimize_names = set(SUPPORTED_OPTIONS.get_optimize_names())
+
+    assert sample_names == {'mesh_scan', 'lh_scan'}
+    assert sample_names.isdisjoint(optimize_names)
+    assert sample_names | optimize_names == set(SUPPORTED_OPTIONS.__members__)
+
+
+@pytest.mark.parametrize('option', SUPPORTED_OPTIONS, ids=lambda o: o.name)
+def test_options_set(option):
+    options = option.model.model_validate({'software': option.name, **MINIMAL_OPTIONS[option.name]})
+
+    assert isinstance(options, option.model)
+    assert options.software == option.name
+
+
+@pytest.mark.parametrize('option', [o for o in SUPPORTED_OPTIONS if MINIMAL_OPTIONS[o.name]], ids=lambda o: o.name)
+def test_missing_required_options(option):
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        option.model.model_validate({'software': option.name})
+
+    missing = {e['loc'][0] for e in exc_info.value.errors() if e['type'] == 'missing'}
+    assert missing == set(MINIMAL_OPTIONS[option.name])
+
+
+def test_software_options_validated_against_method():
+    with pytest.raises(pydantic.ValidationError):
+        SUPPORTED_OPTIONS.nlopt.model.model_validate(
+            {'software': 'nlopt', 'method': 'LN_SBPLX', 'exit_criteria': EXIT_CRITERIA,
+             'software_options': {'not_an_nlopt_option': 1}}
+        )
+
+
+# Configuration
+
+@pytest.mark.parametrize('software', SUPPORTED_OPTIONS.get_sample_names())
+def test_parse_sample_configuration(software):
+    config = parse.parse_sample_configuration(_config(PARAMETERS, software=software))
+
+    assert isinstance(config, configuration.ConfigurationSample)
+    assert config.options.software == software
+
+
+@pytest.mark.parametrize('software', SUPPORTED_OPTIONS.get_optimize_names())
+def test_parse_optimize_configuration(software):
+    config = parse.parse_optimize_configuration(_config(PARAMETERS, software=software))
+
+    assert isinstance(config, configuration.ConfigurationOptimize)
+    assert config.options.software == software
+
+
+def test_sample_configuration_rejects_optimizer():
+    with pytest.raises(pydantic.ValidationError):
+        parse.parse_sample_configuration(_config(PARAMETERS, software='nlopt'))
+
+
+def test_optimize_configuration_rejects_sampler():
+    with pytest.raises(pydantic.ValidationError):
+        parse.parse_optimize_configuration(_config(PARAMETERS, software='mesh_scan'))
+
+
+@pytest.mark.parametrize('software, expected', [
+    ('mesh_scan', configuration.ConfigurationSample),
+    ('nlopt', configuration.ConfigurationOptimize),
+])
+def test_parse_unknown_configuration(software, expected):
+    config = parse.parse_unknown_configuration(_config(PARAMETERS, software=software))
+
+    assert type(config) is expected
+
+
+@pytest.mark.xfail(strict=True, reason='check_objective_function_requirement only checks serial_python_mode, not '
+                                        'use_executor; the job then returns NaN for every evaluation')
+def test_objective_function_required_without_worker_python():
+    # A Python job run through an Executor cannot hand its result back, so an objective function is needed
+    with pytest.raises(pydantic.ValidationError, match='objective_function'):
+        parse.parse_optimize_configuration(_config(PARAMETERS, software='nlopt', force_executor=True))
+
+
+def test_objective_function_satisfies_requirement():
+    config = _config(PARAMETERS, software='nlopt', force_executor=True)
+    config['options']['objective_function'] = [str(SUPPORT_PATH / 'six_hump_camel.py'), 'six_hump_camel_func']
+
+    config = parse.parse_optimize_configuration(config)
+
+    assert config.options.instantiated_objective_function(0., 0.) == 0.
+
+
+def test_unknown_top_level_key_rejected():
+    config = _config(PARAMETERS)
+    config['not_a_key'] = {}
+
+    with pytest.raises(pydantic.ValidationError):
+        parse.parse_sample_configuration(config)
+
+
+def test_flattened_parameter_vectors():
+    params = {**PARAMETERS, 'v': {'min': -1., 'max': 1., 'start': 0., 'dimension': 2}}
+    config = parse.parse_optimize_configuration(_config(params, software='nlopt'))
+
+    np.testing.assert_array_equal(config.lower_bounds, [p['min'] for p in PARAMETERS.values()] + [-1., -1.])
+    np.testing.assert_array_equal(config.upper_bounds, [p['max'] for p in PARAMETERS.values()] + [1., 1.])
+    np.testing.assert_array_equal(config.start, [p['start'] for p in PARAMETERS.values()] + [0., 0.])
+    assert config.dimension == len(PARAMETERS) + 2
+
+
+# YAML
+
+def test_config_read():
+    config_dict = parse.read_configuration_file(CONFIG_FILE)
+
+    assert set(config_dict) == {'codes', 'options'}
+    assert list(config_dict['codes'][0]) == ['python']
+    assert config_dict['options']['software'] == 'nlopt'
+
+
+def test_config_import(monkeypatch):
+    # input_file in the YAML is relative to tests/
+    monkeypatch.chdir(SUPPORT_PATH.parent)
+    config = parse.parse_optimize_configuration(parse.read_configuration_file(CONFIG_FILE))
+
+    assert config.options.software == 'nlopt'
+    assert config.options.method.name == 'LN_BOBYQA'
+    assert config.options.exit_criteria.sim_max == 30
+    assert config.options.software_options.xtol_abs == 1e-6
+    assert [p.name for p in config.codes[0].parameters] == ['x', 'y']
+
+
+def test_job_setup(monkeypatch):
+    monkeypatch.chdir(SUPPORT_PATH.parent)
+    config = parse.parse_optimize_configuration(parse.read_configuration_file(CONFIG_FILE))
+    python_job = config.codes[0]
+
+    assert isinstance(python_job, python.Python)
+    assert python_job.setup.input_file.is_file()
+    assert not python_job.use_executor
+    assert callable(python_job.get_function)
+    assert python_job.get_function(x=0., y=0.) == 0.
