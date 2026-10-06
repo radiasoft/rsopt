@@ -67,6 +67,45 @@ General Setup Fields
 - `postprocess` [list(str,str)]
     This is identical to `preprocess` except the `postprocess` will be run after the simulation ends.
     See the :doc:`Job Dictionary<job_dictionary>` page for details on writing postprocess functions.
+- `early_stop`
+    Periodically run a Python function while the simulation is running to decide whether it should keep running,
+    be stopped and treated as a success, or be stopped and treated as a failure. Only available for jobs that run
+    through an Executor: any code other than serial Python, and Python jobs with ``force_executor: True`` or a
+    parallel `execution_type`. Fields:
+
+        * `function` [list(str, str)]: Required. list(python_file_name, function_name_in_python_file), as for
+          `preprocess`.
+        * `interval` [float]: Seconds between checks. Default is 30. The first check starts `interval` seconds
+          after the simulation starts and each later check starts `interval` seconds after the previous one finished.
+          Checks are made at most once per second.
+        * `on_error` [str]: What to do if `function` raises an exception or returns an invalid value. ``raise``
+          (default) stops the simulation and ends the whole rsopt run with the error. ``fail`` stops the
+          simulation, treats it as failed, and writes the error to `early_stop_error.txt` in the simulation directory.
+
+    .. code-block:: yaml
+
+      - elegant:
+          settings:
+          parameters:
+          setup:
+            input_file: run.ele
+            execution_type: serial
+            timeout: 3600
+            early_stop:
+              function: [early_stop.py, check_run]
+              interval: 30
+              on_error: raise
+
+    The function must return one of:
+
+        * ``'continue'``: Keep running.
+        * ``'stop_success'``: Stop the simulation and continue as if it finished normally: any output distribution,
+          postprocess function, later codes in the `codes` list, and the objective function are all run.
+        * ``'stop_fail'``: Stop the simulation and treat it as failed. Later codes are not run and the penalty value is
+          used.
+
+    `timeout` still applies while `early_stop` is in use. See :doc:`Early Stopping<early_stopping>` for how to
+    write an early stop function.
 - `code_arguments`:
     Can be used to provide arguments that will be given to the code execution
     in the Setup block at run time. For example:
@@ -87,7 +126,10 @@ General Setup Fields
     Would execute OPAL with `opal --info 4 --help-command Monitor --git-revision  opal.in`.
 - `environment_variables` [dict]
     Mapping of environment variable names and values. Environment variables will be set before each simulation is
-    started. This feature does not work with `python` code type but should work for any other code.
+    started. This only applies to jobs run through an Executor: any code other than serial Python, and Python jobs
+    with ``force_executor: True`` or a parallel ``execution_type``. For serial Python jobs (any ``serial_python_mode``)
+    the variables are ignored; set them in the shell before running rsopt instead
+    (e.g. ``OMP_NUM_THREADS=1 rsopt sample configuration config.yml``) or use ``force_executor: True``.
 
     .. code-block:: yaml
 

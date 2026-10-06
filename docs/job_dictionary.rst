@@ -10,6 +10,10 @@ to the objective function to provide information about the final state of the jo
 The Job dictionary will always contain several pre-populated fields containing information about
 the state of the job. These can be read from or even overwritten by the pre/postprocess functions.
 However, in the latter case caution is advised as this can certainly break the rsopt run if not done properly.
+
+Early stop functions (see :doc:`Early Stopping<early_stopping>`) also receive the Job dictionary, but they are given a
+copy. Changes an early stop function makes to `J` are discarded.
+
 Pre-populated fields are:
 
 - `inputs`: This is a dictionary of parameters and settings for the job being run. This is populated
