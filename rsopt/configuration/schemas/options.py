@@ -6,17 +6,12 @@ from rsopt import util
 
 
 class SimSpecs(pydantic.BaseModel):
+    """Declares the outputs a method produces. Shared by every Options instance using the method, so it is never
+    modified after definition. Sized outputs for a particular configuration come from `Options.sim_outputs`."""
     inputs: list[str]  #  = pydantic.Field(alias='in')
     static_outputs: list[typing.Union[tuple[str, type], tuple[str, type, int]]] = pydantic.Field(default_factory=list)
+    # Maps a field name on Options or its software_options to the output whose size that field sets
     dynamic_outputs: dict[str, tuple[str, type]] = pydantic.Field(default_factory=dict)
-
-    # _intialized_dynamic_outputs are set at run time by the Options class
-    _initialized_dynamic_outputs: typing.ClassVar[list[tuple[str, type, int]]] = []
-
-    @pydantic.computed_field
-    @property
-    def outputs(self) -> list:
-        return list(self.static_outputs + self._initialized_dynamic_outputs)
 
 class ExitCriteria(pydantic.BaseModel):
     sim_max: typing.Optional[int] = None
@@ -77,6 +72,9 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
     gpu_options: GpuOptions = pydantic.Field(default_factory=GpuOptions)
     use_zero_resources: bool = pydantic.Field(default=True, frozen=True, exclude=True)
 
+    # Outputs from method.sim_specs.dynamic_outputs sized for this instance. Set by initialize_dynamic_outputs.
+    _dynamic_outputs: list[tuple[str, type, int]] = pydantic.PrivateAttr(default_factory=list)
+
     @pydantic.field_validator('method', mode='before')
     @classmethod
     def set_method_name(cls, v):
@@ -86,6 +84,7 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
 
     @pydantic.model_validator(mode='after')
     def initialize_dynamic_outputs(self):
+        dynamic_outputs = []
         for param, output_type in self.method.sim_specs.dynamic_outputs.items():
             if hasattr(self, param):
                 size = getattr(self, param)
@@ -93,11 +92,15 @@ class Options(pydantic.BaseModel, abc.ABC, extra='forbid'):
                 size = getattr(self.software_options, param)
             else:
                 raise AttributeError(f"{param} not a member of {self}")
-            self.method.sim_specs._initialized_dynamic_outputs.append(
-                output_type + (size,)
-            )
+            dynamic_outputs.append(output_type + (size,))
+        self._dynamic_outputs = dynamic_outputs
 
         return self
+
+    @property
+    def sim_outputs(self) -> list:
+        """Outputs for libEnsemble sim_specs: the method's static outputs followed by its sized dynamic outputs."""
+        return list(self.method.sim_specs.static_outputs) + list(self._dynamic_outputs)
 
     @cached_property
     def instantiated_objective_function(self) -> typing.Callable or None:

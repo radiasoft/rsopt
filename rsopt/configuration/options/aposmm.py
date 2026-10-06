@@ -81,6 +81,7 @@ class Aposmm(options.OptionsExit):
 
     @pydantic.model_validator(mode='after')
     def initialize_dynamic_outputs(self):
+        dynamic_outputs = []
         for param, output_type in self.method.sim_specs.dynamic_outputs.items():
             if hasattr(self, param):
                 size = getattr(self, param)
@@ -88,9 +89,8 @@ class Aposmm(options.OptionsExit):
                 size = getattr(self.software_options.local_opt_options, param)
             else:
                 raise AttributeError(f"{param} not a member of {self}")
-            self.method.sim_specs._initialized_dynamic_outputs.append(
-                output_type + (size,)
-            )
+            dynamic_outputs.append(output_type + (size,))
+        self._dynamic_outputs = dynamic_outputs
 
         return self
 

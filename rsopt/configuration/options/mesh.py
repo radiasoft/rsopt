@@ -29,9 +29,9 @@ class Mesh(options.Options):
 
     use_zero_resources: bool = pydantic.Field(default=False, frozen=True)
 
-    @pydantic.model_validator(mode='after')
-    def update_outputs(self):
+    @property
+    def sim_outputs(self) -> list:
+        """User-supplied outputs replace the method's default outputs."""
         if len(self.outputs) > 0:
-            self.method.sim_specs.static_outputs = self.outputs
-
-        return self
+            return list(self.outputs)
+        return super().sim_outputs

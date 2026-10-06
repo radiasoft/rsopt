@@ -201,7 +201,7 @@ class libEnsembleOptimizer:
             {
                 "sim_f": sim_function,
                 "inputs": self._config.options.method.sim_specs.inputs,
-                "outputs": self._config.options.method.sim_specs.outputs,
+                "outputs": self._config.options.sim_outputs,
             }
         )
 

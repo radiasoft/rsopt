@@ -301,9 +301,9 @@ Gotchas, several of which are live bugs elsewhere in the tree:
 * **Multi-objective / variable-width outputs** use `dynamic_outputs`: a mapping
   `{'<field on options or software_options>': ('<H field>', type)}`, resolved into a sized dtype by
   `Options.initialize_dynamic_outputs`. See `mobo.py` (`num_of_objectives` → `('f', float, n)`).
-  Caveat: `SimSpecs._initialized_dynamic_outputs` is a `ClassVar` list that is *appended* to during
-  validation, so it is shared across instances and accumulates on repeat validation — if the new
-  optimizer needs dynamic outputs, expect to fix or work around this.
+  The full, sized output list for a configuration is `Options.sim_outputs`. `Method.sim_specs` is shared
+  by every instance using the method, so never modify it from a validator; override `sim_outputs`
+  instead (as `mesh.py`/`lh.py` do for user-supplied `outputs`).
 * **`software_options` with required fields** (like `mobo`) must not be given a default; optional ones
   get `= <Package>Options()`.
 * Options models must stay import-light — no third-party optimizer imports here.
