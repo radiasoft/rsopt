@@ -13,6 +13,11 @@ import sys
 def run_path_as_module(fname):
     """Runs ``fname`` in a module.
 
+    The directory containing ``fname`` is placed at the front of ``sys.path`` while it executes, as it would be when
+    running ``python fname``, so the file can import modules that sit next to it. Without this, sibling imports only
+    work when the current directory happens to be on ``sys.path`` (true for an interactive interpreter, but not for
+    the ``rsopt`` console script or a worker running in a simulation directory).
+
     Args:
         fname (str or pathlib.Path): file to be exec'd
 
@@ -24,7 +29,14 @@ def run_path_as_module(fname):
     m = importlib.util.module_from_spec(importlib.machinery.ModuleSpec(mn, None))
     with open(fname, "rt") as f:
         code = compile(f.read(), fname, "exec")
-    exec(code, m.__dict__)
+    module_directory = str(pathlib.Path(fname).resolve().parent)
+    sys.path.insert(0, module_directory)
+    try:
+        exec(code, m.__dict__)
+    finally:
+        # Remove only the entry added here; the exec'd code may have modified sys.path itself
+        if module_directory in sys.path:
+            sys.path.remove(module_directory)
     return m
 
 
