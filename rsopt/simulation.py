@@ -9,6 +9,7 @@ from libensemble.executors.executor import Executor
 from rsopt.libe_tools import gpu
 from rsopt.libe_tools import serial_python
 from rsopt.configuration.schemas import code
+from rsopt import early_stop
 from rsopt import environment
 
 _POLL_TIME = 1  # seconds
@@ -120,50 +121,8 @@ class SimulationFunction:
                 #       function job.execute(**kwargs)
             elif job.use_executor:
                 # MPI Job or non-Python executable
-                exctr = Executor.executor
-                executor_arguments = job._executor_arguments
-                if job.setup.gpu and job.use_mpi and self.gpu_devices:
-                    executor_arguments = gpu.gpu_device_executor_arguments(
-                        executor_arguments, self.gpu_devices
-                    )
-                task = exctr.submit(
-                    env_script=env_setup_name if env_setup_name else None,
-                    **executor_arguments,
-                )
-                while True:
-                    time.sleep(_POLL_TIME)
-                    task.poll()
-                    if task.finished:
-                        if task.state == "FINISHED":
-                            self.J["sim_status"] = message_numbers.WORKER_DONE
-                            f = None
-                            break
-                        elif task.state == "FAILED":
-                            self.J["sim_status"] = message_numbers.TASK_FAILED
-                            halt_job_sequence = True
-                            break
-                        else:
-                            self.log.warning("Unknown task failure")
-                            self.J["sim_status"] = message_numbers.TASK_FAILED
-                            halt_job_sequence = True
-                            break
-                    elif task.runtime > job.setup.timeout:
-                        self.log.warning("Task Timed out, aborting Job chain")
-                        self.J["sim_status"] = message_numbers.WORKER_KILL_ON_TIMEOUT
-                        task.kill()  # Timeout
-                        halt_job_sequence = True
-                        break
-
-                if executor_arguments.get("auto_assign_gpus") and self.log.isEnabledFor(
-                    logging.DEBUG
-                ):
-                    from libensemble.tools.test_support import check_gpu_setting
-
-                    self.log.debug(
-                        check_gpu_setting(
-                            task, assert_setting=False, print_setting=True
-                        )
-                    )
+                halt_job_sequence = self._run_executor_job(job, env_setup_name)
+                f = None
             else:
                 raise NotImplementedError(
                     f"Execution mode for job type: {job.code} was not handled"
@@ -209,3 +168,101 @@ class SimulationFunction:
             output = format_evaluation(self.sim_specs, _PENALTY)
 
         return output, persis_info, self.J["sim_status"]
+
+    @property
+    def _sim_ids(self) -> str:
+        # History rows sent with the work order. For sims these are the sim_ids.
+        return ", ".join(str(row) for row in self.libE_info["H_rows"])
+
+    def _run_executor_job(self, job: code.Code, env_setup_name: str) -> bool:
+        """Run a job through the libEnsemble Executor and poll it until it ends.
+
+        Sets `sim_status` in the job dictionary.
+
+        Args:
+            job: (code.Code) Job to run.
+            env_setup_name: (str) Name of the environment setup script for the task, if any.
+
+        Returns:
+            (bool) True if the job sequence should be halted.
+        """
+        halt_job_sequence = False
+        exctr = Executor.executor
+        executor_arguments = job._executor_arguments
+        if job.setup.gpu and job.use_mpi and self.gpu_devices:
+            executor_arguments = gpu.gpu_device_executor_arguments(
+                executor_arguments, self.gpu_devices
+            )
+        task = exctr.submit(
+            env_script=env_setup_name if env_setup_name else None,
+            **executor_arguments,
+        )
+        monitor = (
+            early_stop.EarlyStopMonitor(job.setup.early_stop)
+            if job.setup.early_stop
+            else None
+        )
+        try:
+            while True:
+                time.sleep(_POLL_TIME)
+                task.poll()
+                if task.finished:
+                    if task.state == "FINISHED":
+                        self.J["sim_status"] = message_numbers.WORKER_DONE
+                        break
+                    elif task.state == "FAILED":
+                        self.J["sim_status"] = message_numbers.TASK_FAILED
+                        halt_job_sequence = True
+                        break
+                    else:
+                        self.log.warning("Unknown task failure")
+                        self.J["sim_status"] = message_numbers.TASK_FAILED
+                        halt_job_sequence = True
+                        break
+                elif exctr.manager_poll() in message_numbers.MAN_KILL_SIGNALS:
+                    self.log.warning(
+                        f"Manager signal received for sim_id {self._sim_ids}, aborting Job chain"
+                    )
+                    task.kill()
+                    self.J["sim_status"] = exctr.manager_signal
+                    halt_job_sequence = True
+                    break
+                elif task.runtime > job.setup.timeout:
+                    self.log.warning("Task Timed out, aborting Job chain")
+                    self.J["sim_status"] = message_numbers.WORKER_KILL_ON_TIMEOUT
+                    task.kill()  # Timeout
+                    halt_job_sequence = True
+                    break
+                elif monitor:
+                    try:
+                        decision = monitor.update(self.J)
+                    except early_stop.EarlyStopError:
+                        task.kill()
+                        raise
+                    if decision is early_stop.EarlyStop.STOP_SUCCESS:
+                        self.log.info(f"Early stop (success) for sim_id {self._sim_ids}")
+                        task.kill()
+                        self.J["sim_status"] = message_numbers.WORKER_DONE
+                        break
+                    elif decision is early_stop.EarlyStop.STOP_FAIL:
+                        self.log.warning(
+                            f"Early stop (failure) for sim_id {self._sim_ids}, aborting Job chain"
+                        )
+                        task.kill()
+                        self.J["sim_status"] = message_numbers.TASK_FAILED
+                        halt_job_sequence = True
+                        break
+        finally:
+            if monitor:
+                monitor.terminate()
+
+        if executor_arguments.get("auto_assign_gpus") and self.log.isEnabledFor(
+            logging.DEBUG
+        ):
+            from libensemble.tools.test_support import check_gpu_setting
+
+            self.log.debug(
+                check_gpu_setting(task, assert_setting=False, print_setting=True)
+            )
+
+        return halt_job_sequence

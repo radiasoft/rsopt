@@ -111,6 +111,14 @@ class Code(pydantic.BaseModel, abc.ABC, extra='allow'):
 
         return self
 
+    @pydantic.model_validator(mode='after')
+    def validate_early_stop(self):
+        # Jobs that do not use an Executor block on the worker until they finish, so there is nothing to stop
+        if self.setup.early_stop is not None and not self.use_executor:
+            raise ValueError(f"early_stop requires the {self.code} job to run through an Executor. "
+                             f"For Python jobs set force_executor: True")
+        return self
+
     @classmethod
     @abc.abstractmethod
     def serial_run_command(cls) -> str or None:
