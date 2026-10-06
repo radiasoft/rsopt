@@ -191,6 +191,46 @@ def test_software_options_validated_against_method():
         )
 
 
+def _options(software, **overrides):
+    return getattr(SUPPORTED_OPTIONS, software).model.model_validate(
+        {'software': software, **copy.deepcopy(MINIMAL_OPTIONS[software]), **overrides}
+    )
+
+
+@pytest.mark.parametrize('software, overrides, expected', [
+    ('mesh_scan', {}, [('f', float)]),
+    ('nlopt', {}, [('f', float)]),
+    ('dfols', {}, [('f', float), ('fvec', float, 128)]),
+    ('nsga2', {}, [('fitness_values', float, 2)]),
+    ('mobo', {}, [('f', float, 2), ('c', float, 0)]),
+    ('aposmm', {'method': 'dfols', 'software_options': {'initial_sample_size': 4, 'local_opt_options': {'components': 7}}},
+     [('f', float), ('fvec', float, 7)]),
+    ('mesh_scan', {'outputs': [('f', float, 3)]}, [('f', float, 3)]),
+    ('lh_scan', {'outputs': [('g', float, 2)]}, [('g', float, 2)]),
+], ids=['mesh_scan', 'nlopt', 'dfols', 'nsga2', 'mobo', 'aposmm_local_opt', 'mesh_scan_outputs', 'lh_scan_outputs'])
+def test_sim_outputs(software, overrides, expected):
+    assert _options(software, **overrides).sim_outputs == expected
+
+
+def test_sim_outputs_independent_between_options():
+    # Outputs used to be accumulated on state shared by every method, so validating one configuration changed the
+    # outputs of every configuration validated after it
+    for software in ('dfols', 'nsga2', 'mobo', 'aposmm'):
+        _options(software)
+    _options('mesh_scan', outputs=[('g', float, 2)])
+
+    assert _options('mesh_scan').sim_outputs == [('f', float)]
+    assert _options('dfols').sim_outputs == [('f', float), ('fvec', float, 128)]
+
+
+def test_sim_outputs_sized_per_instance():
+    small = _options('dfols', software_options={'components': 2})
+    large = _options('dfols', software_options={'components': 64})
+
+    assert small.sim_outputs == [('f', float), ('fvec', float, 2)]
+    assert large.sim_outputs == [('f', float), ('fvec', float, 64)]
+
+
 # Configuration
 
 @pytest.mark.parametrize('software', SUPPORTED_OPTIONS.get_sample_names())
