@@ -33,5 +33,5 @@ The canonical format for setting up an rsopt run is to write configuration files
 to setup and execute the job sequence. Setting up your rsopt job through a configuration file offers the full range
 of capabilities available in rsopt such as job chaining between accelerator codes, parallel execution, and sampling.
 For information on setting up your own configuration files you can see the :doc:`Configuration</configuration>` documentation.
-More examples can be found at: https://github.com/radiasoft/rsopt/tree/master/examples
+More examples can be found at: https://github.com/radiasoft/rsopt/tree/main/examples
 
