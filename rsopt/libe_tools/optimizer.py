@@ -1,4 +1,5 @@
 from libensemble.libE import libE
+from rsopt import run_archive
 from rsopt.configuration.schemas import configuration
 from rsopt.environment import get_run_command_with_path
 from rsopt.libe_tools.executors import create_executor_arguments
@@ -84,19 +85,22 @@ class libEnsembleOptimizer:
         else:
             self.exit_criteria = None
 
-    def run(self, clean_work_dir=False):
-        self.clean_working_directory = clean_work_dir
+    def run(self):
         self._configure_libE()
+        # rsopt creates run_dir itself (rsopt.run_archive), so libEnsemble must accept an existing directory.
+        # Set here rather than in _configure_specs because subclasses override that method.
+        self.libE_specs["reuse_output_dir"] = True
 
-        H, persis_info, flag = libE(
-            self.sim_specs,
-            self.gen_specs,
-            self.exit_criteria,
-            self.persis_info,
-            self.alloc_specs,
-            self.libE_specs,
-            H0=self.H0,
-        )
+        with run_archive.archive_run(self._config):
+            H, persis_info, flag = libE(
+                self.sim_specs,
+                self.gen_specs,
+                self.exit_criteria,
+                self.persis_info,
+                self.alloc_specs,
+                self.libE_specs,
+                H0=self.H0,
+            )
 
         return H, persis_info, flag
 
@@ -233,10 +237,3 @@ class libEnsembleOptimizer:
         self._configure_persistant_info()
         self._configure_executors()
         self._configure_sim()
-        self._cleanup()
-
-    def _cleanup(self):
-        import shutil, os
-
-        if self.clean_working_directory and os.path.isdir(self._config.options.run_dir):
-            shutil.rmtree(self._config.options.run_dir)

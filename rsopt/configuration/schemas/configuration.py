@@ -2,6 +2,7 @@ from collections.abc import Iterable
 from itertools import chain
 from typing import Any
 
+import pathlib
 import pydantic
 import typing
 
@@ -40,6 +41,9 @@ class ConfigurationSample(pydantic.BaseModel, extra="forbid"):
     mpi_size: int = pydantic.Field(default=0, exclude=True)
     is_manager: bool = pydantic.Field(default=True, exclude=True)
     mpi_comm: typing.Any = pydantic.Field(default=None, exclude=True)
+
+    # Absolute path of the configuration file, if the configuration was loaded from one. Set by run.startup_sequence.
+    config_path: typing.Optional[pathlib.Path] = pydantic.Field(default=None, exclude=True)
 
     def model_post_init(self, __context: Any) -> None:
         """Load simulation models before libEnsemble starts up"""

@@ -4,6 +4,7 @@ import importlib.util
 import os
 import pathlib
 import rsopt.util
+from rsopt import run_archive
 
 # path from libEnsemble install directory to .opt_modules.csv
 # This must be hardcoded because importing libensemble.gen_funcs to check the expected file name
@@ -16,16 +17,31 @@ if os.uname().sysname == 'Darwin':
     set_start_method('fork', force=True)
 
 
-def startup_sequence(config: configuration.ConfigurationOptimize or configuration.ConfigurationSample) -> (
+def startup_sequence(config: configuration.ConfigurationOptimize or configuration.ConfigurationSample,
+                     config_path: str or pathlib.Path or None = None) -> (
         configuration.ConfigurationOptimize or configuration.ConfigurationSample):
     """Safely initialize rsopt accounting for the local MPI configuration (if any).
 
+    `options.run_dir` is made absolute and checked first, so that a run_dir already holding output fails before any
+    slow setup.
+
     Args:
-        config:  (str) Path to configuration file that will be used
+        config: (rsopt.configuration.configuration.Configuration) Parsed configuration
+        config_path: (str or pathlib.Path or None) Path to the configuration file that `config` was loaded from
 
     Returns:(rsopt.configuration.configuration.Configuration) object
 
+    Raises:
+        rsopt.run_archive.RunDirectoryError: if run_dir exists and is not an empty directory.
     """
+    if config_path is not None:
+        config.config_path = pathlib.Path(config_path).resolve()
+    run_dir = run_archive.resolve_run_dir(config.options)
+    config.options.run_dir = str(run_dir)
+    # TODO(MPI): config.is_manager is always True until MPI detection below is restored. Under MPI comms,
+    #  worker ranks would otherwise see the manager's new directory and fail.
+    if config.is_manager:
+        run_archive.check_run_dir_at_startup(run_dir, config.config_path)
 
     _local_opt_startup()
 
@@ -53,7 +69,7 @@ def cleanup(config_path, H, persis_info, config):
     if config.is_manager:
         history, _ = rsopt.util.save_final_history(config, config_path, H, persis_info, message='Run finished')
         if config.options.copy_final_logs:
-            rsopt.util.copy_final_logs(config_path, config.options, history)
+            rsopt.util.copy_final_history(config.options, history)
 
 
 def _local_opt_startup() -> None:

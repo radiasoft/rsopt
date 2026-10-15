@@ -50,6 +50,19 @@ Global Options
   If given then all code evaluations will use `run_dir` as the top level for executing evaluations. If not given
   the default path is `./ensemble`. If a relative path is given the path will be relative to the rsopt execution directory.
   Additional directories may be created within `run_dir` depending on the setting of `use_worker_dirs` and `sim_dirs_make`.
+  rsopt never writes into existing output: `run_dir` must not exist, or must be an empty directory. This is checked
+  when rsopt starts and again just before the run launches. If the check fails, delete or rename the existing
+  directory, or set a different `run_dir`. rsopt creates `run_dir` and always writes a snapshot of the run into
+  `run_dir/rsopt_snapshot/` before the run launches, so it is kept even if the run ends abnormally:
+
+    * the configuration file, as given to rsopt.
+    * `resolved_config.yml`: the configuration with all default values filled in. This is for reference only and is
+      not intended to be run by rsopt.
+    * `run_info.yml`: start time, command line, working directory, software versions, git commit of the configuration
+      file's directory (if it is in a git repository), machine information, and batch scheduler environment
+      variables (`SLURM_*`, `PBS_*`, `LSB_*`, `FLUX_*`, `NERSC_HOST`, `CUDA_VISIBLE_DEVICES`, `OMP_NUM_THREADS`).
+      Any part of the snapshot that could not be written is listed under `snapshot_errors`.
+    * `packages.txt`: the installed Python packages and their versions.
 - `sym_links` [list]:
   A list of file names that will be symlinked into every simulation run directory.
 - `sim_dirs_make` [bool]:
@@ -60,8 +73,12 @@ Global Options
   If true then sim directories are organized under a common worker directory. This is used by default
   if parallel execution is being used.
 - `copy_final_logs` [bool]:
-  Defaults to True. If True then ensemble.log, libE_stats.txt, the configuration file, and the final history file
-  will be copied to the top level of `run_dir`. This copying does not occur if the run terminates unexpectedly.
+  Defaults to True. If True then `ensemble.log` and `libE_stats.txt` are written into the top level of `run_dir`
+  while the run is in progress, so they are kept even if the run ends abnormally. These copies hold only the current
+  run. The same logs are also written in the directory rsopt is run from, where libEnsemble keeps appending to them
+  across runs. The final history file is copied to the top level of `run_dir` at the end of the run; this copy does
+  not occur if the run ends abnormally. If False then neither the logs nor the history file are written to `run_dir`.
+  The snapshot in `run_dir/rsopt_snapshot/` (see `run_dir`) is always written.
 - `executor_options` [dict]:
   Options given here are passed directly to the libEnsemble Executor.
     - `hosts` [list] (rsmpi only): A list of rsmpi host indices that workers can use. To see your available host indices run

@@ -48,7 +48,6 @@ def package_data_path() -> pathlib.Path:
 
 
 SLURM_PREFIX = 'nid'
-_FINAL_LOGS = ('ensemble.log', 'libE_stats.txt')
 
 def _expand_idx(idx):
     if idx.startswith('['):
@@ -215,19 +214,20 @@ def get_objective_function(obj_definition: tuple[str, str] or None) -> callable:
     return None
 
 
-def copy_final_logs(config_filename: str,
-                    options: "rsopt.configuration.options.Options",
-                    history_filename: str or None = None):
-    run_dir = pathlib.Path(options.run_dir)
-    for filename in _FINAL_LOGS + (config_filename,):
-        filename = pathlib.Path(filename)
-        if filename.exists():
-            shutil.copy(filename, run_dir.joinpath(filename.name))
-        else:
-            print(f"Could not find {filename} at run end. Will not be copied to run directory.")
+def copy_final_history(options: "rsopt.configuration.options.Options",
+                       history_filename: str or None = None):
+    """Copy the final history file to the top level of `run_dir`.
+
+    The logs and configuration file are not copied here: the logs are written into `run_dir` while the run is in
+    progress (rsopt.libe_tools.log_tee), and the configuration file is saved at startup (rsopt.run_archive).
+
+    Args:
+        options: (rsopt.configuration.options.Options) Options holding `run_dir`.
+        history_filename: (str or None) History file to copy. Nothing is copied if not given.
+    """
     if history_filename:
         history_path = pathlib.Path(history_filename)
         if history_path.exists():
-            shutil.copy(history_path, run_dir.joinpath(history_path.name))
+            shutil.copy(history_path, pathlib.Path(options.run_dir).joinpath(history_path.name))
         else:
             print(f"Could not find {history_filename} at run end. Will not be copied to run directory.")

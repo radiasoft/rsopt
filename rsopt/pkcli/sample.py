@@ -24,7 +24,7 @@ def configuration(config: str) -> ("numpy.ndarray", dict,
     """
     _config_dict = parse.read_configuration_file(config)
     _config = parse.parse_sample_configuration(_config_dict)
-    _config = run.startup_sequence(_config)
+    _config = run.startup_sequence(_config, config)
 
     sampler_type = _config.options.software
     runner = run.sample_modes[sampler_type](_config)
@@ -56,7 +56,7 @@ def start(config: str, n=1):
 
     _config_dict = parse.read_configuration_file(config)
     _config = parse.parse_unknown_configuration(_config_dict)
-    _config = run.startup_sequence(_config)
+    _config = run.startup_sequence(_config, config)
 
     n = int(n)
 
@@ -74,7 +74,7 @@ def start(config: str, n=1):
 def restart(config: str, history: str, rerun_failed: bool = False):
     _config_dict = parse.read_configuration_file(config)
     _config = parse.parse_sample_configuration(_config_dict)
-    _config = run.startup_sequence(_config)
+    _config = run.startup_sequence(_config, config)
 
     runner = run.restart_sampler(_config, history)
     H, persis_info, _ = runner.run()
